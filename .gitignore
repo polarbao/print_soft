@@ -1,0 +1,32 @@
+# 忽略临时文件
+tmp/
+
+# 忽略所有的 .log 文件
+*.log
+
+# 忽略编译生成的文件
+*.o
+.env
+.obj
+.tlog
+.moc
+/log/
+/.vs/
+/obj/
+
+#屏蔽文件夹
+#/print_soft_0_0_1/.vs/
+/print_soft_0_0_1/build/
+/print_soft_0_0_1/project/.vs/
+/print_soft_0_0_1/project/.vs/manu_print_soft/
+/print_soft_0_0_1/project/x64/
+/print_soft_0_0_1/motionControlSDK/x64/
+/print_soft_0_0_1/printDeviceMoudle/x64/
+
+
+#屏蔽文件夹
+.vs
+build
+GeneratedFiles
+log
+

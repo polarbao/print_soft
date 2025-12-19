@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommand>D:\work_namespace\Code\print_moudle\manu_print_soft\print_soft_0_0_1\bin\Release\print_moudle.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>D:\work_namespace\Code\print_moudle\manu_print_soft\print_soft_0_0_1\bin\Release</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtLastBackgroundBuild>2025-12-17T07:44:44.9263096Z</QtLastBackgroundBuild>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtLastBackgroundBuild>2025-12-17T09:12:59.1306727Z</QtLastBackgroundBuild>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>qml;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+    </Filter>
+    <Filter Include="Header Files\comm">
+      <UniqueIdentifier>{b7545906-d3dd-471a-a025-ea0e25fd7afa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\communicate">
+      <UniqueIdentifier>{a89f77e2-6542-4cdc-8da3-8e897a98798d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\protocol">
+      <UniqueIdentifier>{274a4f75-be48-4f95-b7c9-85401d29df4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\service">
+      <UniqueIdentifier>{b6af96e2-309d-470f-88e2-fcca72f2b24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\service">
+      <UniqueIdentifier>{12767e48-c509-4fa5-a28b-593db23f880c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\comm">
+      <UniqueIdentifier>{24430989-aa03-4865-8309-02c45a9ec269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\protocol">
+      <UniqueIdentifier>{662713bf-8e56-43c0-b317-70bcab4cfec8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\communicate">
+      <UniqueIdentifier>{c3d1608b-9ba7-40ef-9deb-2e9cb246ddf3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sdkLogic">
+      <UniqueIdentifier>{2833f667-0574-4f5d-a18e-1bf2e8e3f21e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sdkLogic">
+      <UniqueIdentifier>{8300603d-6b4c-43c1-89dc-d6e351daa7be}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\..\src\sdk\motionControlSDK.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\SDKManager.h">
+      <Filter>Header Files\sdkLogic</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\comm\CLogThread.h">
+      <Filter>Header Files\comm</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\comm\CLogManager.h">
+      <Filter>Header Files\comm</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\comm\utils.h">
+      <Filter>Header Files\comm</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\communicate\TcpClient.h">
+      <Filter>Header Files\communicate</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\sdk\protocol\ProtocolPrint.h">
+      <Filter>Header Files\protocol</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\sdk\motionControlSDK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKMotion.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKPrint.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKCallback.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKConnection.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKManager.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\comm\utils.cpp">
+      <Filter>Source Files\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\comm\CLogManager.cpp">
+      <Filter>Source Files\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\comm\CLogThread.cpp">
+      <Filter>Source Files\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\communicate\TcpClient.cpp">
+      <Filter>Source Files\communicate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\protocol\ProtocolPrint.cpp">
+      <Filter>Source Files\protocol</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\sdk\motioncontrolsdk_global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sdk\comm\CSingleton.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
