@@ -17,6 +17,15 @@ public:
 
 
 	/**  命令组功能码  **/
+
+	enum ECmdType 
+	{
+		SetParamCmd		= 0x0001,
+		GetCmd			= 0x0010,
+		CtrlCmd			= 0x0011,
+		PrintCommCmd	= 0x00F0
+	};
+
 	enum FunCode
 	{
 		// 设置参数
@@ -134,7 +143,7 @@ public:
 		*  @param[out]
 		*  @return
 		*/
-		void Decode(QByteArray datagram);
+		void HandleRecvDatagramData(QByteArray datagram);
 
 
 		/**
@@ -143,18 +152,28 @@ public:
 		*  @param[out]
 		*  @return
 		*/
-		void Parse(QByteArray& datagram);
+		void ParsePackageData(QByteArray& datagram);
+
+		/**
+		*  @brief       根据参数组成主动请求的包
+		*  @param[in]
+		*  @param[out]
+		*  @return
+		*/
+		static QByteArray GetSendDatagram(FunCode code, QByteArray data = QByteArray());
+
+		/**
+		*  @brief       根据参数组成回复包（整合2个PackData
+		*  @param[in]
+		*  @param[out]
+		*  @return
+		*/
+		static QByteArray GetRespDatagram(FunCode code, QByteArray data = QByteArray());
 
 public slots:
 
 
-	/** 
-	*  @brief       根据参数组成主动请求的包
-	*  @param[in]    
-	*  @param[out]   
-	*  @return                    
-	*/
-	static QByteArray GetSendDatagram(FunCode code, QByteArray data = QByteArray());
+
 
 	/**
 	*  @brief       根据图形数据组成图形数据包
@@ -165,13 +184,7 @@ public slots:
 	//static QByteArray GetSendImgDatagram(FunCode code, QByteArray data = QByteArray());
 	static QList<QByteArray> GetSendImgDatagram(quint16 w, quint16 h, quint8 Imgtype, const QByteArray &hexData);
 
-	/** 
-	*  @brief       根据参数组成回复包 
-	*  @param[in]    
-	*  @param[out]   
-	*  @return                    
-	*/
-	static QByteArray GetRespDatagram(FunCode code, QByteArray data = QByteArray());
+
 
 	// 拆分命令字段为高8位和低8位
 	static void SplitComm(uint16_t command, uint8_t& highByte, uint8_t& lowByte);
@@ -205,6 +218,8 @@ signals:
 	void sigSpeedRotatePara();
 
 private:
+
+	int HandleCheckPackageHead(const QByteArray& data, int pos);
 
 
 	/** 

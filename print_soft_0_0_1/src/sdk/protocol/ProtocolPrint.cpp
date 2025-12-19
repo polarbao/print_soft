@@ -14,9 +14,9 @@
 //获取short类型的低字节
 #define LO_OF_SHORT(X) (X & 0xFF)
 //包头，2字节
-#define Req_Head 0xAABB
-#define Resp_Suc_Head 0xAACC
-#define Resp_Rrr_Head 0xAADD
+#define Req_Package_Head 0xAABB
+#define Resp_Package_Head_Succ 0xAACC
+#define Resp_Package_Head_Err 0xAADD
 
 //取消--包尾，2字节
 #define Package_Tail 0xDDEE
@@ -35,21 +35,22 @@ ProtocolPrint::ProtocolPrint(QObject* parent /*= 0*/)
 
 
 
-void ProtocolPrint::Decode(QByteArray recvdata)
+void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 {
 	QString str = recvdata.toHex(' ');
-	//LOG_INFO(u8"接收数据: " + str);
+	LOG_INFO(QString(u8"接收数据: %1").arg(str));
 
 	//新数据加入缓冲区
 	m_recvBuf.append(recvdata);
 
-	if (m_recvBuf.size() < 11)
+	if (m_recvBuf.size() < DATAGRAM_MIN_SIZE)
 	{
 		return;
 	}
 
 	//--------解析缓冲区，找到每一条数据包尾DD EE的位置
 	int preIndex = -1;    
+	//ori
 	QList<QByteArray> packageDatas;
 	for (int i = 1; i < m_recvBuf.size(); i++)
 	{
@@ -57,6 +58,41 @@ void ProtocolPrint::Decode(QByteArray recvdata)
 		uchar lo = (uchar)m_recvBuf.at(i);
 
 		if (hi == HI_OF_SHORT(Package_Tail) && lo == LO_OF_SHORT(Package_Tail))
+		{
+			packageDatas.push_back(m_recvBuf.mid(preIndex + 1, i - preIndex));
+			preIndex = i;
+		}
+	}
+
+	// new
+	// 存储所有包头的起始索引（包头占2字节，索引为第一个字节位置）
+	int friIndex = -2;
+	QList<QByteArray> packageDatas;
+	for (int i = 2; i < m_recvBuf.size(); i++)
+	{
+		uchar hi = (uchar)m_recvBuf.at(i);
+		uchar lo = (uchar)m_recvBuf.at(i + 1);
+
+		if (hi == HI_OF_SHORT(Req_Package_Head) && lo == LO_OF_SHORT(Req_Package_Head) ||
+			hi == HI_OF_SHORT(Resp_Package_Head_Succ) && lo == LO_OF_SHORT(Resp_Package_Head_Succ) ||
+			hi == HI_OF_SHORT(Resp_Package_Head_Err) && lo == LO_OF_SHORT(Resp_Package_Head_Err))
+		{
+			packageDatas.push_back(m_recvBuf.mid(friIndex - 2, i - preIndex));
+			preIndex = i;
+		}
+	}
+
+	// new
+	// 存储所有包头的起始索引（包头占2字节，索引为第一个字节位置）
+	QList<int> headIndexes;
+	for (int i = 0; i < m_recvBuf.size()-1; i++)
+	{
+		uchar hi = (uchar)m_recvBuf.at(i);
+		uchar lo = (uchar)m_recvBuf.at(i+1);
+
+		if (hi == HI_OF_SHORT(Req_Package_Head) && lo == LO_OF_SHORT(Req_Package_Head) || 
+			hi == HI_OF_SHORT(Resp_Package_Head_Succ) && lo == LO_OF_SHORT(Resp_Package_Head_Succ) ||
+			hi == HI_OF_SHORT(Resp_Package_Head_Err) && lo == LO_OF_SHORT(Resp_Package_Head_Err))
 		{
 			packageDatas.push_back(m_recvBuf.mid(preIndex + 1,i - preIndex));
 			preIndex = i;
@@ -69,16 +105,34 @@ void ProtocolPrint::Decode(QByteArray recvdata)
 	//解析完整包
 	for (auto datagram : packageDatas)
 	{
-		Parse(datagram);
+		ParsePackageData(datagram);
 	}
 }
 
+int ProtocolPrint::HandleCheckPackageHead(const QByteArray& data, int pos)
+{
+	int msgType = Req_Package_Head;
+	if (pos < 0 || pos >= data.size() - 1)
+	{
+		return 0x0000;
+	}
 
-void ProtocolPrint::Parse(QByteArray& datagram)
+	uchar hi = (uchar)data.at(pos);
+	uchar lo = (uchar)data.at(pos + 1);
+	quint16 headValue = (hi << 8) | lo; // 拼接成16位包头值
+
+	if (headValue == Req_Package_Head) return Req_Package_Head;
+	if (headValue == Resp_Package_Head_Succ) return Resp_Package_Head_Succ;
+	if (headValue == Resp_Package_Head_Err) return Resp_Package_Head_Err;
+	return 0x0000;
+}
+
+
+void ProtocolPrint::ParsePackageData(QByteArray& datagram)
 {
 	//接收到数据长度
 	int recvLength = datagram.length();
-	//数据包固定字节长度为11字节，变化长度为数据区，从0到n
+	//数据包固定字节长度为10字节，变化长度为数据区，从0到n
 	if (recvLength < DATAGRAM_MIN_SIZE)
 	{
 		LOG_INFO(u8"数据长度错误");
@@ -93,7 +147,7 @@ void ProtocolPrint::Parse(QByteArray& datagram)
 	memcpy(&recvBuf[0], datagram, templen);
 
 	//比较包头
-	if (!(recvBuf[0] == HI_OF_SHORT(Req_Head) && (recvBuf[1] == LO_OF_SHORT(Req_Head))))
+	if (!(recvBuf[0] == HI_OF_SHORT(Req_Package_Head) && (recvBuf[1] == LO_OF_SHORT(Req_Package_Head))))
 	{
 		LOG_INFO(u8"数据包头错误。");
 		return;
@@ -135,7 +189,7 @@ void ProtocolPrint::Parse(QByteArray& datagram)
 	address = recvBuf[6];
 
 	//如果是下位机回应上位机的包
-	if (recvBuf[1] == LO_OF_SHORT(Req_Head))
+	if (recvBuf[1] == LO_OF_SHORT(Req_Package_Head))
 	{
 		//Note:解析回复数据
 		//回复的命令最高位-0x1000
@@ -164,31 +218,35 @@ QByteArray ProtocolPrint::GetSendDatagram(FunCode code, QByteArray data)
 	uchar sendBuf[size];
 	memset(sendBuf, 0, size);
 
+	//包头+命令类型+命令+数据区长度+CRC
+
 	//包头
-	sendBuf[0] = HI_OF_SHORT(Req_Head);
-	sendBuf[1] = LO_OF_SHORT(Req_Head);
+	sendBuf[0] = LO_OF_SHORT(Req_Package_Head);
+	sendBuf[1] = HI_OF_SHORT(Req_Package_Head);
 
-	ushort length = 7 + data.size();
-
-	//长度字
-	sendBuf[2] = HI_OF_SHORT(length);
-	sendBuf[3] = LO_OF_SHORT(length);
+	// 命令类型
+	ECmdType cmd = ECmdType::SetParamCmd;
+	sendBuf[2] = HI_OF_SHORT(cmd);
+	sendBuf[3] = LO_OF_SHORT(cmd);
 
 	//命令字
 	sendBuf[4] = HI_OF_SHORT(code);
 	sendBuf[5] = LO_OF_SHORT(code);
 
-	//地址，默认为0
-	sendBuf[6] = 0x00;
+	//长度字
+	// 数据区长度
+	ushort length = data.size();
+	sendBuf[6] = LO_OF_SHORT(length);
+	sendBuf[7] = HI_OF_SHORT(length);
 	
 	//数据内容
 	if (data.size() > 0)
 	{
-		memcpy(&sendBuf[7], data.data(), data.size());
+		memcpy(&sendBuf[8], data.data(), data.size());
 	}
 
 	//校验
-	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length);
+	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length+8);
 	sendBuf[length] = HI_OF_SHORT(crc);
 	sendBuf[length + 1] = LO_OF_SHORT(crc);
 
@@ -197,9 +255,8 @@ QByteArray ProtocolPrint::GetSendDatagram(FunCode code, QByteArray data)
 	//sendBuf[length + 3] = LO_OF_SHORT(Package_Tail);
 
 	QByteArray senddata;
-	senddata.resize(length + 4);
-
-	memcpy(senddata.data(), sendBuf, length + 4);
+	senddata.resize(length + 8 + 2);
+	memcpy(senddata.data(), sendBuf, length + 8 + 2);
 
 	return senddata;
 }
@@ -251,47 +308,51 @@ QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByt
 	memset(sendBuf, 0, size);
 
 	//包头
-	sendBuf[0] = HI_OF_SHORT(Resp_Suc_Head);
-	sendBuf[1] = LO_OF_SHORT(Resp_Suc_Head);
+	sendBuf[0] = LO_OF_SHORT(Resp_Package_Head_Succ);
+	sendBuf[1] = HI_OF_SHORT(Resp_Package_Head_Succ);
 
-	ushort length = 7 + data.size();
-
-	//长度字
-	sendBuf[2] = HI_OF_SHORT(length);
-	sendBuf[3] = LO_OF_SHORT(length);
+	//命令类型
+	ECmdType cmd = ECmdType::SetParamCmd;
+	sendBuf[2] = LO_OF_SHORT(cmd);
+	sendBuf[3] = HI_OF_SHORT(cmd);
 
 	//命令字
-	sendBuf[4] = HI_OF_SHORT(code);
-	sendBuf[5] = LO_OF_SHORT(code);
+	sendBuf[4] = LO_OF_SHORT(code);
+	sendBuf[5] = HI_OF_SHORT(code);
 
-	//地址，默认为0
-	sendBuf[6] = 0x00;
+	//长度字 数据区长度
+	ushort length = data.size();
+	sendBuf[6] = LO_OF_SHORT(length);
+	sendBuf[7] = HI_OF_SHORT(length);
 
 	//数据内容
 	if (data.size() > 0)
 	{
-		memcpy(&sendBuf[7], data.data(), 102);
+		memcpy(&sendBuf[8], data.data(), 102);
 	}
 
 	//包头
-	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length);
-	sendBuf[length] = HI_OF_SHORT(crc);
-	sendBuf[length + 1] = LO_OF_SHORT(crc);
+	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length+8);
+	sendBuf[length] = LO_OF_SHORT(crc);
+	sendBuf[length + 1] = HI_OF_SHORT(crc);
 
 	//包尾
-	sendBuf[length + 2] = HI_OF_SHORT(Package_Tail);
-	sendBuf[length + 3] = LO_OF_SHORT(Package_Tail);
+	//sendBuf[length + 2] = HI_OF_SHORT(Package_Tail);
+	//sendBuf[length + 3] = LO_OF_SHORT(Package_Tail);
 
 	QByteArray senddata;
-	senddata.resize(length + 4);
-
-	memcpy(senddata.data(), sendBuf, length + 4);
-
+	senddata.resize(length + 2);
+	memcpy(senddata.data(), sendBuf, length + 8 + 2);
 	return senddata;
 }
 
 
 
+
+void ProtocolPrint::HandleCheckPackageHead(const QByteArray& data, int pos)
+{
+
+}
 
 void ProtocolPrint::HandlePeriodData(uchar* data, ushort length)
 {

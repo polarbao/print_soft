@@ -24,7 +24,7 @@ void SDKManager::onRecvData(QByteArray data)
     if (m_protocol) 
 {
         // 将接收到的数据交给协议处理器解码
-        m_protocol->Decode(data);
+        m_protocol->HandleRecvDatagramData(data);
     }
 }
 
