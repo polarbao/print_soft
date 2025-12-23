@@ -106,7 +106,9 @@
     <ClCompile Include="..\..\src\sdk\SDKCallback.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKConnection.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKManager.cpp" />
+    <ClCompile Include="..\..\src\sdk\SDKManager_Position.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKMotion.cpp" />
+    <ClCompile Include="..\..\src\sdk\SDKPackParam.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKPrint.cpp" />
   </ItemGroup>
   <ItemGroup>

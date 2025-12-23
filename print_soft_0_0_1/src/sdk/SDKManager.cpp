@@ -17,6 +17,7 @@ SDKManager* SDKManager::instance() {
     return &manager;
 }
 
+
 // ==================== 构造和析构 ====================
 
 SDKManager::SDKManager() 
@@ -63,6 +64,10 @@ bool SDKManager::init(const QString& log_dir)
     // 连接协议处理器信号
     connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &SDKManager::onHeartbeat);
     connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &SDKManager::onCmdReply);
+	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::onHeartbeat);
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper1, this, &SDKManager::onHandleRecvFunOper);
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper2, this, &SDKManager::onHandleRecvDataOper);
+
     
     // 设置协议的串口（实际上是TCP客户端）
    //m_protocol->SetSerialPort(m_tcpClient.get());
@@ -110,6 +115,7 @@ void SDKManager::release() {
 
 // ==================== 辅助函数 ====================
 
+//fc + dataArr
 void SDKManager::sendCommand(int code, const QByteArray& data) 
 {
     if (!m_tcpClient) 
@@ -118,14 +124,107 @@ void SDKManager::sendCommand(int code, const QByteArray& data)
     }
     
     // 使用协议打包数据
-    QByteArray packet = ProtocolPrint::GetSendDatagram(static_cast<ProtocolPrint::FunCode>(code), data);
+	//操作类型出来
+	auto fc = static_cast<ProtocolPrint::FunCode>(code);
+	ProtocolPrint::ECmdType ct;
+	if (fc >= ProtocolPrint::SetParam_CleanPos && fc <= ProtocolPrint::SetParam_AxistSpd)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Get_AxisPos && fc <= ProtocolPrint::Get_Breath)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Ctrl_StartPrint && fc <= ProtocolPrint::Ctrl_ZAxisRMove)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Print_AxisMovePos && fc <= ProtocolPrint::Print_AxisMovePos)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, data);
     
     // 发送数据
     m_tcpClient->sendData(packet);
 }
 
-void SDKManager::sendEvent(SdkEventType type, int code, const char* message, 
-                          double v1, double v2, double v3) 
+//重发数据
+void SDKManager::sendCommand(const QByteArray& data /*= QByteArray()*/)
+{
+	// 重发失败数据
+	m_tcpClient->sendData(data);
+}
+
+//fc类型+坐标数据
+void SDKManager::sendCommand(int code, const MoveAxisPos& posData)
+{
+	//数据处理
+	//const int dataSize = 12;
+	//uchar sendBuf[dataSize];
+	//memset(sendBuf, 0, dataSize);
+	//sendBuf[0] = posData.xPos >> 0 & 0xFF;
+	//sendBuf[1] = posData.xPos >> 8 & 0xFF;
+	//sendBuf[2] = posData.xPos >> 16 & 0xFF;
+	//sendBuf[3] = posData.xPos >> 24 & 0xFF;
+	//sendBuf[4] = posData.yPos >> 0 & 0xFF;
+	//sendBuf[5] = posData.yPos >> 8 & 0xFF;
+	//sendBuf[6] = posData.yPos >> 16 & 0xFF;
+	//sendBuf[7] = posData.yPos >> 24 & 0xFF;
+	//sendBuf[8] = posData.zPos >> 0 & 0xFF;
+	//sendBuf[9] = posData.zPos >> 8 & 0xFF;
+	//sendBuf[10] = posData.zPos >> 16 & 0xFF;
+	//sendBuf[11] = posData.zPos >> 24 & 0xFF;
+	//QByteArray senddata;
+	//senddata.resize(12);
+	//memcpy(senddata.data(), sendBuf, 12);
+
+	//数据处理
+	QByteArray senddata;
+	senddata.resize(12);
+	senddata[0] = posData.xPos >> 0 & 0xFF;
+	senddata[1] = posData.xPos >> 8 & 0xFF;
+	senddata[2] = posData.xPos >> 16 & 0xFF;
+	senddata[3] = posData.xPos >> 24 & 0xFF;
+
+	senddata[4] = posData.yPos >> 0 & 0xFF;
+	senddata[5] = posData.yPos >> 8 & 0xFF;
+	senddata[6] = posData.yPos >> 16 & 0xFF;
+	senddata[7] = posData.yPos >> 24 & 0xFF;
+
+	senddata[8] = posData.zPos >> 0 & 0xFF;
+	senddata[9] = posData.zPos >> 8 & 0xFF;
+	senddata[10] = posData.zPos >> 16 & 0xFF;
+	senddata[11] = posData.zPos >> 24 & 0xFF;
+
+
+	//操作类型出来
+	auto fc = static_cast<ProtocolPrint::FunCode>(code);
+	ProtocolPrint::ECmdType ct;
+	if (fc >= ProtocolPrint::SetParam_CleanPos && fc <= ProtocolPrint::SetParam_End)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Get_AxisPos && fc <= ProtocolPrint::Get_End)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Ctrl_StartPrint && fc <= ProtocolPrint::Ctrl_End)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+	else if (fc >= ProtocolPrint::Print_AxisMovePos && fc <= ProtocolPrint::Print_End)
+	{
+		ct = ProtocolPrint::ECmdType::SetParamCmd;
+	}
+
+	// 使用协议打包数据
+	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, senddata);
+	m_tcpClient->sendData(packet);
+
+}
+
+void SDKManager::sendEvent(SdkEventType type, int code, const char* message, double v1, double v2, double v3) 
 {
     QMutexLocker lock(&g_callbackMutex);
     

@@ -20,7 +20,7 @@ int SDKManager::startPrint()
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Set_StartPrint);
+   // sendCommand(ProtocolPrint::Set_StartPrint);
     return 0;
 }
 
@@ -31,7 +31,7 @@ int SDKManager::stopPrint()
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Set_StopPrint);
+    //sendCommand(ProtocolPrint::Set_StopPrint);
     return 0;
 }
 
@@ -42,7 +42,7 @@ int SDKManager::pausePrint()
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Set_PausePrint);
+   // sendCommand(ProtocolPrint::Set_PausePrint);
     return 0;
 }
 
@@ -53,7 +53,7 @@ int SDKManager::resumePrint()
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Set_continuePrint);
+    //sendCommand(ProtocolPrint::Set_continuePrint);
     return 0;
 }
 
@@ -64,7 +64,7 @@ int SDKManager::resetPrint()
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Set_ResetPrint);
+    //sendCommand(ProtocolPrint::Set_ResetPrint);
     return 0;
 }
 

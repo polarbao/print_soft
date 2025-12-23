@@ -282,6 +282,7 @@ void PrintDeviceUI::HandlerMoveDeviceOper(const PrintFun& moveFun)
 		//todo: 后续根据实际情况，针对报文数据进行修改，使用统一模板
 	case EAF_XAxisReset:
 	{
+		//sendData = m_motionSDK->
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisReset);
 		cmdType = static_cast<int>(ProtocolPrint::Set_XAxisReset);
 		break;

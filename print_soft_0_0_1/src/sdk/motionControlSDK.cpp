@@ -4,6 +4,7 @@
 #include "ProtocolPrint.h"
 
 #include <QDebug>
+#include <QString>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QMetaObject>
@@ -11,13 +12,13 @@
 
 /**
  * @class motionControlSDK::Private
- * @brief Ë½ÓĞÊµÏÖÀà£¨PimplÄ£Ê½£©
+ * @brief ç§æœ‰å®ç°ç±»ï¼ˆPimplæ¨¡å¼ï¼‰
  *
- * ÓÅµã£º
- * 1. Òş²ØÊµÏÖÏ¸½Ú
- * 2. ¼õÉÙÍ·ÎÄ¼şÒÀÀµ
- * 3. ±£³ÖABIÎÈ¶¨ĞÔ
- * 4. ·½±ãÄÚ²¿ĞŞ¸Ä
+ * ä¼˜ç‚¹ï¼š
+ * 1. éšè—å®ç°ç»†èŠ‚
+ * 2. å‡å°‘å¤´æ–‡ä»¶ä¾èµ–
+ * 3. ä¿æŒABIç¨³å®šæ€§
+ * 4. æ–¹ä¾¿å†…éƒ¨ä¿®æ”¹
  */
 class motionControlSDK::Private
 {
@@ -40,15 +41,15 @@ public:
 	QString ip;
 	quint16 port;
 
-	// ¾²Ì¬»Øµ÷º¯Êı£¨ÇÅ½ÓC»Øµ÷µ½QtĞÅºÅ£©
+	// é™æ€å›è°ƒå‡½æ•°ï¼ˆæ¡¥æ¥Cå›è°ƒåˆ°Qtä¿¡å·ï¼‰
 	static void sdkEventCallback(const SdkEvent* event);
 
-	// È«¾ÖÊµÀı¹ÜÀí£¨ÓÃÓÚC»Øµ÷ÖĞ·ÃÎÊQt¶ÔÏó£©
+	// å…¨å±€å®ä¾‹ç®¡ç†ï¼ˆç”¨äºCå›è°ƒä¸­è®¿é—®Qtå¯¹è±¡ï¼‰
 	static motionControlSDK* s_instance;
 	static QMutex s_mutex;
 };
 
-// ¾²Ì¬³ÉÔ±³õÊ¼»¯
+// é™æ€æˆå‘˜åˆå§‹åŒ–
 motionControlSDK* motionControlSDK::Private::s_instance = nullptr;
 QMutex motionControlSDK::Private::s_mutex;
 
@@ -76,33 +77,36 @@ motionControlSDK::~motionControlSDK()
 
 bool motionControlSDK::initialize(const QString& logDir)
 {
+	//qRegisterMetaType<MoveAxisPos>("MoveAxisPos");
+	//qRegisterMetaType<PackParam>("PackParam");
+
 	if (d->initialized) 
 	{
-		qDebug() << "SDKÒÑ¾­³õÊ¼»¯";
+		//qDebug() << "SDKå·²ç»åˆå§‹åŒ–";
 		return true;
 	}
 
-	// ³õÊ¼»¯SDK
-	// ×¢Òâ£ºÈç¹ûSDK¶ÀÁ¢ÔËĞĞ£¨²»ÔÚQtÓ¦ÓÃ³ÌĞòÖĞ£©£¬ĞèÒª´´½¨QCoreApplication
-	// ÕâÀï¼ÙÉèµ÷ÓÃÕß»á¹ÜÀíQtÊÂ¼şÑ­»·
+	// åˆå§‹åŒ–SDK
+	// æ³¨æ„ï¼šå¦‚æœSDKç‹¬ç«‹è¿è¡Œï¼ˆä¸åœ¨Qtåº”ç”¨ç¨‹åºä¸­ï¼‰ï¼Œéœ€è¦åˆ›å»ºQCoreApplication
+	// è¿™é‡Œå‡è®¾è°ƒç”¨è€…ä¼šç®¡ç†Qtäº‹ä»¶å¾ªç¯
 	bool ret = SDKManager::instance()->init("./");
 
 	if (!ret) 
 	{
-		QString errMsg = tr("SDK³õÊ¼»¯Ê§°Ü£¬´íÎóÂë£º%1").arg(ret);
-		LOG_INFO(u8"SDK³õÊ¼»¯Ê§°Ü");
+		QString errMsg = tr("SDKåˆå§‹åŒ–å¤±è´¥ï¼Œé”™è¯¯ç ï¼š%1").arg(ret);
+		//LOG_INFO(QString(u8"SDKåˆå§‹åŒ–å¤±è´¥"));
 		emit errorOccurred(-1, errMsg);
 		return false;
 	}
-	LOG_INFO(u8"SDK³õÊ¼»¯³É¹¦");
+	//LOG_INFO(QString(u8"SDKåˆå§‹åŒ–æˆåŠŸ"));
 
-	// ×¢²áÊÂ¼ş»Øµ÷º¯Êı£¨ÇÅ½ÓC»Øµ÷µ½QtĞÅºÅ£©
+	// æ³¨å†Œäº‹ä»¶å›è°ƒå‡½æ•°ï¼ˆæ¡¥æ¥Cå›è°ƒåˆ°Qtä¿¡å·ï¼‰
 	//RegisterEventCallback(&Private::sdkEventCallback);
 	QMutexLocker lock(&g_callbackMutex);
 	g_sdkCallback = &Private::sdkEventCallback;
 
 	d->initialized = true;
-	emit infoMessage(tr("SDK³õÊ¼»¯³É¹¦"));
+	//emit infoMessage(tr("SDKåˆå§‹åŒ–æˆåŠŸ"));
 
 	qDebug() << "motionControlSDK initialized successfully";
 	return true;
@@ -115,13 +119,13 @@ void motionControlSDK::release()
 		return;
 	}
 
-	// ¶Ï¿ªÁ¬½Ó
+	// æ–­å¼€è¿æ¥
 	if (d->connectedState) 
 	{
 		disconnectFromDevice();
 	}
 
-	// ÊÍ·Åµ×²ãSDK
+	// é‡Šæ”¾åº•å±‚SDK
 	SDKManager::instance()->release();
 
 
@@ -144,35 +148,35 @@ bool motionControlSDK::connectToDevice(const QString& ip, quint16 port)
 	LOG_INFO("1111111111111connectToDevice");
 	if (!d->initialized) 
 	{
-		emit errorOccurred(-1, tr("SDKÎ´³õÊ¼»¯£¬ÇëÏÈµ÷ÓÃinitialize()"));
-		LOG_INFO(u8"SDKÎ´³õÊ¼»¯£¬ÇëÏÈµ÷ÓÃinitialize()");
+		//emit errorOccurred(-1, tr("SDKæœªåˆå§‹åŒ–ï¼Œè¯·å…ˆè°ƒç”¨initialize()"));
+		//LOG_INFO(u8"SDKæœªåˆå§‹åŒ–ï¼Œè¯·å…ˆè°ƒç”¨initialize()");
 		return false;
 	}
 
 	if (d->connectedState) 
 	{
-		emit infoMessage(tr("Éè±¸ÒÑÁ¬½Ó"));
-		LOG_INFO(u8"Éè±¸ÒÑÁ¬½Ó");
+		//emit infoMessage(tr("è®¾å¤‡å·²è¿æ¥"));
+		//LOG_INFO(u8"è®¾å¤‡å·²è¿æ¥");
 		return true;
 	}
 
-	// µ÷ÓÃC½Ó¿ÚÁ¬½ÓÉè±¸
+	// è°ƒç”¨Cæ¥å£è¿æ¥è®¾å¤‡
 	int ret = SDKManager::instance()->connectByTCP(ip, port);
 	if (ret != 0) 
 	{
-		QString errMsg = tr("Á¬½ÓÊ§°Ü£¬´íÎóÂë£º%1").arg(ret);
-		LOG_INFO(QString(u8"Á¬½ÓÊ§°Ü£¬´íÎóÂë£º%1").arg(ret));
+		QString errMsg = tr("è¿æ¥å¤±è´¥ï¼Œé”™è¯¯ç ï¼š%1").arg(ret);
+		//LOG_INFO(QString(u8"è¿æ¥å¤±è´¥ï¼Œé”™è¯¯ç ï¼š%1").arg(ret));
 		emit errorOccurred(ret, errMsg);
 		return false;
 	}
 
-	// ±£´æÁ¬½ÓĞÅÏ¢
+	// ä¿å­˜è¿æ¥ä¿¡æ¯
 	d->ip = ip;
 	d->port = port;
 	emit deviceIpChanged(ip);
 	emit devicePortChanged(port);
-	emit infoMessage(tr("ÕıÔÚÁ¬½Ó %1:%2...").arg(ip).arg(port));
-	LOG_INFO(QString(u8"ÕıÔÚÁ¬½Ó %1:%2...").arg(ip).arg(port));
+	emit infoMessage(tr("æ­£åœ¨è¿æ¥ %1:%2...").arg(ip).arg(port));
+	LOG_INFO(QString(u8"æ­£åœ¨è¿æ¥ %1:%2...").arg(ip).arg(port));
 
 	return true;
 }
@@ -186,14 +190,14 @@ void motionControlSDK::disconnectFromDevice()
 
 	if (!d->connectedState) 
 	{
-		emit infoMessage(tr("Éè±¸Î´Á¬½Ó"));
+		//emit infoMessage(tr("è®¾å¤‡æœªè¿æ¥"));
 		return;
 	}
 
-	// µ÷ÓÃC½Ó¿Ú¶Ï¿ªÁ¬½Ó
+	// è°ƒç”¨Cæ¥å£æ–­å¼€è¿æ¥
 	SDKManager::instance()->disconnect();
 
-	emit infoMessage(tr("ÕıÔÚ¶Ï¿ªÁ¬½Ó..."));
+	emit infoMessage(tr("æ­£åœ¨æ–­å¼€è¿æ¥..."));
 }
 
 bool motionControlSDK::isConnected() const
@@ -230,42 +234,44 @@ void motionControlSDK::refreshConnectionStatus()
 	}
 }
 
-// ==================== ÔË¶¯¿ØÖÆ ====================
-
-bool motionControlSDK::moveTo(double x, double y, double z, double speed)
+// ==================== è¿åŠ¨æ§åˆ¶ ====================
+//å•è½´ç»å¯¹
+bool motionControlSDK::moveTo(const MoveAxisPos& posdData)
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, QString(u8"11"));
 		return false;
 	}
 	int ret = 0;
-	if (x != 0) 
+	if (posdData.xPos != 0) 
 	{
-		ret |= SDKManager::instance()->moveXAxis(x, true);
+		ret |= SDKManager::instance()->moveXAxis(posdData);
 	}
-	if (y != 0) 
+	if (posdData.yPos != 0)
 	{
-		ret |= SDKManager::instance()->moveYAxis(y, true);
+		ret |= SDKManager::instance()->moveYAxis(posdData);
 	}
-	if (z != 0) 
+	if (posdData.zPos != 0)
 	{
-		ret |= SDKManager::instance()->moveZAxis(z, true);
+		ret |= SDKManager::instance()->moveZAxis(posdData);
 	}
 
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("MoveToÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr(u8"MoveToå‘½ä»¤å¤±è´¥"));
 		return false;
 	}
-	emit moveStatusChanged(tr("ÒÆ¶¯µ½Î»ÖÃ (%.2f, %.2f, %.2f)").arg(x).arg(y).arg(z));
+	emit moveStatusChanged(tr(u8"ç§»åŠ¨åˆ°ä½ç½® (%.2f, %.2f, %.2f)").arg(posdData.xPos).arg(posdData.yPos).arg(posdData.zPos));
 	return true;
 }
 
+//å•è½´ç›¸å¯¹
 bool motionControlSDK::moveBy(double dx, double dy, double dz, double speed)
 {
-	if (!isConnected()) {
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+	if (!isConnected()) 
+	{
+		emit errorOccurred(-1, QString(u8"11"));
 		return false;
 	}
 
@@ -273,43 +279,44 @@ bool motionControlSDK::moveBy(double dx, double dy, double dz, double speed)
 	
 	if (dx != 0) 
 	{
-		ret |= SDKManager::instance()->moveXAxis(dx, false);
+		ret |= SDKManager::instance()->moveRelXAxis(dx);
 	}
 	if (dy != 0) 
 	{
-		ret |= SDKManager::instance()->moveYAxis(dy, false);
+		ret |= SDKManager::instance()->moveRelXAxis(dy);
 	}
 	if (dz != 0) 
 	{
-		ret |= SDKManager::instance()->moveZAxis(dz, false);
+		ret |= SDKManager::instance()->moveRelXAxis(dz);
 	}	
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("MoveByÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr("MoveByå‘½ä»¤å¤±è´¥"));
 		return false;
 	}
 
-	emit moveStatusChanged(tr("Ïà¶ÔÒÆ¶¯ (%.2f, %.2f, %.2f)").arg(dx).arg(dy).arg(dz));
+	emit moveStatusChanged(tr("ç›¸å¯¹ç§»åŠ¨ (%.2f, %.2f, %.2f)").arg(dx).arg(dy).arg(dz));
 	return true;
 }
 
 bool motionControlSDK::goHome()
 {
-	if (!isConnected()) {
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+	if (!isConnected()) 
+	{
+		emit errorOccurred(-1, QString(u8"dev_unconnect"));
 		return false;
 	}
 
-	// ËùÓĞÖá»ØÔ­µã
-	// axisFlag = 7 ±íÊ¾ X(1) + Y(2) + Z(4) = È«²¿Öá 
+	// æ‰€æœ‰è½´å›åŸç‚¹
+	// axisFlag = 7 è¡¨ç¤º X(1) + Y(2) + Z(4) = å…¨éƒ¨è½´ 
 	int ret = SDKManager::instance()->resetAxis(7);
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("»ØÔ­µãÃüÁîÊ§°Ü"));
+		emit errorOccurred(-1, QString(u8"go_home_cmd_failed"));
 		return false;
 	}
 
-	emit moveStatusChanged(tr("ÕıÔÚ»ØÔ­µã..."));
+	emit moveStatusChanged(tr("go_homing..."));
 	return true;
 }
 
@@ -318,9 +325,35 @@ bool motionControlSDK::moveXAxis(double distance, double speed)
 	return moveBy(distance, 0, 0, speed);
 }
 
+bool motionControlSDK::moveXAxis(const MoveAxisPos& targetPos)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„Xè½´ç§»åŠ¨
+	int result = SDKManager::instance()->moveXAxis(targetPos);
+	return (result == 0);
+}
+
 bool motionControlSDK::moveYAxis(double distance, double speed)
 {
 	return moveBy(0, distance, 0, speed);
+}
+
+bool motionControlSDK::moveYAxis(const MoveAxisPos& targetPos)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„Yè½´ç§»åŠ¨
+	int result = SDKManager::instance()->moveYAxis(targetPos);
+	return (result == 0);
 }
 
 bool motionControlSDK::moveZAxis(double distance, double speed)
@@ -328,36 +361,209 @@ bool motionControlSDK::moveZAxis(double distance, double speed)
 	return moveBy(0, 0, distance, speed);
 }
 
-bool motionControlSDK::sendData(int cmdType, const QByteArray& data)
+bool motionControlSDK::moveZAxis(const MoveAxisPos& targetPos)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„Zè½´ç§»åŠ¨
+	int result = SDKManager::instance()->moveZAxis(targetPos);
+	return (result == 0);
+}
+
+
+
+bool motionControlSDK::MC_move2RelSingleAxisPos(double dx, double dy, double dz)
+{
+	if (!d->initialized)
+	{
+		emit errorOccurred(-1, tr((u8"SDKæœªåˆå§‹åŒ–")));
+		return false;
+	}
+
+	int ret = 0;
+	// è°ƒç”¨SDKManagerçš„ç›¸å¯¹ç§»åŠ¨
+	if (dx != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dx);
+	}
+	if (dy != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dy);
+	}
+	if (dz != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dz);
+	}
+	if (ret != 0)
+	{
+		emit errorOccurred(ret, tr(u8"MoveByå‘½ä»¤å¤±è´¥"));
+		return false;
+	}
+
+	emit moveStatusChanged(tr(u8"motion_moudle ç›¸å¯¹ç§»åŠ¨å•ä¸€è½´ (%.2f, %.2f, %.2f)").arg(dx).arg(dy).arg(dz));
+	return true;
+}
+
+bool motionControlSDK::MC_move2AbsSingleAxisPos(const MoveAxisPos& targetPos)
+{
+	return false;
+}
+
+// ==================== 3è½´åŒæ—¶ç§»åŠ¨ ====================
+
+bool motionControlSDK::MC_move2RelAxisPos(double dx, double dy, double dz)
+{
+	if (!d->initialized)
+	{
+		emit errorOccurred(-1, tr((u8"SDKæœªåˆå§‹åŒ–")));
+		return false;
+	}
+
+	int ret = 0;
+	// è°ƒç”¨SDKManagerçš„ç›¸å¯¹ç§»åŠ¨
+	if (dx != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dx);
+	}
+	if (dy != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dy);
+	}
+	if (dz != 0)
+	{
+		ret |= SDKManager::instance()->moveRelXAxis(dz);
+	}
+	if (ret != 0)
+	{
+		emit errorOccurred(ret, tr(u8"MoveByå‘½ä»¤å¤±è´¥"));
+		return false;
+	}
+
+	emit moveStatusChanged(tr(u8"ç›¸å¯¹ç§»åŠ¨ (%.2f, %.2f, %.2f)").arg(dx).arg(dy).arg(dz));
+	return true;
+}
+
+
+bool motionControlSDK::MC_move2AbsAxisPos(const MoveAxisPos& targetPos)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„3è½´åŒæ—¶ç§»åŠ¨
+	// å°†MoveAxisPosç»“æ„ä½“è½¬æ¢ä¸ºQbyteArrayï¼Œä½¿ç”¨å­—èŠ‚æ•°æ®çš„moveToPosition()è¿›è¡Œè°ƒç”¨
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::BigEndian);
+	// å†™å…¥X/Y/Zåæ ‡ï¼ˆå„4å­—èŠ‚ï¼Œå¤§ç«¯åºï¼Œå¾®ç±³å•ä½ï¼‰
+	stream << targetPos.xPos;
+	stream << targetPos.yPos;
+	stream << targetPos.zPos;
+
+	int result = SDKManager::instance()->moveToPosition(data);
+	return (result == 0);
+}
+
+bool motionControlSDK::MC_move2AbsAxisPos(const QByteArray& positionData)
+{
+	if (!d->initialized)
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// éªŒè¯æ•°æ®é•¿åº¦
+	if (positionData.size() != 12)
+	{
+		emit errorOccurred(-1, tr(u8"ä½ç½®æ•°æ®é•¿åº¦å¿…é¡»ä¸º12å­—èŠ‚"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„3è½´åŒæ—¶ç§»åŠ¨
+	int result = SDKManager::instance()->moveToPosition(positionData);
+	return (result == 0);
+}
+
+// ==================== 3è½´åŒæ—¶ç§»åŠ¨ ====================
+
+bool motionControlSDK::MC_moveToPosition(const MoveAxisPos& targetPos)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„3è½´åŒæ—¶ç§»åŠ¨
+	// å°†MoveAxisPosç»“æ„ä½“è½¬æ¢ä¸ºQbyteArrayï¼Œä½¿ç”¨å­—èŠ‚æ•°æ®çš„moveToPosition()è¿›è¡Œè°ƒç”¨
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::BigEndian);
+	// å†™å…¥X/Y/Zåæ ‡ï¼ˆå„4å­—èŠ‚ï¼Œå¤§ç«¯åºï¼Œå¾®ç±³å•ä½ï¼‰
+	stream << targetPos.xPos;
+	stream << targetPos.yPos;
+	stream << targetPos.zPos;
+
+	int result = SDKManager::instance()->moveToPosition(data);
+	return (result == 0);
+}
+
+bool motionControlSDK::MC_moveToPosition(const QByteArray& positionData)
+{
+	if (!d->initialized) 
+	{
+		emit errorOccurred(-1, tr(u8"SDKæœªåˆå§‹åŒ–"));
+		return false;
+	}
+
+	// éªŒè¯æ•°æ®é•¿åº¦
+	if (positionData.size() != 12) 
+	{
+		emit errorOccurred(-1, tr(u8"ä½ç½®æ•°æ®é•¿åº¦å¿…é¡»ä¸º12å­—èŠ‚"));
+		return false;
+	}
+
+	// è°ƒç”¨SDKManagerçš„3è½´åŒæ—¶ç§»åŠ¨
+	int result = SDKManager::instance()->moveToPosition(positionData);
+	return (result == 0);
+}
+
+bool motionControlSDK::MC_sendData(int cmdType, const QByteArray& data)
 {
 	SDKManager::instance()->sendCommand(cmdType, data);
 	return true;
 }
 
-// ======================= ´òÓ¡¿ØÖÆ ====================
+// ======================= æ‰“å°æ§åˆ¶ ====================
 
-bool motionControlSDK::loadPrintData(const QString& filePath)
+bool motionControlSDK::MC_loadPrintData(const QString& filePath)
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, tr(u8"dev_unconnect"));
 		return false;
 	}
 
 	if (filePath.isEmpty()) 
 	{
-		emit errorOccurred(-1, tr("ÎÄ¼şÂ·¾¶Îª¿Õ"));
+		emit errorOccurred(-1, tr(u8"æ–‡ä»¶è·¯å¾„ä¸ºç©º"));
 		return false;
 	}
 
 	int ret = SDKManager::instance()->loadImageData(filePath.toUtf8().constData());
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("¼ÓÔØ´òÓ¡Êı¾İÊ§°Ü"));
+		emit errorOccurred(ret, tr(u8"åŠ è½½æ‰“å°æ•°æ®å¤±è´¥"));
 		return false;
 	}
 
-	emit infoMessage(tr("Í¼ÏñÊı¾İÒÑ¼ÓÔØ£º%1").arg(filePath));
+	emit infoMessage(tr(u8"å›¾åƒæ•°æ®å·²åŠ è½½ï¼š%1").arg(filePath));
 	return true;
 }
 
@@ -365,18 +571,18 @@ bool motionControlSDK::startPrint()
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, tr("dev_unconnect"));
 		return false;
 	}
 
 	int ret = SDKManager::instance()->startPrint();
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("¿ªÊ¼´òÓ¡ÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr("start_print_cmd_failed"));
 		return false;
 	}
 
-	emit printStatusChanged(tr("´òÓ¡¿ªÊ¼"));
+	emit printStatusChanged(tr("start_print"));
 	return true;
 }
 
@@ -384,18 +590,18 @@ bool motionControlSDK::pausePrint()
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, tr("dev_unconnect"));
 		return false;
 	}
 
 	int ret = SDKManager::instance()->pausePrint();
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("ÔİÍ£´òÓ¡ÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr(u8"æš‚åœæ‰“å°å‘½ä»¤å¤±è´¥"));
 		return false;
 	}
 
-	emit printStatusChanged(tr("´òÓ¡ÔİÍ£"));
+	emit printStatusChanged(tr(u8"æ‰“å°æš‚åœ"));
 	return true;
 }
 
@@ -403,18 +609,18 @@ bool motionControlSDK::resumePrint()
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, tr("dev_unconnect"));
 		return false;
 	}
 
 	int ret = SDKManager::instance()->resumePrint();
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("»Ö¸´´òÓ¡ÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr(u8"æ¢å¤æ‰“å°å‘½ä»¤å¤±è´¥"));
 		return false;
 	}
 
-	emit printStatusChanged(tr("´òÓ¡»Ö¸´"));
+	emit printStatusChanged(tr(u8"æ‰“å°æ¢å¤"));
 	return true;
 }
 
@@ -422,22 +628,22 @@ bool motionControlSDK::stopPrint()
 {
 	if (!isConnected()) 
 	{
-		emit errorOccurred(-1, tr("Éè±¸Î´Á¬½Ó"));
+		emit errorOccurred(-1, tr("dev_unconnect"));
 		return false;
 	}
 
 	int ret = SDKManager::instance()->stopPrint();
 	if (ret != 0) 
 	{
-		emit errorOccurred(ret, tr("Í£Ö¹´òÓ¡ÃüÁîÊ§°Ü"));
+		emit errorOccurred(ret, tr(u8"åœæ­¢æ‰“å°å‘½ä»¤å¤±è´¥"));
 		return false;
 	}
 
-	emit printStatusChanged(tr("´òÓ¡Í£Ö¹"));
+	emit printStatusChanged(tr(u8"æ‰“å°åœæ­¢"));
 	return true;
 }
 
-// ==================== »Øµ÷º¯Êı£¨ÇÅ½ÓC»Øµ÷µ½QtĞÅºÅ£©====================
+// ==================== å›è°ƒå‡½æ•°ï¼ˆæ¡¥æ¥Cå›è°ƒåˆ°Qtä¿¡å·ï¼‰====================
 
 void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 {
@@ -453,8 +659,8 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		return;
 	}
 
-	// ½«C»Øµ÷×ª»»ÎªQtĞÅºÅ
-	// Ê¹ÓÃQMetaObject::invokeMethodÈ·±£ĞÅºÅÔÚÕıÈ·µÄÏß³ÌÖĞ·¢Éä£¨Ïß³Ì°²È«£©
+	// å°†Cå›è°ƒè½¬æ¢ä¸ºQtä¿¡å·
+	// ä½¿ç”¨QMetaObject::invokeMethodç¡®ä¿ä¿¡å·åœ¨æ­£ç¡®çš„çº¿ç¨‹ä¸­å‘å°„ï¼ˆçº¿ç¨‹å®‰å…¨ï¼‰
 	QString message = QString::fromUtf8(event->message);
 	SdkEventType type = event->type;
 	int code = event->code;
@@ -462,14 +668,14 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 	double v2 = event->value2;
 	double v3 = event->value3;
 
-	// Ê¹ÓÃQt::QueuedConnectionÈ·±£ÔÚÖ÷Ïß³ÌÖĞÖ´ĞĞ
+	// ä½¿ç”¨Qt::QueuedConnectionç¡®ä¿åœ¨ä¸»çº¿ç¨‹ä¸­æ‰§è¡Œ
 	QMetaObject::invokeMethod(s_instance, [=]() 
 	{
 		switch (type) 
 		{
 		case EVENT_TYPE_GENERAL: 
 		{
-			// ¼ì²âÁ¬½Ó×´Ì¬±ä»¯
+			// æ£€æµ‹è¿æ¥çŠ¶æ€å˜åŒ–
 			if (message.contains("Connected", Qt::CaseInsensitive) &&
 				message.contains("device", Qt::CaseInsensitive)) 
 			{
@@ -505,7 +711,7 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 
 			emit s_instance->printProgressUpdated(progress, currentLayer, totalLayers);
 
-			QString statusMsg = QString("´òÓ¡½ø¶È: %1% (%2/%3²ã)").arg(progress).arg(currentLayer).arg(totalLayers);
+			QString statusMsg = QString(u8"æ‰“å°è¿›åº¦: %1% (%2/%3å±‚)").arg(progress).arg(currentLayer).arg(totalLayers);
 			emit s_instance->printStatusChanged(statusMsg);
 
 			qDebug() << "Print progress:" << progress << "%"
@@ -517,7 +723,7 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		{
 			emit s_instance->moveStatusChanged(message);
 
-			// Èç¹ûÓĞ×ø±êĞÅÏ¢£¬·¢ËÍÎ»ÖÃ¸üĞÂ
+			// å¦‚æœæœ‰åæ ‡ä¿¡æ¯ï¼Œå‘é€ä½ç½®æ›´æ–°
 			if (v1 != 0 || v2 != 0 || v3 != 0) {
 				emit s_instance->positionUpdated(v1, v2, v3);
 				qDebug() << "Position:" << v1 << v2 << v3;
@@ -528,7 +734,7 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		case EVENT_TYPE_LOG: 
 		{
 			emit s_instance->logMessage(message);
-			// qDebug() << "SDK Log:" << message;  // ¿ÉÑ¡£º´òÓ¡µ½µ÷ÊÔÊä³ö
+			// qDebug() << "SDK Log:" << message;  // å¯é€‰ï¼šæ‰“å°åˆ°è°ƒè¯•è¾“å‡º
 			break;
 		}
 

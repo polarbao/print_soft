@@ -1,44 +1,88 @@
 #pragma once
 
 #include "motioncontrolsdk_global.h"
+#define DATA_LEN_12 12
 
-// --- ÊÂ¼ş»Øµ÷¶¨Òå ---
+// --- äº‹ä»¶å›è°ƒå®šä¹‰ ---
 /**
- * @brief SDKÊÂ¼şÀàĞÍÃ¶¾Ù
+ * @brief SDKäº‹ä»¶ç±»å‹æšä¸¾
  */
 typedef enum 
 {
-	EVENT_TYPE_GENERAL,     // ÆÕÍ¨ĞÅÏ¢ÊÂ¼ş (Èç: "Connected", "Disconnected")
-	EVENT_TYPE_ERROR,       // ´íÎóÊÂ¼ş
-	EVENT_TYPE_PRINT_STATUS,// ´òÓ¡×´Ì¬¸üĞÂ (Èç: ½ø¶È, ²ãÊı)
-	EVENT_TYPE_MOVE_STATUS, // ÔË¶¯×´Ì¬¸üĞÂ (Èç: "Moving", "Idle")
-	EVENT_TYPE_LOG          // ÄÚ²¿ÈÕÖ¾ÊÂ¼ş
+	EVENT_TYPE_GENERAL,     // æ™®é€šä¿¡æ¯äº‹ä»¶ (å¦‚: "Connected", "Disconnected")
+	EVENT_TYPE_ERROR,       // é”™è¯¯äº‹ä»¶
+	EVENT_TYPE_PRINT_STATUS,// æ‰“å°çŠ¶æ€æ›´æ–° (å¦‚: è¿›åº¦, å±‚æ•°)
+	EVENT_TYPE_MOVE_STATUS, // è¿åŠ¨çŠ¶æ€æ›´æ–° (å¦‚: "Moving", "Idle")
+	EVENT_TYPE_LOG          // å†…éƒ¨æ—¥å¿—äº‹ä»¶
 } SdkEventType;
 
 /**
- * @brief SDKÊÂ¼ş½á¹¹Ìå
+ * @brief SDKäº‹ä»¶ç»“æ„ä½“
  */
 typedef struct 
 {
-	SdkEventType type;      // ÊÂ¼şÀàĞÍ
-	int code;               // ×´Ì¬/´íÎóÂë
-	const char* message;    // ÊÂ¼şÏûÏ¢
-	double value1;          // ¸½¼ÓÊı¾İ1 (ÀıÈç: ´òÓ¡½ø¶È, X×ø±ê)
-	double value2;          // ¸½¼ÓÊı¾İ2 (ÀıÈç: µ±Ç°²ã, Y×ø±ê)
-	double value3;          // ¸½¼ÓÊı¾İ3 (ÀıÈç: ×Ü²ãÊı, Z×ø±ê)
+	SdkEventType type;      // äº‹ä»¶ç±»å‹
+	int code;               // çŠ¶æ€/é”™è¯¯ç 
+	const char* message;    // äº‹ä»¶æ¶ˆæ¯
+	double value1;          // é™„åŠ æ•°æ®1 (ä¾‹å¦‚: æ‰“å°è¿›åº¦, Xåæ ‡)
+	double value2;          // é™„åŠ æ•°æ®2 (ä¾‹å¦‚: å½“å‰å±‚, Yåæ ‡)
+	double value3;          // é™„åŠ æ•°æ®3 (ä¾‹å¦‚: æ€»å±‚æ•°, Zåæ ‡)
 } SdkEvent;
 
 /**
- * @brief »Øµ÷º¯ÊıÖ¸ÕëÀàĞÍ
+ * @brief å›è°ƒå‡½æ•°æŒ‡é’ˆç±»å‹
  */
 typedef void(*SdkEventCallback)(const SdkEvent* event);
+
+
+struct MOTIONCONTROLSDK_EXPORT MoveAxisPos
+{
+	quint32 xPos;  
+	quint32 yPos;  
+	quint32 zPos;  
+
+	MoveAxisPos() : xPos(0), yPos(0), zPos(0) {}
+
+	MoveAxisPos(quint32 x, quint32 y, quint32 z) 
+		: xPos(x), yPos(y), zPos(z) {}
+
+	static MoveAxisPos fromMillimeters(double x_mm, double y_mm, double z_mm)
+	{
+		return MoveAxisPos(
+			static_cast<quint32>(x_mm * 1000.0),
+			static_cast<quint32>(y_mm * 1000.0),
+			static_cast<quint32>(z_mm * 1000.0)
+		);
+	}
+
+	void toMillimeters(double& x_out, double& y_out, double& z_out) const
+	{
+		x_out = static_cast<double>(xPos) / 1000.0;
+		y_out = static_cast<double>(yPos) / 1000.0;
+		z_out = static_cast<double>(zPos) / 1000.0;
+	}
+};
+Q_DECLARE_METATYPE(MoveAxisPos)
+
+struct MOTIONCONTROLSDK_EXPORT PackParam
+{
+	uint16_t head;
+	uint16_t operType;
+	uint16_t cmdFun;
+	uint16_t dataLen;
+	uint8_t data[DATA_LEN_12];
+	uint16_t crc16;
+
+	//PackParam() ;
+};
+Q_DECLARE_METATYPE(PackParam)
 
 
 class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 {
 	Q_OBJECT
 
-	// QtÊôĞÔ¶¨Òå
+	// Qtå±æ€§å®šä¹‰
 	Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
 	Q_PROPERTY(QString deviceIp READ deviceIp NOTIFY deviceIpChanged)
 	Q_PROPERTY(quint16 devicePort READ devicePort NOTIFY devicePortChanged)
@@ -46,163 +90,249 @@ class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 public:
 
 	/**
-	 * @brief ¹¹Ôìº¯Êı
-	 * @param parent ¸¸¶ÔÏó£¨Qt¶ÔÏóÊ÷¹ÜÀí£©
+	 * @brief æ„é€ å‡½æ•°
+	 * @param parent çˆ¶å¯¹è±¡ï¼ˆQtå¯¹è±¡æ ‘ç®¡ç†ï¼‰
 	 */
 	explicit motionControlSDK(QObject *parent = nullptr);
 
 	/**
-	 * @brief Îö¹¹º¯Êı
-	 * @note ×Ô¶¯ÊÍ·ÅSDK×ÊÔ´
+	 * @brief ææ„å‡½æ•°
+	 * @note è‡ªåŠ¨é‡Šæ”¾SDKèµ„æº
 	 */
 	~motionControlSDK();
 
 
-	// ==================== ÉúÃüÖÜÆÚ¹ÜÀí ====================
+	// ==================== ç”Ÿå‘½å‘¨æœŸç®¡ç† ====================
 
 	/**
-	 * @brief ³õÊ¼»¯SDK
-	 * @param logDir ÈÕÖ¾Ä¿Â¼£¨¿ÉÎª¿Õ£©
-	 * @return true=³É¹¦, false=Ê§°Ü
+	 * @brief åˆå§‹åŒ–SDK
+	 * @param logDir æ—¥å¿—ç›®å½•ï¼ˆå¯ä¸ºç©ºï¼‰
+	 * @return true=æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool initialize(const QString& logDir = QString());
 
 	/**
-	 * @brief ÊÍ·ÅSDK×ÊÔ´
-	 * @note Í¨³£ÎŞĞèÊÖ¶¯µ÷ÓÃ£¬Îö¹¹Ê±×Ô¶¯ÊÍ·Å
+	 * @brief é‡Šæ”¾SDKèµ„æº
+	 * @note é€šå¸¸æ— éœ€æ‰‹åŠ¨è°ƒç”¨ï¼Œææ„æ—¶è‡ªåŠ¨é‡Šæ”¾
 	 */
 	void release();
 
 	/**
-	 * @brief ¼ì²éSDKÊÇ·ñÒÑ³õÊ¼»¯
-	 * @return true=ÒÑ³õÊ¼»¯, false=Î´³õÊ¼»¯
+	 * @brief æ£€æŸ¥SDKæ˜¯å¦å·²åˆå§‹åŒ–
+	 * @return true=å·²åˆå§‹åŒ–, false=æœªåˆå§‹åŒ–
 	 */
 	bool isInitialized() const;
 
-	// ==================== Á¬½Ó¹ÜÀí ====================
+	// ==================== è¿æ¥ç®¡ç† ====================
+
 
 	/**
-	 * @brief Á¬½ÓÉè±¸
-	 * @param ip Éè±¸IPµØÖ·
-	 * @param port ¶Ë¿ÚºÅ£¨Ä¬ÈÏ5555£©
-	 * @return true=³É¹¦·¢ÆğÁ¬½Ó, false=Ê§°Ü
-	 * @note Á¬½Ó½á¹ûÍ¨¹ıconnected()»òerrorOccurred()ĞÅºÅÍ¨Öª
+	 * @brief è¿æ¥è®¾å¤‡
+	 * @param ip è®¾å¤‡IPåœ°å€
+	 * @param port ç«¯å£å·ï¼ˆé»˜è®¤5555ï¼‰
+	 * @return true=æˆåŠŸå‘èµ·è¿æ¥, false=å¤±è´¥
+	 * @note è¿æ¥ç»“æœé€šè¿‡connected()æˆ–errorOccurred()ä¿¡å·é€šçŸ¥
 	 */
 	bool connectToDevice(const QString& ip, quint16 port = 5555);
 
 	/**
-	 * @brief ¶Ï¿ªÁ¬½Ó
-	 * @note ¶Ï¿ª½á¹ûÍ¨¹ıdisconnected()ĞÅºÅÍ¨Öª
+	 * @brief æ–­å¼€è¿æ¥
+	 * @note æ–­å¼€ç»“æœé€šè¿‡disconnected()ä¿¡å·é€šçŸ¥
 	 */
 	void disconnectFromDevice();
 
 	/**
-	 * @brief ²éÑ¯Á¬½Ó×´Ì¬
-	 * @return true=ÒÑÁ¬½Ó, false=Î´Á¬½Ó
+	 * @brief æŸ¥è¯¢è¿æ¥çŠ¶æ€
+	 * @return true=å·²è¿æ¥, false=æœªè¿æ¥
 	 */
 	bool isConnected() const;
 
 	/**
-	 * @brief »ñÈ¡Éè±¸IP
-	 * @return IPµØÖ·×Ö·û´®
+	 * @brief è·å–è®¾å¤‡IP
+	 * @return IPåœ°å€å­—ç¬¦ä¸²
 	 */
 	QString deviceIp() const;
 
 	/**
-	 * @brief »ñÈ¡Éè±¸¶Ë¿Ú
-	 * @return ¶Ë¿ÚºÅ
+	 * @brief è·å–è®¾å¤‡ç«¯å£
+	 * @return ç«¯å£å·
 	 */
 	quint16 devicePort() const;
 
-	// ==================== ÔË¶¯¿ØÖÆ ====================
+	// ==================== è¿åŠ¨æ§åˆ¶ ====================
 
 	/**
-	 * @brief ÒÆ¶¯µ½¾ø¶Ô×ø±ê
-	 * @param x XÖá×ø±ê£¨mm£©
-	 * @param y YÖá×ø±ê£¨mm£©
-	 * @param z ZÖá×ø±ê£¨mm£©
-	 * @param speed ËÙ¶È£¨mm/s£¬Ä¬ÈÏ100£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief ç§»åŠ¨åˆ°ç»å¯¹åæ ‡
+	 * @param x Xè½´åæ ‡ï¼ˆmmï¼‰
+	 * @param y Yè½´åæ ‡ï¼ˆmmï¼‰
+	 * @param z Zè½´åæ ‡ï¼ˆmmï¼‰
+	 * @param speed é€Ÿåº¦ï¼ˆmm/sï¼Œé»˜è®¤100ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
-	bool moveTo(double x, double y, double z, double speed = 100.0);
+	bool moveTo(const MoveAxisPos& posData);
 
 	/**
-	 * @brief Ïà¶ÔÒÆ¶¯
-	 * @param dx XÖáÔöÁ¿£¨mm£©
-	 * @param dy YÖáÔöÁ¿£¨mm£©
-	 * @param dz ZÖáÔöÁ¿£¨mm£©
-	 * @param speed ËÙ¶È£¨mm/s£¬Ä¬ÈÏ100£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief ç›¸å¯¹ç§»åŠ¨
+	 * @param dx Xè½´å¢é‡ï¼ˆmmï¼‰
+	 * @param dy Yè½´å¢é‡ï¼ˆmmï¼‰
+	 * @param dz Zè½´å¢é‡ï¼ˆmmï¼‰
+	 * @param speed é€Ÿåº¦ï¼ˆmm/sï¼Œé»˜è®¤100ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool moveBy(double dx, double dy, double dz, double speed = 100.0);
 
+
+
+
+
 	/**
-	 * @brief »ØÔ­µã£¨ËùÓĞÖá¸´Î»£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief å›åŸç‚¹ï¼ˆæ‰€æœ‰è½´å¤ä½ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool goHome();
 
 	/**
-	 * @brief XÖáÒÆ¶¯
-	 * @param distance ÒÆ¶¯¾àÀë£¨mm£¬ÕıÊıÏòÇ°£¬¸ºÊıÏòºó£©
-	 * @param speed ËÙ¶È£¨mm/s£¬Ä¬ÈÏ100£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief Xè½´ç§»åŠ¨
+	 * @param distance ç§»åŠ¨è·ç¦»ï¼ˆmmï¼Œæ­£æ•°å‘å‰ï¼Œè´Ÿæ•°å‘åï¼‰
+	 * @param speed é€Ÿåº¦ï¼ˆmm/sï¼Œé»˜è®¤100ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool moveXAxis(double distance, double speed = 100.0);
 
 	/**
-	 * @brief YÖáÒÆ¶¯
-	 * @param distance ÒÆ¶¯¾àÀë£¨mm£©
-	 * @param speed ËÙ¶È£¨mm/s£¬Ä¬ÈÏ100£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief Xè½´ç§»åŠ¨ï¼ˆç»“æ„ä½“ç‰ˆæœ¬ï¼‰
+	 * @param targetPos ç›®æ ‡ä½ç½®ç»“æ„ä½“ï¼ˆä»…ä½¿ç”¨xPosï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	 *
+	 * @code
+	 * MoveAxisPos pos(100000, 0, 0);  // Xè½´ç§»åŠ¨100mm
+	 * sdk.moveXAxis(pos);
+	 * @endcode
+	 */
+	bool moveXAxis(const MoveAxisPos& targetPos);
+
+	/**
+	 * @brief Yè½´ç§»åŠ¨
+	 * @param distance ç§»åŠ¨è·ç¦»ï¼ˆmmï¼‰
+	 * @param speed é€Ÿåº¦ï¼ˆmm/sï¼Œé»˜è®¤100ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool moveYAxis(double distance, double speed = 100.0);
 
 	/**
-	 * @brief ZÖáÒÆ¶¯
-	 * @param distance ÒÆ¶¯¾àÀë£¨mm£¬ÕıÊıÏòÉÏ£¬¸ºÊıÏòÏÂ£©
-	 * @param speed ËÙ¶È£¨mm/s£¬Ä¬ÈÏ100£©
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief Yè½´ç§»åŠ¨ï¼ˆç»“æ„ä½“ç‰ˆæœ¬ï¼‰
+	 * @param targetPos ç›®æ ‡ä½ç½®ç»“æ„ä½“ï¼ˆä»…ä½¿ç”¨yPosï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	 *
+	 * @code
+	 * MoveAxisPos pos(0, 200000, 0);  // Yè½´ç§»åŠ¨200mm
+	 * sdk.moveYAxis(pos);
+	 * @endcode
+	 */
+	bool moveYAxis(const MoveAxisPos& targetPos);
+
+	/**
+	 * @brief Zè½´ç§»åŠ¨
+	 * @param distance ç§»åŠ¨è·ç¦»ï¼ˆmmï¼Œæ­£æ•°å‘ä¸Šï¼Œè´Ÿæ•°å‘ä¸‹ï¼‰
+	 * @param speed é€Ÿåº¦ï¼ˆmm/sï¼Œé»˜è®¤100ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool moveZAxis(double distance, double speed = 100.0);
 
-
 	/**
-	* @brief ·¢ËÍÊı¾İ
-	* @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
-	*/
-	bool sendData(int cmdType,const QByteArray& data);
-
-	// ==================== ´òÓ¡¿ØÖÆ ====================
-
-	/**
-	 * @brief ¼ÓÔØ´òÓ¡Êı¾İ
-	 * @param filePath Í¼ÏñÎÄ¼şÂ·¾¶£¨Ö§³ÖJPG/PNG/BMP£©
-	 * @return true=³É¹¦, false=Ê§°Ü
+	 * @brief Zè½´ç§»åŠ¨ï¼ˆç»“æ„ä½“ç‰ˆæœ¬ï¼‰
+	 * @param targetPos ç›®æ ‡ä½ç½®ç»“æ„ä½“ï¼ˆä»…ä½¿ç”¨zPosï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	 *
+	 * @code
+	 * MoveAxisPos pos(0, 0, 50000);  // Zè½´ç§»åŠ¨50mmå‘ä¸Š
+	 * sdk.moveZAxis(pos);
+	 * @endcode
 	 */
-	bool loadPrintData(const QString& filePath);
+	bool moveZAxis(const MoveAxisPos& targetPos);
+	
+	// å•è½´ç§»åŠ¨
+	bool MC_move2RelSingleAxisPos(double dx, double dy, double dz);
+	bool MC_move2AbsSingleAxisPos(const MoveAxisPos& targetPos);
+
+
+	// 3è½´åŒæ­¥ç§»åŠ¨
+	bool MC_move2RelAxisPos(double dx, double dy, double dz);
+	bool MC_move2AbsAxisPos(const MoveAxisPos& targetPos);
+	bool MC_move2AbsAxisPos(const QByteArray& targetPos);
+
+
 
 	/**
-	 * @brief ¿ªÊ¼´òÓ¡
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief 3è½´åŒæ—¶ç§»åŠ¨ï¼ˆç»“æ„ä½“ç‰ˆæœ¬ï¼‰
+	 * @param targetPos ç›®æ ‡ä½ç½®ï¼ˆå¾®ç±³å•ä½ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	 *
+	 * @code
+	 * // ä½¿ç”¨å¾®ç±³
+	 * MoveAxisPos pos(100000, 200000, 50000);  // X=100mm, Y=200mm, Z=50mm
+	 * sdk.MC_moveToPosition(pos);
+	 *
+	 * // ä½¿ç”¨æ¯«ç±³è½¬æ¢
+	 * sdk.MC_moveToPosition(MoveAxisPos::fromMillimeters(100, 200, 50));
+	 * @endcode
+	 */
+	bool MC_moveToPosition(const MoveAxisPos& targetPos);
+
+	/**
+	 * @brief 3è½´åŒæ—¶ç§»åŠ¨ï¼ˆå­—èŠ‚æ•°ç»„ç‰ˆæœ¬ï¼‰
+	 * @param positionData ä½ç½®æ•°æ®ï¼ˆ12å­—èŠ‚ï¼šX4+Y4+Z4ï¼‰
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	 *
+	 * @code
+	 * QByteArray data(12, 0);
+	 * // å¡«å……Xåæ ‡ï¼ˆ100000å¾®ç±³ = 100mmï¼‰
+	 * data[0] = 0x00; data[1] = 0x01; data[2] = 0x86; data[3] = 0xA0;
+	 * sdk.moveToPosition(data);
+	 * @endcode
+	 */
+	bool MC_moveToPosition(const QByteArray& positionData);
+
+
+
+
+
+	/**
+	* @brief å‘é€æ•°æ®
+	* @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
+	*/
+	bool MC_sendData(int cmdType,const QByteArray& data);
+
+	// ==================== æ‰“å°æ§åˆ¶ ====================
+
+	/**
+	 * @brief åŠ è½½æ‰“å°æ•°æ®
+	 * @param filePath å›¾åƒæ–‡ä»¶è·¯å¾„ï¼ˆæ”¯æŒJPG/PNG/BMPï¼‰
+	 * @return true=æˆåŠŸ, false=å¤±è´¥
+	 */
+	bool MC_loadPrintData(const QString& filePath);
+
+	/**
+	 * @brief å¼€å§‹æ‰“å°
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool startPrint();
 
 	/**
-	 * @brief ÔİÍ£´òÓ¡
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief æš‚åœæ‰“å°
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool pausePrint();
 
 	/**
-	 * @brief »Ö¸´´òÓ¡
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief æ¢å¤æ‰“å°
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool resumePrint();
 
 	/**
-	 * @brief Í£Ö¹´òÓ¡
-	 * @return true=ÃüÁî·¢ËÍ³É¹¦, false=Ê§°Ü
+	 * @brief åœæ­¢æ‰“å°
+	 * @return true=å‘½ä»¤å‘é€æˆåŠŸ, false=å¤±è´¥
 	 */
 	bool stopPrint();
 
@@ -210,99 +340,99 @@ public:
 
 public slots:
 	/**
-	 * @brief ²Ûº¯Êı£ºË¢ĞÂÁ¬½Ó×´Ì¬
+	 * @brief æ§½å‡½æ•°ï¼šåˆ·æ–°è¿æ¥çŠ¶æ€
 	 */
 	void refreshConnectionStatus();
 
 signals:
-	// ==================== Á¬½ÓÏà¹ØĞÅºÅ ====================
+	// ==================== è¿æ¥ç›¸å…³ä¿¡å· ====================
 
 	/**
-	 * @brief Á¬½Ó³É¹¦
+	 * @brief è¿æ¥æˆåŠŸ
 	 */
 	void connected();
 
 	/**
-	 * @brief Á¬½Ó¶Ï¿ª
+	 * @brief è¿æ¥æ–­å¼€
 	 */
 	void disconnected();
 
 	/**
-	 * @brief Á¬½Ó×´Ì¬¸Ä±ä
-	 * @param isConnected ÊÇ·ñÒÑÁ¬½Ó
+	 * @brief è¿æ¥çŠ¶æ€æ”¹å˜
+	 * @param isConnected æ˜¯å¦å·²è¿æ¥
 	 */
 	void connectedChanged(bool isConnected);
 
 	/**
-	 * @brief Éè±¸IP¸Ä±ä
-	 * @param ip IPµØÖ·
+	 * @brief è®¾å¤‡IPæ”¹å˜
+	 * @param ip IPåœ°å€
 	 */
 	void deviceIpChanged(const QString& ip);
 
 	/**
-	 * @brief Éè±¸¶Ë¿Ú¸Ä±ä
-	 * @param port ¶Ë¿ÚºÅ
+	 * @brief è®¾å¤‡ç«¯å£æ”¹å˜
+	 * @param port ç«¯å£å·
 	 */
 	void devicePortChanged(quint16 port);
 
-	// ==================== ´íÎóºÍ×´Ì¬ĞÅºÅ ====================
+	// ==================== é”™è¯¯å’ŒçŠ¶æ€ä¿¡å· ====================
 
 	/**
-	 * @brief ·¢Éú´íÎó
-	 * @param errorCode ´íÎóÂë
-	 * @param errorMessage ´íÎóĞÅÏ¢
+	 * @brief å‘ç”Ÿé”™è¯¯
+	 * @param errorCode é”™è¯¯ç 
+	 * @param errorMessage é”™è¯¯ä¿¡æ¯
 	 */
 	void errorOccurred(int errorCode, const QString& errorMessage);
 
 	/**
-	 * @brief Ò»°ãĞÅÏ¢
-	 * @param message ÏûÏ¢ÎÄ±¾
+	 * @brief ä¸€èˆ¬ä¿¡æ¯
+	 * @param message æ¶ˆæ¯æ–‡æœ¬
 	 */
 	void infoMessage(const QString& message);
 
 	/**
-	 * @brief ÈÕÖ¾ÏûÏ¢
-	 * @param message ÈÕÖ¾ÎÄ±¾
+	 * @brief æ—¥å¿—æ¶ˆæ¯
+	 * @param message æ—¥å¿—æ–‡æœ¬
 	 */
 	void logMessage(const QString& message);
 
-	// ==================== ´òÓ¡Ïà¹ØĞÅºÅ ====================
+	// ==================== æ‰“å°ç›¸å…³ä¿¡å· ====================
 
 	/**
-	 * @brief ´òÓ¡½ø¶È¸üĞÂ
-	 * @param progress ½ø¶È°Ù·Ö±È£¨0-100£©
-	 * @param currentLayer µ±Ç°²ã
-	 * @param totalLayers ×Ü²ãÊı
+	 * @brief æ‰“å°è¿›åº¦æ›´æ–°
+	 * @param progress è¿›åº¦ç™¾åˆ†æ¯”ï¼ˆ0-100ï¼‰
+	 * @param currentLayer å½“å‰å±‚
+	 * @param totalLayers æ€»å±‚æ•°
 	 */
 	void printProgressUpdated(int progress, int currentLayer, int totalLayers);
 
 	/**
-	 * @brief ´òÓ¡×´Ì¬¸Ä±ä
-	 * @param status ×´Ì¬ÃèÊö
+	 * @brief æ‰“å°çŠ¶æ€æ”¹å˜
+	 * @param status çŠ¶æ€æè¿°
 	 */
 	void printStatusChanged(const QString& status);
 
-	// ==================== ÔË¶¯Ïà¹ØĞÅºÅ ====================
+	// ==================== è¿åŠ¨ç›¸å…³ä¿¡å· ====================
 
 	/**
-	 * @brief ÔË¶¯×´Ì¬¸Ä±ä
-	 * @param status ×´Ì¬ÃèÊö
+	 * @brief è¿åŠ¨çŠ¶æ€æ”¹å˜
+	 * @param status çŠ¶æ€æè¿°
 	 */
 	void moveStatusChanged(const QString& status);
 
 	/**
-	 * @brief Î»ÖÃ¸üĞÂ
-	 * @param x X×ø±ê£¨mm£©
-	 * @param y Y×ø±ê£¨mm£©
-	 * @param z Z×ø±ê£¨mm£©
+	 * @brief ä½ç½®æ›´æ–°
+	 * @param x Xåæ ‡ï¼ˆmmï¼‰
+	 * @param y Yåæ ‡ï¼ˆmmï¼‰
+	 * @param z Zåæ ‡ï¼ˆmmï¼‰
 	 */
 	void positionUpdated(double x, double y, double z);
 
 private:
-	// PimplÄ£Ê½£ºÒş²ØÊµÏÖÏ¸½Ú£¬±£³ÖABIÎÈ¶¨ĞÔ
+	// Pimplæ¨¡å¼ï¼šéšè—å®ç°ç»†èŠ‚ï¼Œä¿æŒABIç¨³å®šæ€§
 	class Private;
 	Private* d;
 
-	//Q_DISABLE_COPY(PrintDeviceController)  // ½ûÖ¹¿½±´
+	//Q_DISABLE_COPY(PrintDeviceController)  // ç¦æ­¢æ‹·è´
 
 };

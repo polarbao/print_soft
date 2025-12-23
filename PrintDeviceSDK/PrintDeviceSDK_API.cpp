@@ -35,7 +35,7 @@ void RegisterEventCallback(SdkEventCallback callback) {
 
 int ConnectByTCP(const char* ip, unsigned short port) {
     if (!ip) {
-        return -1;
+    return -1;
     }
     
     return SDKManager::instance()->connectByTCP(QString(ip), port);
@@ -102,7 +102,7 @@ int GoHome() {
 
 int LoadPrintData(const char* data) {
     if (!data) {
-        return -1;
+    return -1;
     }
     
     // data参数为图像文件路径
