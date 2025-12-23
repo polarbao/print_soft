@@ -246,15 +246,15 @@ bool motionControlSDK::moveTo(const MoveAxisPos& posdData)
 	int ret = 0;
 	if (posdData.xPos != 0) 
 	{
-		ret |= SDKManager::instance()->moveXAxis(posdData);
+		ret |= SDKManager::instance()->move2AbsXAxis(posdData);
 	}
 	if (posdData.yPos != 0)
 	{
-		ret |= SDKManager::instance()->moveYAxis(posdData);
+		ret |= SDKManager::instance()->move2AbsYAxis(posdData);
 	}
 	if (posdData.zPos != 0)
 	{
-		ret |= SDKManager::instance()->moveZAxis(posdData);
+		ret |= SDKManager::instance()->move2AbsZAxis(posdData);
 	}
 
 	if (ret != 0) 
@@ -299,7 +299,7 @@ bool motionControlSDK::moveBy(double dx, double dy, double dz, double speed)
 	return true;
 }
 
-bool motionControlSDK::goHome()
+bool motionControlSDK::MC_GoHome()
 {
 	if (!isConnected()) 
 	{
@@ -320,12 +320,12 @@ bool motionControlSDK::goHome()
 	return true;
 }
 
-bool motionControlSDK::moveXAxis(double distance, double speed)
+bool motionControlSDK::MC_moveXAxis(double distance, double speed)
 {
 	return moveBy(distance, 0, 0, speed);
 }
 
-bool motionControlSDK::moveXAxis(const MoveAxisPos& targetPos)
+bool motionControlSDK::MC_moveXAxis(const MoveAxisPos& targetPos)
 {
 	if (!d->initialized) 
 	{
@@ -334,16 +334,16 @@ bool motionControlSDK::moveXAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的X轴移动
-	int result = SDKManager::instance()->moveXAxis(targetPos);
+	int result = SDKManager::instance()->move2AbsXAxis(targetPos);
 	return (result == 0);
 }
 
-bool motionControlSDK::moveYAxis(double distance, double speed)
+bool motionControlSDK::MC_moveYAxis(double distance, double speed)
 {
 	return moveBy(0, distance, 0, speed);
 }
 
-bool motionControlSDK::moveYAxis(const MoveAxisPos& targetPos)
+bool motionControlSDK::MC_moveYAxis(const MoveAxisPos& targetPos)
 {
 	if (!d->initialized) 
 	{
@@ -352,16 +352,16 @@ bool motionControlSDK::moveYAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的Y轴移动
-	int result = SDKManager::instance()->moveYAxis(targetPos);
+	int result = SDKManager::instance()->move2AbsYAxis(targetPos);
 	return (result == 0);
 }
 
-bool motionControlSDK::moveZAxis(double distance, double speed)
+bool motionControlSDK::MC_moveZAxis(double distance, double speed)
 {
 	return moveBy(0, 0, distance, speed);
 }
 
-bool motionControlSDK::moveZAxis(const MoveAxisPos& targetPos)
+bool motionControlSDK::MC_moveZAxis(const MoveAxisPos& targetPos)
 {
 	if (!d->initialized) 
 	{
@@ -370,7 +370,7 @@ bool motionControlSDK::moveZAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的Z轴移动
-	int result = SDKManager::instance()->moveZAxis(targetPos);
+	int result = SDKManager::instance()->move2AbsZAxis(targetPos);
 	return (result == 0);
 }
 
@@ -466,7 +466,7 @@ bool motionControlSDK::MC_move2AbsAxisPos(const MoveAxisPos& targetPos)
 	stream << targetPos.yPos;
 	stream << targetPos.zPos;
 
-	int result = SDKManager::instance()->moveToPosition(data);
+	int result = SDKManager::instance()->move2AbsPosition(data);
 	return (result == 0);
 }
 
@@ -486,7 +486,7 @@ bool motionControlSDK::MC_move2AbsAxisPos(const QByteArray& positionData)
 	}
 
 	// 调用SDKManager的3轴同时移动
-	int result = SDKManager::instance()->moveToPosition(positionData);
+	int result = SDKManager::instance()->move2AbsPosition(positionData);
 	return (result == 0);
 }
 
@@ -510,7 +510,7 @@ bool motionControlSDK::MC_moveToPosition(const MoveAxisPos& targetPos)
 	stream << targetPos.yPos;
 	stream << targetPos.zPos;
 
-	int result = SDKManager::instance()->moveToPosition(data);
+	int result = SDKManager::instance()->move2AbsPosition(data);
 	return (result == 0);
 }
 
@@ -530,7 +530,7 @@ bool motionControlSDK::MC_moveToPosition(const QByteArray& positionData)
 	}
 
 	// 调用SDKManager的3轴同时移动
-	int result = SDKManager::instance()->moveToPosition(positionData);
+	int result = SDKManager::instance()->move2AbsPosition(positionData);
 	return (result == 0);
 }
 

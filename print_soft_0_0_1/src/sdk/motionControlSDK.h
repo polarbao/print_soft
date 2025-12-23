@@ -189,7 +189,7 @@ public:
 	 * @brief 回原点（所有轴复位）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool goHome();
+	bool MC_GoHome();
 
 	/**
 	 * @brief X轴移动
@@ -197,7 +197,7 @@ public:
 	 * @param speed 速度（mm/s，默认100）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool moveXAxis(double distance, double speed = 100.0);
+	bool MC_moveXAxis(double distance, double speed = 100.0);
 
 	/**
 	 * @brief X轴移动（结构体版本）
@@ -209,7 +209,7 @@ public:
 	 * sdk.moveXAxis(pos);
 	 * @endcode
 	 */
-	bool moveXAxis(const MoveAxisPos& targetPos);
+	bool MC_moveXAxis(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief Y轴移动
@@ -217,7 +217,7 @@ public:
 	 * @param speed 速度（mm/s，默认100）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool moveYAxis(double distance, double speed = 100.0);
+	bool MC_moveYAxis(double distance, double speed = 100.0);
 
 	/**
 	 * @brief Y轴移动（结构体版本）
@@ -229,7 +229,7 @@ public:
 	 * sdk.moveYAxis(pos);
 	 * @endcode
 	 */
-	bool moveYAxis(const MoveAxisPos& targetPos);
+	bool MC_moveYAxis(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief Z轴移动
@@ -237,7 +237,7 @@ public:
 	 * @param speed 速度（mm/s，默认100）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool moveZAxis(double distance, double speed = 100.0);
+	bool MC_moveZAxis(double distance, double speed = 100.0);
 
 	/**
 	 * @brief Z轴移动（结构体版本）
@@ -249,7 +249,7 @@ public:
 	 * sdk.moveZAxis(pos);
 	 * @endcode
 	 */
-	bool moveZAxis(const MoveAxisPos& targetPos);
+	bool MC_moveZAxis(const MoveAxisPos& targetPos);
 	
 	// 单轴移动
 	bool MC_move2RelSingleAxisPos(double dx, double dy, double dz);
@@ -288,7 +288,7 @@ public:
 	 * QByteArray data(12, 0);
 	 * // 填充X坐标（100000微米 = 100mm）
 	 * data[0] = 0x00; data[1] = 0x01; data[2] = 0x86; data[3] = 0xA0;
-	 * sdk.moveToPosition(data);
+	 * sdk.MC_moveToPosition(data);
 	 * @endcode
 	 */
 	bool MC_moveToPosition(const QByteArray& positionData);

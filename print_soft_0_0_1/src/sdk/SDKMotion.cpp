@@ -99,7 +99,7 @@ static QByteArray fullPositionToByteArray(const MoveAxisPos& pos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X坐标 + Y=0 + Z=0)
  */
-int SDKManager::moveXAxis(const MoveAxisPos& targetPos)
+int SDKManager::move2AbsXAxis(const MoveAxisPos& targetPos)
 {
 	if (!isConnected())
 	{
@@ -111,8 +111,7 @@ int SDKManager::moveXAxis(const MoveAxisPos& targetPos)
 
 	// 转换为毫米用于日志
 	double x_mm = static_cast<double>(targetPos.xPos) / 1000.0;
-	LOG_INFO(QString(u8"目标位置: X=%1mm (%2μm), Y=0, Z=0")
-		.arg(x_mm, 0, 'f', 3).arg(targetPos.xPos));
+	LOG_INFO(QString(u8"目标位置: X=%1mm (%2μm), Y=0, Z=0").arg(x_mm, 0, 'f', 3).arg(targetPos.xPos));
 
 	// 创建12字节数据（X轴坐标，其他轴补0）
 	QByteArray data;
@@ -158,7 +157,7 @@ int SDKManager::moveXAxis(const MoveAxisPos& targetPos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X=0 + Y坐标 + Z=0)
  */
-int SDKManager::moveYAxis(const MoveAxisPos& targetPos)
+int SDKManager::move2AbsYAxis(const MoveAxisPos& targetPos)
 {
 	if (!isConnected())
 	{
@@ -217,7 +216,7 @@ int SDKManager::moveYAxis(const MoveAxisPos& targetPos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X=0 + Y=0 + Z坐标)
  */
-int SDKManager::moveZAxis(const MoveAxisPos& targetPos)
+int SDKManager::move2AbsZAxis(const MoveAxisPos& targetPos)
 {
 	if (!isConnected()) 
 	{
@@ -580,7 +579,7 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
 	QByteArray arrData = fullPositionToByteArray(movPos);
 	// 选择命令（根据移动方向）
 	ProtocolPrint::FunCode cmd = ProtocolPrint::Ctrl_AxisAbsMove;
-	LOG_INFO(QString(u8"相对运动命令转换为绝对命令: Ctrl_AxisAbsMove (0x%1)，数据: 0x%2").arg(QString::number(cmd, 16).toUpper()).arg(QString(arrData.toHex()).data()));
+	LOG_INFO(QString(u8"相对运动命令转换为绝对命令: Ctrl_AxisAbsMove (0x%1)，数据: 0x%2").arg(QString::number(cmd, 16).toUpper()).arg(QString(arrData.toHex().toUpper()).data()));
 
 	// 发送命令
 	sendCommand(cmd, arrData);
@@ -593,7 +592,7 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
  * @param targetPos 目标位置（微米单位）
  * @return 0=成功, -1=失败
  */
-int SDKManager::moveToPosition(const MoveAxisPos& targetPos)
+int SDKManager::move2AbsPosition(const MoveAxisPos& targetPos)
 {
 	if (!isConnected())
 	{
@@ -639,7 +638,7 @@ int SDKManager::moveToPosition(const MoveAxisPos& targetPos)
  * @param positionData 位置数据（12字节：X4+Y4+Z4）
  * @return 0=成功, -1=失败
  */
-int SDKManager::moveToPosition(const QByteArray& positionData)
+int SDKManager::move2AbsPosition(const QByteArray& positionData)
 {
 	if (!isConnected())
 	{

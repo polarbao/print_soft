@@ -92,9 +92,9 @@ public:
      * @param isAbsolute 是否为绝对坐标
      * @return 0=成功, -1=失败
      */
-	int moveXAxis(const MoveAxisPos& targetPos);
-	int moveYAxis(const MoveAxisPos& targetPos);
-	int moveZAxis(const MoveAxisPos& targetPos);
+	int move2AbsXAxis(const MoveAxisPos& targetPos);
+	int move2AbsYAxis(const MoveAxisPos& targetPos);
+	int move2AbsZAxis(const MoveAxisPos& targetPos);
 
 	int moveRelXAxis(double distance);
 	int moveRelYAxis(double distance);
@@ -116,14 +116,14 @@ public:
 	 * - 命令字: 0x3107 (绝对移动)
 	 * - 数据区: 12字节 (X/Y/Z各4字节，大端序，微米)
 	 */
-	int moveToPosition(const MoveAxisPos& targetPos);
+	int move2AbsPosition(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief 3轴同时移动（字节数组版本）
 	 * @param positionData 位置数据（12字节：X4+Y4+Z4）
 	 * @return 0=成功, -1=失败
 	 */
-	int moveToPosition(const QByteArray& positionData);
+	int move2AbsPosition(const QByteArray& positionData);
 
 
 	/**
