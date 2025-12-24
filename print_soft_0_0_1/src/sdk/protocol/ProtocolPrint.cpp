@@ -442,10 +442,7 @@ QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByt
 	sendBuf[1] = HI_OF_SHORT(Resp_Package_Head_Succ);
 
 	//√¸¡Ó¿‡–Õ
-	ECmdType cmd = ECmdType::SetParamCmd;
-	{
-
-	}
+	ProtocolPrint::ECmdType cmd = ProtocolPrint::ECmdType::SetParamCmd;
 	sendBuf[2] = LO_OF_SHORT(cmd);
 	sendBuf[3] = HI_OF_SHORT(cmd);
 

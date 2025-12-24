@@ -30,7 +30,7 @@ static QByteArray positionToByteArray(quint32 position, char axis)
 {
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(QDataStream::LittleEndian);
 
 	// 写入位置（4字节，大端序）
 	stream << position;
@@ -64,7 +64,7 @@ static QByteArray fullPositionToByteArray(const MoveAxisPos& pos)
 {
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(QDataStream::LittleEndian);
 
 	// 写入X/Y/Z坐标（各4字节，大端序，微米单位）
 	stream << pos.xPos;
@@ -107,44 +107,23 @@ int SDKManager::move2AbsXAxis(const MoveAxisPos& targetPos)
 		return -1;
 	}
 
-	LOG_INFO(QString(u8"  X轴移动（结构体）  "));
-
 	// 转换为毫米用于日志
 	double x_mm = static_cast<double>(targetPos.xPos) / 1000.0;
-	LOG_INFO(QString(u8"目标位置: X=%1mm (%2μm), Y=0, Z=0").arg(x_mm, 0, 'f', 3).arg(targetPos.xPos));
+	auto posArr = fullPositionToByteArray(targetPos);
 
-	// 创建12字节数据（X轴坐标，其他轴补0）
-	QByteArray data;
-	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
-
-	stream << targetPos.xPos;  // X轴坐标（微米）
-	stream << (quint32)0;      // Y轴补0
-	stream << (quint32)0;      // Z轴补0
-
-	// 打印十六进制数据
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"协议数据(12字节 Hex): %1").arg(hex));
+	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=%1mm (%2μm), Y=0, Z=0; 协议数据(12字节 Hex): %3")
+		.arg(x_mm, 0, 'f', 3)
+		.arg(targetPos.xPos)
+		.arg(QString(posArr.toHex(' ').toUpper())));
 
 	// 选择命令（根据X坐标的符号）
-	ProtocolPrint::FunCode cmd;
-	if (targetPos.xPos >= 0)
-	{
-		cmd = ProtocolPrint::Ctrl_XAxisRMove;  // 向右/正方向
-		LOG_INFO(QString(u8"命令: Ctrl_XAxisRMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-	else
-	{
-		cmd = ProtocolPrint::Ctrl_XAxisLMove;  // 向左/负方向
-		LOG_INFO(QString(u8"命令: Ctrl_XAxisLMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
+	ProtocolPrint::FunCode cmd = (targetPos.xPos >= 0) ? ProtocolPrint::Ctrl_XAxisRMove : ProtocolPrint::Ctrl_XAxisLMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(x_mm, 0, 'f', 3)
+		.arg(m_curAxisData.xPos));
 
 	// 发送命令
-	sendCommand(cmd, data);
-	//LOG_INFO(QString(u8"X轴移动 命令已发送"));
-
+	sendCommand(cmd, posArr);
 	return 0;
 }
 
@@ -165,45 +144,22 @@ int SDKManager::move2AbsYAxis(const MoveAxisPos& targetPos)
 		return -1;
 	}
 
-	LOG_INFO(QString(u8"  Y轴移动（结构体）  "));
-
 	// 转换为毫米用于日志
 	double y_mm = static_cast<double>(targetPos.yPos) / 1000.0;
-	LOG_INFO(QString(u8"目标位置: X=0, Y=%1mm (%2μm), Z=0")
-		.arg(y_mm, 0, 'f', 3).arg(targetPos.yPos));
+	auto posArr = fullPositionToByteArray(targetPos);
+	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=0, Y=%1mm (%2μm), Z=0; 协议数据(12字节 Hex): %3")
+		.arg(y_mm, 0, 'f', 3)
+		.arg(targetPos.yPos)
+		.arg(QString(posArr.toHex(' ').toUpper())));
 
-	// 创建12字节数据（Y轴坐标，其他轴补0）
-	QByteArray data;
-	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
 
-	stream << (quint32)0;      // X轴补0
-	stream << targetPos.yPos;  // Y轴坐标（微米）
-	stream << (quint32)0;      // Z轴补0
+	// 选择命令（根据y坐标的符号）
+	ProtocolPrint::FunCode cmd = (targetPos.yPos >= 0) ? ProtocolPrint::Ctrl_YAxisRMove : ProtocolPrint::Ctrl_YAxisLMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(y_mm, 0, 'f', 3)
+		.arg(m_curAxisData.yPos));
 
-	// 打印十六进制数据
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"协议数据(12字节 Hex): %1").arg(hex));
-
-	// 选择命令（根据Y坐标的符号）
-	ProtocolPrint::FunCode cmd;
-	if (targetPos.yPos >= 0)
-	{
-		cmd = ProtocolPrint::Ctrl_YAxisRMove;  // 向前/正方向
-		LOG_INFO(QString(u8"命令: Ctrl_YAxisRMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-	else
-	{
-		cmd = ProtocolPrint::Ctrl_YAxisLMove;  // 向后/负方向
-		LOG_INFO(QString(u8"命令: Ctrl_YAxisLMove (0x %1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-
-	// 发送命令
-	sendCommand(cmd, data);
-	//LOG_INFO(QString(u8"Y轴移动 命令已发送"));
-
+	sendCommand(cmd, posArr);
 	return 0;
 }
 
@@ -224,45 +180,24 @@ int SDKManager::move2AbsZAxis(const MoveAxisPos& targetPos)
 		return -1;
 	}
 
-	//LOG_INFO(QString(u8"Z轴移动结构体"));
-
 	// 转换为毫米用于日志
 	double z_mm = static_cast<double>(targetPos.zPos) / 1000.0;
-	LOG_INFO(QString(u8"目标位置: X=0, Y=0, Z=%1mm (%2μm)")
-		.arg(z_mm, 0, 'f', 3).arg(targetPos.zPos));
+	auto posArr = fullPositionToByteArray(targetPos);
+	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=0, Y= 0, Z=%1mm (%2μm); 协议数据(12字节 Hex): %3")
+		.arg(z_mm, 0, 'f', 3)
+		.arg(targetPos.zPos)
+		.arg(QString(posArr.toHex(' ').toUpper())));
 
-	// 创建12字节数据（Z轴坐标，其他轴补0）
-	QByteArray data;
-	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
 
-	stream << (quint32)0;      // X轴补0
-	stream << (quint32)0;      // Y轴补0
-	stream << targetPos.zPos;  // Z轴坐标（微米）
+	// 选择命令（根据y坐标的符号）
+	ProtocolPrint::FunCode cmd = (targetPos.zPos >= 0) ? ProtocolPrint::Ctrl_ZAxisLMove : ProtocolPrint::Ctrl_ZAxisRMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(z_mm, 0, 'f', 3)
+		.arg(m_curAxisData.yPos));
 
-	// 打印十六进制数据
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"协议数据(12字节 Hex): %1").arg(hex));
-
-	// 选择命令（根据Z坐标的符号）
-	ProtocolPrint::FunCode cmd;
-	if (targetPos.zPos >= 0)
-	{
-		cmd = ProtocolPrint::Ctrl_ZAxisLMove;  // 向上/正方向
-		LOG_INFO(QString(u8"命令: Ctrl_ZAxisLMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-	else
-	{
-		cmd = ProtocolPrint::Ctrl_ZAxisRMove;  // 向下/负方向
-		LOG_INFO(QString(u8"命令: Ctrl_ZAxisRMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-
-	sendCommand(cmd, data);
-	LOG_INFO(QString(u8"Z轴移动 命令已发送 "));
-
+	sendCommand(cmd, posArr);
 	return 0;
+
 }
 
 // ==================== 运动控制实现 ====================
@@ -278,76 +213,33 @@ int SDKManager::move2AbsZAxis(const MoveAxisPos& targetPos)
  * 2. 将目标位置（微米）转换为QByteArray
  * 3. 发送命令到设备
  */
-int SDKManager::moveRelXAxis(double distance)
+int SDKManager::move2RelXAxis(double distance)
 {
 	if (!isConnected())
 	{
 		LOG_INFO(QString(u8"X轴移动 失败：设备未连接"));
 		return -1;
 	}
+	LOG_INFO(QString(u8"X轴移动相对位置参数: distance = %1mm").arg(distance, 0, 'f', 3));
 
-	//LOG_INFO(QString(u8" X轴移动相对位置"));
-	LOG_INFO(QString(u8"  参数: distance = %1mm")
-		.arg(distance, 0, 'f', 3));
-
-	quint32 targetPos_um;  // 目标位置（微米）
-	MoveAxisPos movPos;
-
-	// 相对移动：在当前位置基础上偏移
-	quint32 currentPos_um = m_curAxisData.xPos;
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	// 相对移动
 	quint32 offset_um = static_cast<quint32>(abs(distance) * 1000.0);
 
-	if (distance > 0)
-	{
-		// 正方向移动
-		targetPos_um = currentPos_um + offset_um;
-		LOG_INFO(QString(u8"  模式: 相对移动 +%1mm (当前%2μm + 偏移%3μm = 目标%4μm)")
-			.arg(distance, 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(offset_um)
-			.arg(targetPos_um));
-	}
-	else
-	{
-		// 负方向移动
-		if (currentPos_um > offset_um)
-		{
-			targetPos_um = currentPos_um - offset_um;
-		}
-		else
-		{
-			targetPos_um = 0;
-			LOG_INFO(QString(u8"  警告: 移动距离超过当前位置，限制到0"));
-		}
-		LOG_INFO(QString(u8"  模式: 相对移动 %1mm (当前%2μm - 偏移%3μm = 目标%4μm)")
-			.arg(distance, 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(offset_um)
-			.arg(targetPos_um));
-	}
-
-	// 转换为协议数据
-	QByteArray data = positionToByteArray(targetPos_um, 'X');
+	stream << offset_um;		// X轴坐标（微米）
+	stream << (quint32)0;		// Y轴补0
+	stream << (quint32)0;		// Z轴补0
 
 	// 选择命令（根据移动方向）
-	ProtocolPrint::FunCode cmd;
-	if (distance >= 0)
-	{
-		cmd = ProtocolPrint::Ctrl_XAxisRMove;  // 向右/正方向
-		LOG_INFO(QString(u8"  命令: Ctrl_XAxisRMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
-	else
-	{
-		cmd = ProtocolPrint::Ctrl_XAxisLMove;  // 向左/负方向
-		LOG_INFO(QString(u8"  命令: Ctrl_XAxisLMove (0x%1)")
-			.arg(QString::number(cmd, 16).toUpper()));
-	}
+	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_XAxisRMove : ProtocolPrint::Ctrl_XAxisLMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(distance, 0, 'f', 3)
+		.arg(m_curAxisData.xPos)
+		.arg(offset_um));
 
-	// 发送命令
 	sendCommand(cmd, data);
-	LOG_INFO(QString(u8"X轴移动 命令已发送 "));
-
 	return 0;
 }
 
@@ -357,7 +249,7 @@ int SDKManager::moveRelXAxis(double distance)
  * @param isAbsolute true=绝对移动，false=相对移动
  * @return 0=成功, -1=失败
  */
-int SDKManager::moveRelYAxis(double distance)
+int SDKManager::move2RelYAxis(double distance)
 {
 	if (!isConnected())
 	{
@@ -365,44 +257,26 @@ int SDKManager::moveRelYAxis(double distance)
 		return -1;
 	}
 
-	LOG_INFO(QString(u8"  Y轴移动相对位置  "));
-	LOG_INFO(QString(u8"  参数: distance=%1mm ")
-		.arg(distance, 0, 'f', 3));
+	LOG_INFO(QString(u8"Y轴移动相对位置参数: distance=%1mm ").arg(distance, 0, 'f', 3));
 
-	quint32 targetPos_um;
-	quint32 currentPos_um = m_curAxisData.yPos;
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	// 相对移动
 	quint32 offset_um = static_cast<quint32>(abs(distance) * 1000.0);
 
-	if (distance > 0)
-	{
-		targetPos_um = currentPos_um + offset_um;
-		LOG_INFO(QString(u8"  模式: 相对移动 +%1mm (%2μm -> %3μm)")
-			.arg(distance, 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(targetPos_um));
-	}
-	else
-	{
-		targetPos_um = (currentPos_um > offset_um) ?
-			(currentPos_um - offset_um) : 0;
-		LOG_INFO(QString(u8"  模式: 相对移动 %1mm (%2μm -> %3μm)")
-			.arg(distance, 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(targetPos_um));
-	}
+	stream << (quint32)0;		// X轴坐标（微米）
+	stream << offset_um ;		// Y轴补0
+	stream << (quint32)0;		// Z轴补0
 
-
-	QByteArray data = positionToByteArray(targetPos_um, 'Y');
-
-	ProtocolPrint::FunCode cmd = (distance >= 0) ?
-		ProtocolPrint::Ctrl_YAxisRMove : ProtocolPrint::Ctrl_YAxisLMove;
-
-	//绝对运动跟相对运动的坐标数据不同
-
+	// 选择命令（根据移动方向）
+	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_YAxisRMove : ProtocolPrint::Ctrl_YAxisLMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(distance, 0, 'f', 3)
+		.arg(m_curAxisData.yPos)
+		.arg(offset_um));
 
 	sendCommand(cmd, data);
-	//LOG_INFO(QString(u8"Y轴移动 命令已发送"));
-
 	return 0;
 }
 
@@ -412,117 +286,41 @@ int SDKManager::moveRelYAxis(double distance)
  * @param isAbsolute true=绝对移动，false=相对移动
  * @return 0=成功, -1=失败
  */
-int SDKManager::moveRelZAxis(double distance)
+int SDKManager::move2RelZAxis(double distance)
 {
 	if (!isConnected()) {
 		LOG_INFO(QString(u8"Z轴移动 失败：设备未连接"));
 		return -1;
 	}
+	LOG_INFO(QString(u8"Z轴移动相对位置参数: distance=%1mm ").arg(distance, 0, 'f', 3));
 
-	LOG_INFO(QString(u8"  Z轴移动相对位置  "));
-	LOG_INFO(QString(u8"  参数: distance=%1mm")
-		.arg(distance, 0, 'f', 3));
-
-	quint32 targetPos_um;
-	quint32 currentPos_um = m_curAxisData.zPos;
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	// 相对移动
 	quint32 offset_um = static_cast<quint32>(abs(distance) * 1000.0);
 
-	if (distance > 0)
-	{
-		targetPos_um = currentPos_um + offset_um;
-		LOG_INFO(QString(u8"  模式: 相对移动  %1mm (%2μm -> %3μm)")
-			.arg(distance, 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(targetPos_um));
-	}
-	else
-	{
-		targetPos_um = (currentPos_um > offset_um) ?
-			(currentPos_um - offset_um) : 0;
-		LOG_INFO(QString(u8"  模式: 相对移动  %1mm (%2μm -> %3μm)")
-			.arg(abs(distance), 0, 'f', 3)
-			.arg(currentPos_um)
-			.arg(targetPos_um));
-	}
+	stream << (quint32)0;		// X轴补0 
+	stream << (quint32)0;		// Y轴补0
+	stream << offset_um ;		// Z轴坐标（微米）
 
-	QByteArray data = positionToByteArray(targetPos_um, 'Z');
-
-	ProtocolPrint::FunCode cmd = (distance >= 0) ?
-		ProtocolPrint::Ctrl_ZAxisLMove : ProtocolPrint::Ctrl_ZAxisRMove;
+	// 选择命令（根据移动方向）
+	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_ZAxisLMove : ProtocolPrint::Ctrl_ZAxisRMove;
+	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
+		.arg(distance, 0, 'f', 3)
+		.arg(m_curAxisData.zPos)
+		.arg(offset_um));
 
 	sendCommand(cmd, data);
-	LOG_INFO(QString(u8"Z轴移动 命令已发送 "));
-
 	return 0;
 }
 
-/**
- * @brief 轴复位
- * @param axisFlag 轴标志位：bit0(1)=X, bit1(2)=Y, bit2(4)=Z，可组合
- * @return 0=成功, -1=失败
- *
- * 示例：
- * - axisFlag=1: 仅复位X轴
- * - axisFlag=3: 复位X和Y轴
- * - axisFlag=7: 复位所有轴
- */
-int SDKManager::resetAxis(int axisFlag)
-{
-	if (!isConnected())
-	{
-		LOG_INFO(QString(u8"轴复位 失败：设备未连接"));
-		return -1;
-	}
 
-	LOG_INFO(QString(u8"  轴复位  "));
-	LOG_INFO(QString(u8"  axisFlag = 0x%1 (%2)")
-		.arg(QString::number(axisFlag, 16).toUpper())
-		.arg(QString::number(axisFlag, 2).rightJustified(3, '0')));
 
-	QStringList axes;
-	if (axisFlag & 1) axes << "X";
-	if (axisFlag & 2) axes << "Y";
-	if (axisFlag & 4) axes << "Z";
 
-	LOG_INFO(QString(u8"  要复位的轴: %1").arg(axes.join(", ")));
-
-	// 复位各轴
-	if (axisFlag & 1)
-	{
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		sendCommand(ProtocolPrint::Ctrl_ResetPos);
-		//LOG_INFO(QString(u8"X轴复位命令已发送"));
-	}
-
-	if (axisFlag & 2)
-	{
-		// 复位Y轴
-		m_dstAxisData.yPos = 0;
-		m_curAxisData.yPos = 0;
-		sendCommand(ProtocolPrint::Ctrl_ResetPos);
-		//LOG_INFO(QString(u8"Y轴复位命令已发送"));
-	}
-
-	if (axisFlag & 4)
-	{
-		// 复位Z轴
-		m_dstAxisData.zPos = 0;
-		m_curAxisData.zPos = 0;
-		sendCommand(ProtocolPrint::Ctrl_ResetPos);
-		//LOG_INFO(QString(u8"Z轴复位命令已发送"));
-	}
-
-	//LOG_INFO(QString(u8"轴复位所有复位命令已发送"));
-
-	return 0;
-}
 
 
 // ==================== 3轴同时移动 ====================
-
-
 int SDKManager::move2RelPos(double dx, double dy, double dz)
 {
 	if (!isConnected())
@@ -605,7 +403,7 @@ int SDKManager::move2AbsPosition(const MoveAxisPos& targetPos)
 	// 转换为12字节协议数据
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(QDataStream::LittleEndian);
 
 	// 写入X/Y/Z坐标（各4字节，大端序，微米单位）
 	stream << targetPos.xPos;
@@ -655,7 +453,7 @@ int SDKManager::move2AbsPosition(const QByteArray& positionData)
 
 	// 解析数据用于日志（大端序）
 	QDataStream stream(positionData);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(QDataStream::LittleEndian);
 
 	quint32 xPos, yPos, zPos;
 	stream >> xPos >> yPos >> zPos;
@@ -679,5 +477,137 @@ int SDKManager::move2AbsPosition(const QByteArray& positionData)
 	sendCommand(ProtocolPrint::Ctrl_AxisAbsMove, positionData);
 
 	LOG_INFO(QString(u8"3轴移动 命令已发送 "));
+	return 0;
+}
+
+
+// ==================== 3轴复位 ====================
+/**
+ * @brief 轴复位
+ * @param axisFlag 轴标志位：bit0(1)=X, bit1(2)=Y, bit2(4)=Z，可组合
+ * @return 0=成功, -1=失败
+ *
+ * 示例：
+ * - axisFlag=1: 仅复位X轴
+ * - axisFlag=3: 复位X和Y轴
+ * - axisFlag=7: 复位所有轴
+ */
+int SDKManager::resetAxis(int axisFlag)
+{
+	if (!isConnected())
+	{
+		LOG_INFO(QString(u8"轴复位 失败：设备未连接"));
+		return -1;
+	}
+
+	LOG_INFO(QString(u8"轴复位 axisFlag = %1").arg(QString::number(axisFlag, 10).toUpper()));
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+
+
+	//QStringList axes;
+	//if (axisFlag & 1) axes << "X";
+	//if (axisFlag & 2) axes << "Y";
+	//if (axisFlag & 4) axes << "Z";
+	//LOG_INFO(QString(u8"  要复位的轴: %1").arg(axes.join(", ")));
+
+	// 复位各轴
+	switch (axisFlag)
+	{
+	case 1:
+	{
+		stream << (quint32)1;		// X轴补0 
+		stream << (quint32)0;		// Y轴补0
+		stream << (quint32)0;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.xPos = 0;
+		m_curAxisData.xPos = 0;
+		break;
+	}
+	case 2:
+	{
+		stream << (quint32)0;		// X轴补0 
+		stream << (quint32)1;		// Y轴补0
+		stream << (quint32)0;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.yPos = 0;
+		m_curAxisData.yPos = 0;
+		break;
+	}
+	case 3:
+	{
+		stream << (quint32)1;		// X轴补0 
+		stream << (quint32)1;		// Y轴补0
+		stream << (quint32)0;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.xPos = 0;
+		m_curAxisData.xPos = 0;
+		m_dstAxisData.yPos = 0;
+		m_curAxisData.yPos = 0;
+		break;
+	}
+	case 4:
+	{
+		stream << (quint32)0;		// X轴补0 
+		stream << (quint32)0;		// Y轴补0
+		stream << (quint32)1;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.zPos = 0;
+		m_curAxisData.zPos = 0;
+		break;
+	}
+	case 5:
+	{
+		stream << (quint32)1;		// X轴补0 
+		stream << (quint32)0;		// Y轴补0
+		stream << (quint32)1;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.xPos = 0;
+		m_curAxisData.xPos = 0;
+		m_dstAxisData.zPos = 0;
+		m_curAxisData.zPos = 0;
+		break;
+	}
+	case 6:
+	{
+		stream << (quint32)1;		// X轴补0 
+		stream << (quint32)1;		// Y轴补0
+		stream << (quint32)0;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.xPos = 0;
+		m_curAxisData.xPos = 0;
+		m_dstAxisData.yPos = 0;
+		m_curAxisData.yPos = 0;
+		break;
+	}
+	case 7:
+	{
+		stream << (quint32)1;		// X轴补0 
+		stream << (quint32)1;		// Y轴补0
+		stream << (quint32)1;		// Z轴补0
+
+		// 复位X轴
+		m_dstAxisData.xPos = 0;
+		m_curAxisData.xPos = 0;
+		m_dstAxisData.yPos = 0;
+		m_curAxisData.yPos = 0;
+		m_dstAxisData.zPos = 0;
+		m_curAxisData.zPos = 0;
+
+		break;
+	}
+	default:
+		break;
+	}
+
+	sendCommand(ProtocolPrint::Ctrl_ResetPos, data);
+	//LOG_INFO(QString(u8"轴复位所有复位命令已发送"));
 	return 0;
 }

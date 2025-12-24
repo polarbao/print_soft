@@ -22,6 +22,7 @@
 
 namespace UI { class PrintDeviceUI; }
 
+class motionControlSDK;
 
 class PrintDeviceUI : public QDialog
 {

@@ -83,9 +83,9 @@ class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 	Q_OBJECT
 
 	// Qt属性定义
-	Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
-	Q_PROPERTY(QString deviceIp READ deviceIp NOTIFY deviceIpChanged)
-	Q_PROPERTY(quint16 devicePort READ devicePort NOTIFY devicePortChanged)
+	Q_PROPERTY(bool connected READ MC_IsConnected NOTIFY MC_SigConnectedChanged)
+	Q_PROPERTY(QString deviceIp READ MC_GetDevIp NOTIFY MC_SigDevIpChanged)
+	Q_PROPERTY(quint16 devicePort READ MC_GetDevPort NOTIFY MC_SigDevPortChanged)
 
 public:
 
@@ -109,19 +109,19 @@ public:
 	 * @param logDir 日志目录（可为空）
 	 * @return true=成功, false=失败
 	 */
-	bool initialize(const QString& logDir = QString());
+	bool MC_Init(const QString& logDir = QString());
 
 	/**
 	 * @brief 释放SDK资源
 	 * @note 通常无需手动调用，析构时自动释放
 	 */
-	void release();
+	void MC_Release();
 
 	/**
 	 * @brief 检查SDK是否已初始化
 	 * @return true=已初始化, false=未初始化
 	 */
-	bool isInitialized() const;
+	bool MC_IsInit() const;
 
 	// ==================== 连接管理 ====================
 
@@ -131,33 +131,33 @@ public:
 	 * @param ip 设备IP地址
 	 * @param port 端口号（默认5555）
 	 * @return true=成功发起连接, false=失败
-	 * @note 连接结果通过connected()或errorOccurred()信号通知
+	 * @note 连接结果通过connected()或MC_SigErrOccurred()信号通知
 	 */
-	bool connectToDevice(const QString& ip, quint16 port = 5555);
+	bool MC_Connect2Dev(const QString& ip, quint16 port = 5555);
 
 	/**
 	 * @brief 断开连接
-	 * @note 断开结果通过disconnected()信号通知
+	 * @note 断开结果通过MC_SigDisconnected()信号通知
 	 */
-	void disconnectFromDevice();
+	void MC_DisconnectDev();
 
 	/**
 	 * @brief 查询连接状态
 	 * @return true=已连接, false=未连接
 	 */
-	bool isConnected() const;
+	bool MC_IsConnected() const;
 
 	/**
 	 * @brief 获取设备IP
 	 * @return IP地址字符串
 	 */
-	QString deviceIp() const;
+	QString MC_GetDevIp() const;
 
 	/**
 	 * @brief 获取设备端口
 	 * @return 端口号
 	 */
-	quint16 devicePort() const;
+	quint16 MC_GetDevPort() const;
 
 	// ==================== 运动控制 ====================
 
@@ -169,7 +169,7 @@ public:
 	 * @param speed 速度（mm/s，默认100）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool moveTo(const MoveAxisPos& posData);
+	//bool moveTo(const MoveAxisPos& posData);
 
 	/**
 	 * @brief 相对移动
@@ -179,26 +179,13 @@ public:
 	 * @param speed 速度（mm/s，默认100）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool moveBy(double dx, double dy, double dz, double speed = 100.0);
-
-
-
-
+	//bool moveBy(double dx, double dy, double dz, double speed = 100.0);
 
 	/**
 	 * @brief 回原点（所有轴复位）
 	 * @return true=命令发送成功, false=失败
 	 */
 	bool MC_GoHome();
-
-	/**
-	 * @brief X轴移动
-	 * @param distance 移动距离（mm，正数向前，负数向后）
-	 * @param speed 速度（mm/s，默认100）
-	 * @return true=命令发送成功, false=失败
-	 */
-	bool MC_moveXAxis(double distance, double speed = 100.0);
-
 	/**
 	 * @brief X轴移动（结构体版本）
 	 * @param targetPos 目标位置结构体（仅使用xPos）
@@ -211,13 +198,7 @@ public:
 	 */
 	bool MC_moveXAxis(const MoveAxisPos& targetPos);
 
-	/**
-	 * @brief Y轴移动
-	 * @param distance 移动距离（mm）
-	 * @param speed 速度（mm/s，默认100）
-	 * @return true=命令发送成功, false=失败
-	 */
-	bool MC_moveYAxis(double distance, double speed = 100.0);
+
 
 	/**
 	 * @brief Y轴移动（结构体版本）
@@ -230,14 +211,6 @@ public:
 	 * @endcode
 	 */
 	bool MC_moveYAxis(const MoveAxisPos& targetPos);
-
-	/**
-	 * @brief Z轴移动
-	 * @param distance 移动距离（mm，正数向上，负数向下）
-	 * @param speed 速度（mm/s，默认100）
-	 * @return true=命令发送成功, false=失败
-	 */
-	bool MC_moveZAxis(double distance, double speed = 100.0);
 
 	/**
 	 * @brief Z轴移动（结构体版本）
@@ -277,7 +250,7 @@ public:
 	 * sdk.MC_moveToPosition(MoveAxisPos::fromMillimeters(100, 200, 50));
 	 * @endcode
 	 */
-	bool MC_moveToPosition(const MoveAxisPos& targetPos);
+	//bool MC_moveToPosition(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief 3轴同时移动（字节数组版本）
@@ -291,17 +264,13 @@ public:
 	 * sdk.MC_moveToPosition(data);
 	 * @endcode
 	 */
-	bool MC_moveToPosition(const QByteArray& positionData);
-
-
-
-
+	//bool MC_moveToPosition(const QByteArray& positionData);
 
 	/**
 	* @brief 发送数据
 	* @return true=命令发送成功, false=失败
 	*/
-	bool MC_sendData(int cmdType,const QByteArray& data);
+	bool MC_SendData(int cmdType,const QByteArray& data);
 
 	// ==================== 打印控制 ====================
 
@@ -316,25 +285,25 @@ public:
 	 * @brief 开始打印
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool startPrint();
+	bool MC_StartPrint();
 
 	/**
 	 * @brief 暂停打印
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool pausePrint();
+	bool MC_PausePrint();
 
 	/**
 	 * @brief 恢复打印
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool resumePrint();
+	bool MC_ResumePrint();
 
 	/**
 	 * @brief 停止打印
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool stopPrint();
+	bool MC_StopPrint();
 
 
 
@@ -355,25 +324,25 @@ signals:
 	/**
 	 * @brief 连接断开
 	 */
-	void disconnected();
+	void MC_SigDisconnected();
 
 	/**
 	 * @brief 连接状态改变
 	 * @param isConnected 是否已连接
 	 */
-	void connectedChanged(bool isConnected);
+	void MC_SigConnectedChanged(bool isConnected);
 
 	/**
 	 * @brief 设备IP改变
 	 * @param ip IP地址
 	 */
-	void deviceIpChanged(const QString& ip);
+	void MC_SigDevIpChanged(const QString& ip);
 
 	/**
 	 * @brief 设备端口改变
 	 * @param port 端口号
 	 */
-	void devicePortChanged(quint16 port);
+	void MC_SigDevPortChanged(quint16 port);
 
 	// ==================== 错误和状态信号 ====================
 
@@ -382,19 +351,19 @@ signals:
 	 * @param errorCode 错误码
 	 * @param errorMessage 错误信息
 	 */
-	void errorOccurred(int errorCode, const QString& errorMessage);
+	void MC_SigErrOccurred(int errorCode, const QString& errorMessage);
 
 	/**
 	 * @brief 一般信息
 	 * @param message 消息文本
 	 */
-	void infoMessage(const QString& message);
+	void MC_SigInfoMsg(const QString& message);
 
 	/**
 	 * @brief 日志消息
 	 * @param message 日志文本
 	 */
-	void logMessage(const QString& message);
+	void MC_SigLogMsg(const QString& message);
 
 	// ==================== 打印相关信号 ====================
 
@@ -404,13 +373,13 @@ signals:
 	 * @param currentLayer 当前层
 	 * @param totalLayers 总层数
 	 */
-	void printProgressUpdated(int progress, int currentLayer, int totalLayers);
+	void MC_SigPrintProgUpdated(int progress, int currentLayer, int totalLayers);
 
 	/**
 	 * @brief 打印状态改变
 	 * @param status 状态描述
 	 */
-	void printStatusChanged(const QString& status);
+	void MC_SigPrintStatusChanged(const QString& status);
 
 	// ==================== 运动相关信号 ====================
 
@@ -418,7 +387,7 @@ signals:
 	 * @brief 运动状态改变
 	 * @param status 状态描述
 	 */
-	void moveStatusChanged(const QString& status);
+	void MC_SigMoveStatusChanged(const QString& status);
 
 	/**
 	 * @brief 位置更新
@@ -426,7 +395,7 @@ signals:
 	 * @param y Y坐标（mm）
 	 * @param z Z坐标（mm）
 	 */
-	void positionUpdated(double x, double y, double z);
+	void MC_SigPosChanged(double x, double y, double z);
 
 private:
 	// Pimpl模式：隐藏实现细节，保持ABI稳定性

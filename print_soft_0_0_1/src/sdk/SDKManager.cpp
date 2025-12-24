@@ -123,26 +123,29 @@ void SDKManager::sendCommand(int code, const QByteArray& data)
         return;
     }
     
-    // 使用协议打包数据
-	//操作类型出来
+	// 使用协议打包数据
+	// 根据FunCode确定ECmdType
 	auto fc = static_cast<ProtocolPrint::FunCode>(code);
-	ProtocolPrint::ECmdType ct;
-	if (fc >= ProtocolPrint::SetParam_CleanPos && fc <= ProtocolPrint::SetParam_AxistSpd)
+	ProtocolPrint::ECmdType ct = ProtocolPrint::ECmdType::CtrlCmd; // 默认为控制命令
+
+	// 根据FunCode范围确定命令类型
+	if (fc >= ProtocolPrint::SetParam_CleanPos && fc <= ProtocolPrint::SetParam_End)
 	{
 		ct = ProtocolPrint::ECmdType::SetParamCmd;
 	}
-	else if (fc >= ProtocolPrint::Get_AxisPos && fc <= ProtocolPrint::Get_Breath)
+	else if (fc >= ProtocolPrint::Get_AxisPos && fc <= ProtocolPrint::Get_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::GetCmd;
 	}
-	else if (fc >= ProtocolPrint::Ctrl_StartPrint && fc <= ProtocolPrint::Ctrl_ZAxisRMove)
+	else if (fc >= ProtocolPrint::Ctrl_StartPrint && fc <= ProtocolPrint::Ctrl_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::CtrlCmd;
 	}
-	else if (fc >= ProtocolPrint::Print_AxisMovePos && fc <= ProtocolPrint::Print_AxisMovePos)
+	else if (fc >= ProtocolPrint::Print_AxisMovePos && fc <= ProtocolPrint::Print_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::PrintCommCmd;
 	}
+
 	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, data);
     
     // 发送数据
@@ -198,24 +201,26 @@ void SDKManager::sendCommand(int code, const MoveAxisPos& posData)
 	senddata[11] = posData.zPos >> 24 & 0xFF;
 
 
-	//操作类型出来
+	// 根据FunCode确定ECmdType
 	auto fc = static_cast<ProtocolPrint::FunCode>(code);
-	ProtocolPrint::ECmdType ct;
+	ProtocolPrint::ECmdType ct = ProtocolPrint::ECmdType::CtrlCmd; // 默认为控制命令
+
+	// 根据FunCode范围确定命令类型
 	if (fc >= ProtocolPrint::SetParam_CleanPos && fc <= ProtocolPrint::SetParam_End)
 	{
 		ct = ProtocolPrint::ECmdType::SetParamCmd;
 	}
 	else if (fc >= ProtocolPrint::Get_AxisPos && fc <= ProtocolPrint::Get_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::GetCmd;
 	}
 	else if (fc >= ProtocolPrint::Ctrl_StartPrint && fc <= ProtocolPrint::Ctrl_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::CtrlCmd;
 	}
 	else if (fc >= ProtocolPrint::Print_AxisMovePos && fc <= ProtocolPrint::Print_End)
 	{
-		ct = ProtocolPrint::ECmdType::SetParamCmd;
+		ct = ProtocolPrint::ECmdType::PrintCommCmd;
 	}
 
 	// 使用协议打包数据

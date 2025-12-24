@@ -16,6 +16,7 @@
 SdkEventCallback g_sdkCallback = nullptr;
 QMutex g_callbackMutex;
 QByteArray g_messageBuffer;
+class ProtocolPrint;
 
 // ==================== TCP事件处理 ====================
 

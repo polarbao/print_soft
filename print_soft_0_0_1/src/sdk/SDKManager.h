@@ -22,6 +22,7 @@ class QTimer;
 
 // 导入事件类型定义
 #include "motionControlSDK.h"
+// 导入事件类型定义
 
 // 全局回调相关（在SDKCallback.cpp中定义）
 extern SdkEventCallback g_sdkCallback;
@@ -96,9 +97,9 @@ public:
 	int move2AbsYAxis(const MoveAxisPos& targetPos);
 	int move2AbsZAxis(const MoveAxisPos& targetPos);
 
-	int moveRelXAxis(double distance);
-	int moveRelYAxis(double distance);
-	int moveRelZAxis(double distance);
+	int move2RelXAxis(double distance);
+	int move2RelYAxis(double distance);
+	int move2RelZAxis(double distance);
 
 
 

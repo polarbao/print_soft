@@ -34,40 +34,40 @@ PrintDeviceUI::~PrintDeviceUI()
 void PrintDeviceUI::Init() 
 {
 	m_motionSDK = new motionControlSDK(this);
-	m_motionSDK->initialize("./");
+	m_motionSDK->MC_Init("./");
 
 	connect(m_motionSDK, &motionControlSDK::connected, this, [this]() 
 	{
 		LOG_INFO(QString(u8"motion_SDK_链接成功"));
 	});
 
-	connect(m_motionSDK, &motionControlSDK::disconnected, this, [this]() 
+	connect(m_motionSDK, &motionControlSDK::MC_SigDisconnected, this, [this]() 
 	{
 		LOG_INFO(QString(u8"motion_SDK_断开成功"));
 
 	});
 
-	connect(m_motionSDK, &motionControlSDK::connectedChanged, this, [this](bool bConn)
+	connect(m_motionSDK, &motionControlSDK::MC_SigConnectedChanged, this, [this](bool bConn)
 	{
 		LOG_INFO(QString(u8"motion_SDK_链接状态%1").arg(bConn));
 	});
 
-	connect(m_motionSDK, &motionControlSDK::printProgressUpdated, [this]()
+	connect(m_motionSDK, &motionControlSDK::MC_SigPrintProgUpdated, [this]()
 	{
 	
 	});
 
-	connect(m_motionSDK, &motionControlSDK::errorOccurred, this, [this](int ec, const QString& emsg)
+	connect(m_motionSDK, &motionControlSDK::MC_SigErrOccurred, this, [this](int ec, const QString& emsg)
 	{
 		LOG_INFO(QString(u8"motion_SDK_当前错误code:%1, 当前错误msg:%2").arg(ec).arg(emsg));
 	});
 
-	connect(m_motionSDK, &motionControlSDK::infoMessage, this, [this](const QString& emsg)
+	connect(m_motionSDK, &motionControlSDK::MC_SigInfoMsg, this, [this](const QString& emsg)
 	{
 		LOG_INFO(QString(u8"motion_SDK_当前msg:%1").arg(emsg));
 	});
 
-	connect(m_motionSDK, &motionControlSDK::logMessage, this, [this](const QString& msg)
+	connect(m_motionSDK, &motionControlSDK::MC_SigLogMsg, this, [this](const QString& msg)
 	{
 		LOG_INFO(QString(u8"motion_SDK_当前打印日志msg:%1").arg(msg));
 	});
@@ -291,7 +291,6 @@ void PrintDeviceUI::HandlerMoveDeviceOper(const PrintFun& moveFun)
 	{
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisMovePrintPos);
 		cmdType = static_cast<int>(ProtocolPrint::Set_XAxisMovePrintPos);
-
 		break;
 	}
 
@@ -355,7 +354,11 @@ void PrintDeviceUI::HandlerMoveDeviceOper(const PrintFun& moveFun)
 	default:
 		break;
 	}
-	m_motionSDK->sendData(cmdType, sendData);
+	//m_motionSDK->MC_SendData(cmdType, sendData);
+	MoveAxisPos tmpPos(1,1,1);
+	m_motionSDK->MC_move2RelSingleAxisPos(10, 10, 10);
+	m_motionSDK->MC_move2AbsSingleAxisPos(tmpPos);
+
 	//m_tcpClient->sendData(sendData);
 	logStr.append(QString::fromLocal8Bit("开始进行移动操作"));
 	emit SigShowOperComm(logStr, ESET_OperComm);
@@ -430,7 +433,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StartPrint);
 		cmdType = static_cast<int>(ProtocolPrint::Set_StartPrint);
-		m_motionSDK->sendData(cmdType, sendData);
+		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
 		logStr.append(QString::fromLocal8Bit("开始打印操作"));
@@ -440,7 +443,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StopPrint);
 		cmdType = static_cast<int>(ProtocolPrint::Set_StopPrint);
-		m_motionSDK->sendData(cmdType, sendData);
+		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
 		logStr.append(QString::fromLocal8Bit("停止打印操作"));
@@ -450,7 +453,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_PausePrint);
 		cmdType = static_cast<int>(ProtocolPrint::Set_PausePrint);
-		m_motionSDK->sendData(cmdType, sendData);
+		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
 		logStr.append(QString::fromLocal8Bit("暂停打印操作"));
@@ -460,7 +463,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{		
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_continuePrint);
 		cmdType = static_cast<int>(ProtocolPrint::Set_continuePrint);
-		m_motionSDK->sendData(cmdType, sendData);
+		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
 		logStr.append(QString::fromLocal8Bit("继续打印操作"));
@@ -470,7 +473,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{
 		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ResetPrint);
 		cmdType = static_cast<int>(ProtocolPrint::Set_ResetPrint);
-		m_motionSDK->sendData(cmdType, sendData);
+		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
 		logStr.append(QString::fromLocal8Bit("重置打印操作"));
@@ -498,7 +501,7 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 		{
 			QByteArray sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StartPrint, it);
 			cmdType = static_cast<int>(ProtocolPrint::Set_StartPrint);
-			m_motionSDK->sendData(cmdType, sendData);
+			//m_motionSDK->MC_SendData(cmdType, sendData);
 
 			//m_tcpClient->sendData(sendData);	
 		}
@@ -531,25 +534,25 @@ void PrintDeviceUI::OnListenBtnClicked(int idx)
 		auto ip = m_ipLine->text();
 		auto port = m_portLine->text();
 
-		if (m_motionSDK->isConnected())
+		if (m_motionSDK->MC_IsConnected())
 		{
 			logStr.append(QString::fromLocal8Bit("开始连接服务器，但已处于在线状态"));
 			emit SigShowOperComm(logStr, ESET_OperComm);
 			return;
 		}
-		m_motionSDK->connectToDevice(m_ipLine->text(), m_portLine->text().toShort());
+		m_motionSDK->MC_Connect2Dev(m_ipLine->text(), m_portLine->text().toShort());
 		logStr.append(QString::fromLocal8Bit("连接服务器"));
 		emit SigShowOperComm(logStr, ESET_OperComm);
 		break;
 	}
 	case ENF_DisConn:
 	{
-		if (!m_motionSDK->isConnected())
+		if (!m_motionSDK->MC_IsConnected())
 		{
 			logStr.append(QString::fromLocal8Bit("处于离线状态"));
 			return;
 		}
-		m_motionSDK->disconnectFromDevice();
+		m_motionSDK->MC_DisconnectDev();
 		logStr.append(QString::fromLocal8Bit("断连服务器"));
 		emit SigShowOperComm(logStr, ESET_OperComm);
 		break;
@@ -557,8 +560,8 @@ void PrintDeviceUI::OnListenBtnClicked(int idx)
 	case ENF_ChangePort:
 	{
 		auto newPort = m_portLine->text();
-		m_motionSDK->disconnectFromDevice();
-		m_motionSDK->connectToDevice(m_ipLine->text(), m_portLine->text().toShort());
+		m_motionSDK->MC_DisconnectDev();
+		m_motionSDK->MC_Connect2Dev(m_ipLine->text(), m_portLine->text().toShort());
 		logStr.append(QString::fromLocal8Bit("改变连接服务器状态"));
 		emit SigShowOperComm(logStr, ESET_OperComm);
 		break;
