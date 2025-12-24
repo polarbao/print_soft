@@ -6,9 +6,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-#include "moveDeviceUI.h"
 #include "printDeviceUI.h"
-#include "SerialPortWidget.h"
 
 
 namespace UI { class printDeviceMoudle; }

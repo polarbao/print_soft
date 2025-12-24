@@ -20,9 +20,6 @@
     <Filter Include="Source Files\comm">
       <UniqueIdentifier>{0dccc14c-4b03-4186-8c3b-33d2e64d96c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\service">
-      <UniqueIdentifier>{709de858-4dc0-49a8-bdbd-5e31b2b51ab4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\ui">
       <UniqueIdentifier>{87f343a9-cff1-46d6-b9e7-66c0e5342c38}</UniqueIdentifier>
     </Filter>
@@ -31,21 +28,6 @@
     </Filter>
     <Filter Include="Header Files\comm">
       <UniqueIdentifier>{825f469e-49f7-41e7-b687-d8d8d0a85e2e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\service">
-      <UniqueIdentifier>{209d8d58-f6d7-4232-9ede-cca91c45dd79}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\communicate">
-      <UniqueIdentifier>{113458a2-efdf-4487-88d9-24df78473f40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\communicate">
-      <UniqueIdentifier>{dd8b8dbb-bab7-41c6-82ad-fb15f8d66e65}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\protocol">
-      <UniqueIdentifier>{5979aafe-5cc1-47f9-b744-936ef6eaf7ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\protocol">
-      <UniqueIdentifier>{d71babd1-80cb-437e-b14a-a87e6d710739}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,9 +45,6 @@
     <ClCompile Include="..\..\src\comm\global.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\service\printDevice.cpp">
-      <Filter>Source Files\service</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,17 +54,8 @@
     <ClCompile Include="..\..\src\ui\printDeviceUI.cpp">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\protocol\ProtocolPrint.cpp">
-      <Filter>Source Files\protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\communicate\TcpClient.cpp">
-      <Filter>Source Files\communicate</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\comm\utils.cpp">
       <Filter>Source Files\comm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\thdManage.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,23 +65,11 @@
     <QtMoc Include="..\..\src\comm\CLogManager.h">
       <Filter>Header Files\comm</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\src\service\printDevice.h">
-      <Filter>Header Files\service</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\printDeviceMoudle.h">
       <Filter>Header Files\ui</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\ui\printDeviceUI.h">
       <Filter>Header Files\ui</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\protocol\ProtocolPrint.h">
-      <Filter>Header Files\protocol</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\communicate\TcpClient.h">
-      <Filter>Header Files\communicate</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\thdManage.h">
-      <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\comm\utils.h">
       <Filter>Header Files\comm</Filter>

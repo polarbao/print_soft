@@ -14,23 +14,16 @@
     <QtRcc Include="..\..\res\printDeviceMoudle.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\communicate\TcpClient.cpp" />
     <ClCompile Include="..\..\src\comm\CLogManager.cpp" />
     <ClCompile Include="..\..\src\comm\CLogThread.cpp" />
     <ClCompile Include="..\..\src\comm\global.cpp" />
     <ClCompile Include="..\..\src\comm\utils.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\printDeviceMoudle.cpp" />
-    <ClCompile Include="..\..\src\protocol\ProtocolPrint.cpp" />
-    <ClCompile Include="..\..\src\service\printDevice.cpp" />
-    <ClCompile Include="..\..\src\thdManage.cpp" />
     <ClCompile Include="..\..\src\ui\printDeviceUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\printDeviceMoudle.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="..\..\src\service\printDevice.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\comm\CLogManager.h" />
@@ -40,9 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\comm\utils.h" />
-    <QtMoc Include="..\..\src\thdManage.h" />
-    <QtMoc Include="..\..\src\protocol\ProtocolPrint.h" />
-    <QtMoc Include="..\..\src\communicate\TcpClient.h" />
     <ClInclude Include="..\..\src\comm\CSingleton.h" />
     <ClInclude Include="..\..\src\comm\global.h" />
     <QtMoc Include="..\..\src\ui\printDeviceUI.h" />
@@ -99,7 +89,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutDir>$(SolutionDir)..\bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\build\</IntDir>
+    <IntDir>$(SolutionDir)..\build\ui_soft\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
@@ -107,7 +97,7 @@
       <AdditionalDependencies>motionControlSDK.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(QTDIR);$(SolutionDir)..\src\;$(SolutionDir)..\src\ui\;$(SolutionDir)..\src\comm\;$(SolutionDir)..\src\service\;$(SolutionDir)..\src\protocol\;$(SolutionDir)..\src\communicate\;$(SolutionDir)..\ext\inc\;$(SolutionDir)..\src\sdk\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR);$(SolutionDir)..\src\;$(SolutionDir)..\src\ui\;$(SolutionDir)..\src\comm\;$(SolutionDir)..\src\service\;$(SolutionDir)..\src\protocol\;$(SolutionDir)..\src\communicate\;$(SolutionDir)..\ext\inc\;$(SolutionDir)..\src\sdk\;$(SolutionDir)..\src\sdk\protocol\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>

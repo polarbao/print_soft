@@ -4,18 +4,15 @@
 #include "utils.h"
 
 
-
+#include "sdk/protocol/ProtocolPrint.h"
 
 #define TurnOffHeartBeat
 
 PrintDeviceUI::PrintDeviceUI(QWidget *parent)
     : QDialog(parent)
 	//, m_motionSDK(new motionControlSDK())
-	//, m_tcpClient(std::make_unique<TcpClient>())
-	//, m_protocol(std::make_unique<ProtocolPrint>())
 	, m_printBtnGroup(new QButtonGroup())
 	, m_funBtnGroup(new QButtonGroup())
-	//, m_heartOutCnt(0)
 	, m_portLine(new QLineEdit())
 
 {
@@ -24,11 +21,8 @@ PrintDeviceUI::PrintDeviceUI(QWidget *parent)
 
 PrintDeviceUI::~PrintDeviceUI()
 {
-	//if (m_heartSendTimer.isActive() || m_heartOutTimer.isActive())
-	//{
-	//	m_heartSendTimer.stop();
-	//	m_heartOutTimer.stop();
-	//}
+
+
 }
 
 void PrintDeviceUI::Init() 
@@ -72,24 +66,11 @@ void PrintDeviceUI::Init()
 		LOG_INFO(QString(u8"motion_SDK_当前打印日志msg:%1").arg(msg));
 	});
 
-	//m_heartSendTimer.setInterval(10000); // 10秒心跳
-	//m_heartOutTimer.setInterval(5000);
+
 	InitUI();
-
-	//connect(m_tcpClient.get(), &TcpClient::sigNewData, this, &PrintDeviceUI::OnRecvMsg);
-	//connect(m_tcpClient.get(), &TcpClient::sigError, this, &PrintDeviceUI::OnErrMsg);
-	//connect(m_tcpClient.get(), &TcpClient::sigSocketStateChanged, this, &PrintDeviceUI::OnSockChangeState);
-
 
 	connect(m_printBtnGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), this, &PrintDeviceUI::OnPrintFunClicked);
 	connect(m_funBtnGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), this, &PrintDeviceUI::OnListenBtnClicked);
-
-	//heart
-	//connect(&m_heartSendTimer, &QTimer::timeout, this, &PrintDeviceUI::OnSendHeartComm);
-	//connect(&m_heartOutTimer, &QTimer::timeout, this, &PrintDeviceUI::OnRecvHeartTimeout);
-	//connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &PrintDeviceUI::OnRecvHeartComm);
-	//connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &PrintDeviceUI::OnProtocolReply);
-
 
 	//UI
 	connect(this, &PrintDeviceUI::SigShowOperComm, this, &PrintDeviceUI::OnAppendShowComm);
@@ -283,71 +264,71 @@ void PrintDeviceUI::HandlerMoveDeviceOper(const PrintFun& moveFun)
 	case EAF_XAxisReset:
 	{
 		//sendData = m_motionSDK->
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisReset);
-		cmdType = static_cast<int>(ProtocolPrint::Set_XAxisReset);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisReset);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ResetPos);
 		break;
 	}
 	case EAF_XAxisMovePrintPos:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisMovePrintPos);
-		cmdType = static_cast<int>(ProtocolPrint::Set_XAxisMovePrintPos);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_XAxisMovePrintPos);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_XAxisLMove);
 		break;
 	}
 
 	case EAF_ZAxisAutoForward:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisUpAuto);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisUpAuto);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisUpAuto);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisLMove);
 
 		break;
 	}
 	case EAF_ZAxisAutoBack:
 	{	
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisDownAuto);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisDownAuto);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisDownAuto);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisRMove);
 
 		break;
 	}
 	case EAF_ZAxisForward1CM:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisUp1CM);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisUp1CM);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisUp1CM);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisLMove);
 
 		break;
 	}
 
 	case EAF_ZAxisBack1CM:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisDown1CM);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisDown1CM);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisDown1CM);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisRMove);
 
 		break;
 	}
 	case EAF_ZAxisReset:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisReset);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisReset);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisReset);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ResetPos);
 
 		break;
 	}
 	case EAF_ZAxisMovePrintPos:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisMovePrintPos);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisMovePrintPos);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ZAxisMovePrintPos);
+		//cmdType = static_cast<int>(ProtocolPrint::Set_ZAxisMovePrintPos);
 
 		break;
 	}
 	case EAF_YAxisReset:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_YAxisReset);
-		cmdType = static_cast<int>(ProtocolPrint::Set_YAxisReset);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_YAxisReset);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ResetPos);
 
 		break;
 	}
 	case EAF_YAxisMovePrintPos:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_YAxisMovePrintPos);
-		cmdType = static_cast<int>(ProtocolPrint::Set_YAxisMovePrintPos);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_YAxisMovePrintPos);
+		//cmdType = static_cast<int>(ProtocolPrint::Set_YAxisMovePrintPos);
 
 		break;
 	}
@@ -362,56 +343,9 @@ void PrintDeviceUI::HandlerMoveDeviceOper(const PrintFun& moveFun)
 	//m_tcpClient->sendData(sendData);
 	logStr.append(QString::fromLocal8Bit("开始进行移动操作"));
 	emit SigShowOperComm(logStr, ESET_OperComm);
-	emit SigShowOperComm(sendData.toHex().toUpper(), ESET_Sendomm);
+	//emit SigShowOperComm(sendData.toHex().toUpper(), ESET_Sendomm);
 
 }
-
-void PrintDeviceUI::OnRecvMsg(QByteArray msg)
-{
-	//m_protocol->Decode(msg);
-}
-
-void PrintDeviceUI::OnErrMsg(QAbstractSocket::SocketError err)
-{
-
-}
-
-void PrintDeviceUI::OnSockChangeState(QAbstractSocket::SocketState state)
-{
-//	if (QAbstractSocket::ConnectedState == state)
-//	{
-//		m_connStateLab->setText(QString::fromLocal8Bit("已连接"));
-//		//启动心跳数据
-//#ifndef TurnOffHeartBeat
-//		m_heartOutTimer.start();
-//		m_heartSendTimer.start();
-//#endif
-//		auto sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Con_Breath);
-//		m_tcpClient->sendData(sendData);
-//		LOG_DEBUG(QString::fromLocal8Bit("启动心跳"));
-//		auto logStr(QString::fromLocal8Bit("连接服务器成功，并启动心跳检测"));
-//		m_funBtnGroup->button(ENF_StartConn)->setEnabled(false);
-//		m_funBtnGroup->button(ENF_DisConn)->setEnabled(true);
-//		emit SigShowOperComm(logStr, ESET_OperComm, sendData.toHex().toUpper());
-//		emit SigShowOperComm(sendData.toHex().toUpper(), ESET_Sendomm);
-//
-//
-//	}
-//	else if (QAbstractSocket::ClosingState == state)
-//	{
-//		if (m_heartSendTimer.isActive() || m_heartOutTimer.isActive())
-//		{
-//			m_heartOutTimer.stop();
-//			m_heartSendTimer.stop();
-//		}
-//		m_connStateLab->setText(QString::fromLocal8Bit("未连接"));
-//		m_funBtnGroup->button(ENF_StartConn)->setEnabled(true);
-//		m_funBtnGroup->button(ENF_DisConn)->setEnabled(false);
-//		auto logStr(QString::fromLocal8Bit("断连服务器成功，并停止心跳检测"));
-//		emit SigShowOperComm(logStr, ESET_OperComm);
-//	}
-}
-
 
 void PrintDeviceUI::OnPrintFunClicked(int idx)
 {
@@ -431,8 +365,8 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	{
 	case EPF_StartPrint:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StartPrint);
-		cmdType = static_cast<int>(ProtocolPrint::Set_StartPrint);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Ctrl_StartPrint);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_StartPrint);
 		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
@@ -441,8 +375,8 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	}
 	case EPF_StopPrint:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StopPrint);
-		cmdType = static_cast<int>(ProtocolPrint::Set_StopPrint);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Ctrl_StopPrint);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_StopPrint);
 		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
@@ -451,8 +385,8 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	}
 	case EPF_PausePrint:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_PausePrint);
-		cmdType = static_cast<int>(ProtocolPrint::Set_PausePrint);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Ctrl_PasusePrint);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_PasusePrint);
 		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
@@ -461,8 +395,8 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	}
 	case EPF_ContinuePrint:
 	{		
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_continuePrint);
-		cmdType = static_cast<int>(ProtocolPrint::Set_continuePrint);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Ctrl_ContinuePrint);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ContinuePrint);
 		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
@@ -471,8 +405,8 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 	}
 	case EPF_ResetPrint:
 	{
-		sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_ResetPrint);
-		cmdType = static_cast<int>(ProtocolPrint::Set_ResetPrint);
+		//sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Ctrl_ResetPos);
+		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ResetPos);
 		//m_motionSDK->MC_SendData(cmdType, sendData);
 
 		//m_tcpClient->sendData(sendData);	
@@ -496,11 +430,11 @@ void PrintDeviceUI::OnPrintFunClicked(int idx)
 		}
 		QByteArray rawData = file.readAll().toHex();
 		file.close();
-		auto sendData = ProtocolPrint::GetSendImgDatagram(img.width(), img.width(), ImgType::EIT_JPG, rawData);
+		//auto sendData = ProtocolPrint::GetSendImgDatagram(img.width(), img.width(), ImgType::EIT_JPG, rawData);
 		for (auto& it : sendData)
 		{
-			QByteArray sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StartPrint, it);
-			cmdType = static_cast<int>(ProtocolPrint::Set_StartPrint);
+			//QByteArray sendData = ProtocolPrint::GetSendDatagram(ProtocolPrint::Set_StartPrint, it);
+			//cmdType = static_cast<int>(ProtocolPrint::Set_StartPrint);
 			//m_motionSDK->MC_SendData(cmdType, sendData);
 
 			//m_tcpClient->sendData(sendData);	

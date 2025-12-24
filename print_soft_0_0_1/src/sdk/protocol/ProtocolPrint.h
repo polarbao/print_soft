@@ -1,6 +1,6 @@
 #pragma once
 #include <QtCore/QtCore>
-#include "TcpClient.h"
+#include "communicate/TcpClient.h"
 
 
 // 导入事件类型定义

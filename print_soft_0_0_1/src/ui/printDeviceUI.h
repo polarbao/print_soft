@@ -12,9 +12,6 @@
 
 
 #include "global.h"
-#include "TcpClient.h"
-#include "ProtocolPrint.h"
-
 
 #include "motioncontrolsdk_global.h"
 #include "motionControlSDK.h"
@@ -128,11 +125,6 @@ private:
 
 	 
 public slots:
-	//tcp
-	void OnRecvMsg(QByteArray msg);
-	void OnErrMsg(QAbstractSocket::SocketError err);
-	void OnSockChangeState(QAbstractSocket::SocketState state);
-
 	//UI
 	void OnPrintFunClicked(int idx);
 	void OnListenBtnClicked(int idx);
