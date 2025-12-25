@@ -289,9 +289,9 @@ int SDKManager::resetAxis(int axisFlag)
 	// 转换为12字节协议数据
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(QDataStream::LittleEndian);
 
-	// 写入X/Y/Z坐标（各4字节，大端序，微米单位）
+	// 写入X/Y/Z坐标（各4字节，小端序，微米单位）
 	stream << targetPos.xPos;
 	stream << targetPos.yPos;
 	stream << targetPos.zPos;

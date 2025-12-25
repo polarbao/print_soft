@@ -6,25 +6,25 @@
 #include <QtEndian>
 #include "utils.h"
 
-//Æô¶¯CRC¼ì²â
+//å¯åŠ¨CRCæ£€æµ‹
 //#define TurnOnCRC 
 
 //è·å–shortç±»å‹çš„é«˜å­—èŠ‚
 #define HI_OF_SHORT(X) (X >> 8)
 //è·å–shortç±»å‹çš„ä½å­—èŠ‚
 #define LO_OF_SHORT(X) (X & 0xFF)
-//åŒ…å¤´ï¼?2å­—èŠ‚
+//åŒ…å¤´ 2å­—èŠ‚
 #define Req_Package_Head 0xAABB
 #define Resp_Package_Head_Succ 0xAACC
 #define Resp_Package_Head_Err 0xAADD
 
-//å–æ¶ˆ--åŒ…å°¾ï¼?2å­—èŠ‚
+//å–æ¶ˆ--åŒ…å°¾ 2å­—èŠ‚
 #define Package_Tail 0xDDEE
 
 #define SER_HIGH_OFFSET 0x10
 #define ZERO 0x00
 
-//åè??æ•°æ®åŒ…æœ€å°å›ºå®šé•¿åº?
+//æ•°æ®åŒ…æœ€å°å›ºå®šé•¿
 #define DATAGRAM_MIN_SIZE 10
 
 
@@ -39,12 +39,12 @@ ProtocolPrint::ProtocolPrint(QObject* parent /*= 0*/)
 
 void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 {
-	//ÅĞ¶Ïµ±Ç°recvÊÇreq»¹ÊÇresp
-	//·ÖÂß¼­´¦Àí3¸ö²»Í¬ÀàĞÍµÄ±¨ÎÄÊı¾İ
+	//åˆ¤æ–­å½“å‰recvæ˜¯reqè¿˜æ˜¯resp
+	//åˆ†é€»è¾‘å¤„ç†3ä¸ªä¸åŒç±»å‹çš„æŠ¥æ–‡æ•°æ®
 	QString str = recvdata.toHex(' ');
-	LOG_INFO(QString(u8"½ÓÊÕÊı¾İ: %1").arg(str));
+	LOG_INFO(QString(u8"æ¥æ”¶æ•°æ®: %1").arg(str));
 
-	//ĞÂÊı¾İ¼ÓÈë»º³åÇø
+	//æ–°æ•°æ®åŠ å…¥ç¼“å†²åŒº
 	m_recvBuf.append(recvdata);
 
 	if (m_recvBuf.size() < DATAGRAM_MIN_SIZE)
@@ -52,7 +52,7 @@ void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 		return;
 	}
 
-	//--------½âÎö»º³åÇø£¬ÕÒµ½Ã¿Ò»ÌõÊı¾İ°üÎ²DD EEµÄÎ»ÖÃ
+	//--------è§£æç¼“å†²åŒºï¼Œæ‰¾åˆ°æ¯ä¸€æ¡æ•°æ®åŒ…å°¾DD EEçš„ä½ç½®
 	int preIndex = -1;
 	//ori
 	QList<QByteArray> packageDatas;
@@ -68,10 +68,10 @@ void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 		}
 	}
 
-	//±£ÁôÓÒ²à²»ÊÇÒ»¸öÍêÕû°üµÄÊı¾İ
+	//ä¿ç•™å³ä¾§ä¸æ˜¯ä¸€ä¸ªå®Œæ•´åŒ…çš„æ•°æ®
 	m_recvBuf = m_recvBuf.right(m_recvBuf.size() - preIndex - 1);
 
-	//½âÎöÍêÕû°ü
+	//è§£æå®Œæ•´åŒ…
 	for (auto datagram : packageDatas)
 	{
 		ParsePackageData(datagram);
@@ -80,12 +80,12 @@ void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 
 void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 {
-	//ÅĞ¶Ïµ±Ç°recvÊÇreq»¹ÊÇresp
-	//·ÖÂß¼­´¦Àí3¸ö²»Í¬ÀàĞÍµÄ±¨ÎÄÊı¾İ
+	//åˆ¤æ–­å½“å‰recvæ˜¯reqè¿˜æ˜¯resp
+	//åˆ†é€»è¾‘å¤„ç†3ä¸ªä¸åŒç±»å‹çš„æŠ¥æ–‡æ•°æ®
 	QString str = recvdata.toHex(' ');
 	LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
 
-	//ĞÂÊı¾İ¼ÓÈë»º³åÇø
+	//æ–°æ•°æ®åŠ å…¥ç¼“å†²åŒº
 	m_recvBuf.append(recvdata);
 
 	if (m_recvBuf.size() < DATAGRAM_MIN_SIZE)
@@ -93,89 +93,89 @@ void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 		return;
 	}
 
-	// ´æ´¢ËùÓĞ°üÍ·µÄÆğÊ¼Ë÷Òı£¨°üÍ·Õ¼2×Ö½Ú£¬Ë÷ÒıÎªµÚÒ»¸ö×Ö½ÚÎ»ÖÃ£©
-	// --------µÚÒ»²½£º±éÀú»º³åÇø£¬ÊÕ¼¯ËùÓĞºÏ·¨°üÍ·µÄÎ»ÖÃºÍÀàĞÍ
+	// å­˜å‚¨æ‰€æœ‰åŒ…å¤´çš„èµ·å§‹ç´¢å¼•ï¼ˆåŒ…å¤´å 2å­—èŠ‚ï¼Œç´¢å¼•ä¸ºç¬¬ä¸€ä¸ªå­—èŠ‚ä½ç½®ï¼‰
+	// --------ç¬¬ä¸€æ­¥ï¼šéå†ç¼“å†²åŒºï¼Œæ”¶é›†æ‰€æœ‰åˆæ³•åŒ…å¤´çš„ä½ç½®å’Œç±»å‹
 	struct HeadInfo
 	{
-		int pos;                // °üÍ·ÆğÊ¼Î»ÖÃ£¨µÚÒ»¸ö×Ö½ÚµÄË÷Òı£©
-		PackageHeadType type;   // °üÍ·ÀàĞÍ
+		int pos;                // åŒ…å¤´èµ·å§‹ä½ç½®ï¼ˆç¬¬ä¸€ä¸ªå­—èŠ‚çš„ç´¢å¼•ï¼‰
+		PackageHeadType type;   // åŒ…å¤´ç±»å‹
 	};
-	QList<HeadInfo> headList;   // ´æ´¢ËùÓĞºÏ·¨°üÍ·µÄĞÅÏ¢
+	QList<HeadInfo> headList;   // å­˜å‚¨æ‰€æœ‰åˆæ³•åŒ…å¤´çš„ä¿¡æ¯
 
-	// ±éÀú·¶Î§£º0 ~ size-2£¨±ÜÃâpos+1Ô½½ç£©
+	// éå†èŒƒå›´ï¼š0 ~ size-2ï¼ˆé¿å…pos+1è¶Šç•Œï¼‰
 	for (int i = 0; i < m_recvBuf.size() - 1; i++)
 	{
 		PackageHeadType headType = static_cast<PackageHeadType>(HandleCheckPackageHead(m_recvBuf, i));
 		if (headType != 0)
-		{ // Æ¥Åäµ½ºÏ·¨°üÍ·
+		{ // åŒ¹é…åˆ°åˆæ³•åŒ…å¤´
 			headList.append({ i, headType });
-			// Ìø¹ıÏÂÒ»¸ö×Ö½Ú£¨°üÍ·Õ¼2×Ö½Ú£¬±ÜÃâÖØ¸´Æ¥Åä£¬±ÈÈçAABBµÄµÚ¶ş¸ö×Ö½Ú²»»á±»ÎóÅĞ£©
+			// è·³è¿‡ä¸‹ä¸€ä¸ªå­—èŠ‚ï¼ˆåŒ…å¤´å 2å­—èŠ‚ï¼Œé¿å…é‡å¤åŒ¹é…ï¼Œæ¯”å¦‚AABBçš„ç¬¬äºŒä¸ªå­—èŠ‚ä¸ä¼šè¢«è¯¯åˆ¤ï¼‰
 			i++;
 		}
 	}
 
-	// Î´ÕÒµ½ÈÎºÎºÏ·¨°üÍ·£¬·µ»Ø£¨¿ÉÑ¡Çå¿ÕÔàÊı¾İ£©
+	// æœªæ‰¾åˆ°ä»»ä½•åˆæ³•åŒ…å¤´ï¼Œè¿”å›ï¼ˆå¯é€‰æ¸…ç©ºè„æ•°æ®ï¼‰
 	if (headList.isEmpty())
 	{
-		// m_recvBuf.clear(); // °´ĞèÆôÓÃ£ºÇå¿ÕÎŞºÏ·¨°üÍ·µÄÎŞĞ§Êı¾İ
+		// m_recvBuf.clear(); // æŒ‰éœ€å¯ç”¨ï¼šæ¸…ç©ºæ— åˆæ³•åŒ…å¤´çš„æ— æ•ˆæ•°æ®
 		return;
 	}
 
-	// --------µÚ¶ş²½£ºÇåÀíµÚÒ»¸ö°üÍ·Ç°µÄÔàÊı¾İ
+	// --------ç¬¬äºŒæ­¥ï¼šæ¸…ç†ç¬¬ä¸€ä¸ªåŒ…å¤´å‰çš„è„æ•°æ®
 	int firstHeadPos = headList.first().pos;
 	if (firstHeadPos > 0)
 	{
-		m_recvBuf.remove(0, firstHeadPos); // ÒÆ³ıÇ°ÖÃÔàÊı¾İ
-		// ĞŞÕıËùÓĞ°üÍ·µÄÎ»ÖÃ£¨»º³åÇøÒÑ²Ã¼ô£©
+		m_recvBuf.remove(0, firstHeadPos); // ç§»é™¤å‰ç½®è„æ•°æ®
+		// ä¿®æ­£æ‰€æœ‰åŒ…å¤´çš„ä½ç½®ï¼ˆç¼“å†²åŒºå·²è£å‰ªï¼‰
 		for (auto& head : headList)
 		{
 			head.pos -= firstHeadPos;
 		}
 	}
-	int bufSize = m_recvBuf.size(); // ¸üĞÂ»º³åÇø³¤¶È
+	int bufSize = m_recvBuf.size(); // æ›´æ–°ç¼“å†²åŒºé•¿åº¦
 
-	  // --------µÚÈı²½£º·Ö¸îÍêÕûÊı¾İ°ü
-	QList<QPair<QByteArray, PackageHeadType>> packageList; // Êı¾İ°ü + ¶ÔÓ¦°üÍ·ÀàĞÍ
+	  // --------ç¬¬ä¸‰æ­¥ï¼šåˆ†å‰²å®Œæ•´æ•°æ®åŒ…
+	QList<QPair<QByteArray, PackageHeadType>> packageList; // æ•°æ®åŒ… + å¯¹åº”åŒ…å¤´ç±»å‹
 	for (int i = 0; i < headList.size(); i++)
 	{
 		const HeadInfo& currHead = headList.at(i);
-		// ÏÂÒ»¸ö°üÍ·µÄÎ»ÖÃ£¨×îºóÒ»¸ö°üÍ·ÔòÈ¡»º³åÇøÄ©Î²£©
+		// ä¸‹ä¸€ä¸ªåŒ…å¤´çš„ä½ç½®ï¼ˆæœ€åä¸€ä¸ªåŒ…å¤´åˆ™å–ç¼“å†²åŒºæœ«å°¾ï¼‰
 		int nextHeadPos = (i + 1 < headList.size()) ? headList.at(i + 1).pos : bufSize;
 		int packageLen = nextHeadPos - currHead.pos;
 
-		// ¼ì²é°ü³¤¶ÈÊÇ·ñÂú×ã×îĞ¡ÒªÇó£¬²»×ãÔò±£ÁôÔÚ»º³åÇø
+		// æ£€æŸ¥åŒ…é•¿åº¦æ˜¯å¦æ»¡è¶³æœ€å°è¦æ±‚ï¼Œä¸è¶³åˆ™ä¿ç•™åœ¨ç¼“å†²åŒº
 		if (packageLen >= 11) {
 			QByteArray packageData = m_recvBuf.mid(currHead.pos, packageLen);
 			packageList.append({ packageData, currHead.type });
 		}
 		else {
-			break; // ×îºóÒ»¸ö°ü²»ÍêÕû£¬Í£Ö¹±éÀú
+			break; // æœ€åä¸€ä¸ªåŒ…ä¸å®Œæ•´ï¼Œåœæ­¢éå†
 		}
 	}
 
-	// --------µÚËÄ²½£º¸üĞÂ»º³åÇø£¬±£ÁôÎ´´¦ÀíµÄÊ£ÓàÊı¾İ
+	// --------ç¬¬å››æ­¥ï¼šæ›´æ–°ç¼“å†²åŒºï¼Œä¿ç•™æœªå¤„ç†çš„å‰©ä½™æ•°æ®
 	int lastProcessedPos = 0;
 	if (!packageList.isEmpty()) {
-		// ×îºóÒ»¸öÍêÕû°üµÄ½áÊøÎ»ÖÃ
+		// æœ€åä¸€ä¸ªå®Œæ•´åŒ…çš„ç»“æŸä½ç½®
 		const HeadInfo& lastHead = headList.at(packageList.size() - 1);
 		int lastPackageLen = packageList.last().first.size();
 		lastProcessedPos = lastHead.pos + lastPackageLen;
 	}
-	// ±£ÁôÎ´´¦ÀíµÄÊı¾İ£¨×îºóÒ»¸ö²»ÍêÕû°üÍ·¼°ºóĞø£©
+	// ä¿ç•™æœªå¤„ç†çš„æ•°æ®ï¼ˆæœ€åä¸€ä¸ªä¸å®Œæ•´åŒ…å¤´åŠåç»­ï¼‰
 	m_recvBuf = (lastProcessedPos < bufSize) ? m_recvBuf.mid(lastProcessedPos) : QByteArray();
 
 
-	// --------µÚÎå²½£º½âÎöËùÓĞÍêÕûÊı¾İ°ü£¨¿É´«µİ°üÍ·ÀàĞÍ£©
+	// --------ç¬¬äº”æ­¥ï¼šè§£ææ‰€æœ‰å®Œæ•´æ•°æ®åŒ…ï¼ˆå¯ä¼ é€’åŒ…å¤´ç±»å‹ï¼‰
 	for (auto& packageItem : packageList)
 	{
 		QByteArray& datagram = packageItem.first;
 		PackageHeadType headType = packageItem.second;
 
-		// ¿É¸ù¾İ°üÍ·ÀàĞÍ×ö²»Í¬´¦Àí£¬Ê¾Àı£º
-		LOG_INFO(QString(u8"½âÎö°üÍ·ÀàĞÍ: 0x%1 Êı¾İ°ü³¤¶È: %2")
+		// å¯æ ¹æ®åŒ…å¤´ç±»å‹åšä¸åŒå¤„ç†ï¼Œç¤ºä¾‹ï¼š
+		LOG_INFO(QString(u8"è§£æåŒ…å¤´ç±»å‹: 0x%1 æ•°æ®åŒ…é•¿åº¦: %2")
 			.arg(QString::number(headType, 16).toUpper())
 			.arg(datagram.size()));
-		ParsePackageData(datagram, headType); // Èç¹ûĞèÒª£¬¿ÉĞŞ¸ÄParseº¯Êı½ÓÊÕheadType²ÎÊı£ºParse(datagram, headType)
+		ParsePackageData(datagram, headType); // å¦‚æœéœ€è¦ï¼Œå¯ä¿®æ”¹Parseå‡½æ•°æ¥æ”¶headTypeå‚æ•°ï¼šParse(datagram, headType)
 	}
 }
 
@@ -189,7 +189,7 @@ int ProtocolPrint::HandleCheckPackageHead(const QByteArray& data, int pos)
 
 	uchar hi = (uchar)data.at(pos);
 	uchar lo = (uchar)data.at(pos + 1);
-	quint16 headValue = (hi << 8) | lo; // Æ´½Ó³É16Î»°üÍ·Öµ
+	quint16 headValue = (hi << 8) | lo; // æ‹¼æ¥æˆ16ä½åŒ…å¤´å€¼
 
 	if (headValue == Req_Package_Head) return Req_Package_Head;
 	if (headValue == Resp_Package_Head_Succ) return Resp_Package_Head_Succ;
@@ -226,70 +226,68 @@ void ProtocolPrint::ParsePackageData(QByteArray& datagram, PackageHeadType type 
 
 void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType type)
 {
-	//½ÓÊÕµ½Êı¾İ³¤¶È
+	//æ¥æ”¶åˆ°æ•°æ®é•¿åº¦
 	int recvLength = datagram.length();
-	//Êı¾İ°ü¹Ì¶¨×Ö½Ú³¤¶ÈÎª10×Ö½Ú£¬±ä»¯³¤¶ÈÎªÊı¾İÇø£¬´Ó0µ½n
+	//æ•°æ®åŒ…å›ºå®šå­—èŠ‚é•¿åº¦ä¸º10å­—èŠ‚ï¼Œå˜åŒ–é•¿åº¦ä¸ºæ•°æ®åŒºï¼Œä»0åˆ°n
 	if (recvLength < DATAGRAM_MIN_SIZE)
 	{
-		LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_Êı¾İ³¤¶È´íÎó");
+		LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_æ•°æ®é•¿åº¦é”™è¯¯");
 		return;
 	}
 
-	//Êı¾İ×ª±ä³ÉucharÀàĞÍµÄ»º´æ
+	//æ•°æ®è½¬å˜æˆucharç±»å‹çš„ç¼“å­˜
 	const int size = 512;
 	uchar recvBuf[size];
 	memset(recvBuf, 0, size);
 	int templen = datagram.size() > size ? size : datagram.size();
 	memcpy(&recvBuf[0], datagram, templen);
 
-	//±È½Ï°üÍ·
+	//æ¯”è¾ƒåŒ…å¤´
 	if (!(recvBuf[0] == LO_OF_SHORT(Req_Package_Head) && (recvBuf[1] == HI_OF_SHORT(Req_Package_Head))))
 	{
-		LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_Êı¾İ°üÍ·´íÎó¡£");
+		//LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_æ•°æ®åŒ…å¤´é”™è¯¯");
 		return;
 	}
 
-	//ÅĞ¶ÏcrcĞ£Ñé
+	//åˆ¤æ–­crcæ ¡éªŒ
 	if (!Utils::GetInstance().CheckCRC(recvBuf, recvLength - 10))
 	{
-		LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_crcĞ£Ñé´íÎó"));
-		LOG_INFO(QString(u8"crcĞ£Ñé´íÎó´ÎÊıÍ³¼Æ£º%1").arg(++m_crcErrorNum));
+		LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_crcæ ¡éªŒé”™è¯¯"));
+		LOG_INFO(QString(u8"crcæ ¡éªŒé”™è¯¯æ¬¡æ•°ç»Ÿè®¡ï¼š%1").arg(++m_crcErrorNum));
 #ifdef TurnOnCRC
 		return;
 #endif 
 	}
 
-	//-------------ÕıÈ·µÄ°ü£¬¿ªÊ¼½âÎö-------------------//
-	//ÃüÁîÀàĞÍ
+	//-------------æ­£ç¡®çš„åŒ…ï¼Œå¼€å§‹è§£æ-------------------//
+	// å‘½ä»¤ç±»å‹ (å°ç«¯å­—èŠ‚åº)
 	ushort codeType;
-	codeType = recvBuf[2] << 8;
-	codeType += recvBuf[3];
+	codeType = (recvBuf[3] << 8) | recvBuf[2];
 
-	//ÃüÁîÂë
+	// å‘½ä»¤å­— (å°ç«¯å­—èŠ‚åº)
 	ushort code;
-	code = recvBuf[4] << 8;
-	code += recvBuf[5];
+	code = (recvBuf[5] << 8) | recvBuf[4];
 
-	//³¤¶È×Ö¶ÎÅĞ¶Ï
+	// é•¿åº¦å­—æ®µåˆ¤æ–­ (å°ç«¯å­—èŠ‚åº)
 	ushort lenByte;
-	lenByte = recvBuf[6] << 8;
-	lenByte += recvBuf[7];
+	lenByte = (recvBuf[7] << 8) | recvBuf[6];
 	if (lenByte != recvLength - 10)
 	{
-		LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_Êı¾İÇø³¤¶È×Ö¶Î´íÎó"));
+		//LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_æ•°æ®åŒºé•¿åº¦å­—æ®µé”™è¯¯"));
 		return;
 	}
 
-	// Æ´³ÉÒ»¸ö½á¹¹Ìå£¬½øĞĞºóĞøÂß¼­´¦Àí
-	// req´¦ÀíÂß¼­
+	// æ‹¼æˆä¸€ä¸ªç»“æ„ä½“ï¼Œè¿›è¡Œåç»­é€»è¾‘å¤„ç†
+	// reqå¤„ç†é€»è¾‘
 	emit SigHandleFunOper(codeType, code);
 
 
-	//Èç¹ûÊÇÏÂÎ»»ú»ØÓ¦ÉÏÎ»»úµÄ°ü
+	//å¦‚æœæ˜¯ä¸‹ä½æœºå›åº”ä¸Šä½æœºçš„åŒ…
+
 	if (recvBuf[1] == LO_OF_SHORT(Req_Package_Head))
 	{
-		//Note:½âÎö»Ø¸´Êı¾İ
-		//»Ø¸´µÄÃüÁî×î¸ßÎ»-0x1000
+		//Note:è§£æå›å¤æ•°æ®
+		//å›å¤çš„å‘½ä»¤æœ€é«˜ä½-0x1000
 		code = (recvBuf[4] - SER_HIGH_OFFSET) << 8;
 		code += recvBuf[5];
 		HandleResponseData(code, &recvBuf[7], recvLength - DATAGRAM_MIN_SIZE, datagram);
@@ -297,10 +295,10 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 		//auto a = GetResponseCommData(datagram);
 		//return;
 	}
-	//Èç¹ûÊÇÏÂÎ»»úÖ÷¶¯·¢ËÍµ½ÉÏÎ»»úµÄ°ü
+	//å¦‚æœæ˜¯ä¸‹ä½æœºä¸»åŠ¨å‘é€åˆ°ä¸Šä½æœºçš„åŒ…
 	else
 	{
-		//ÏÂÎ»»úÖÜÆÚÍÆËÍµÄÊı¾İ°ü
+		//ä¸‹ä½æœºå‘¨æœŸæ¨é€çš„æ•°æ®åŒ…
 		//if (codeType == Period_AllPara)
 		//{
 		//	HandlePeriodData(&recvBuf[7], recvLength - DATAGRAM_MIN_SIZE);
@@ -308,62 +306,63 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	}
 }
 
-// ´¦Àí²Ù×÷³É¹¦µÄ±¨ÎÄÊı¾İ
-// typeÉèÖÃÄ¬ÈÏÊı¾İÀàĞÍ
+// å¤„ç†æ“ä½œæˆåŠŸçš„æŠ¥æ–‡æ•°æ®
+// typeè®¾ç½®é»˜è®¤æ•°æ®ç±»å‹
 void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType type)
 {
 	if (type == Head_AACC)
 	{
-		// ¶ÁÈ¡ÃüÁîÊı¾İÀàĞÍ£¬»ñÈ¡Êı¾İĞÅÏ¢
-		// ´æ×ø±ê¡¢´æËÙ¶È¡¢´æ
+		// è¯»å–å‘½ä»¤æ•°æ®ç±»å‹ï¼Œè·å–æ•°æ®ä¿¡æ¯
+		// å­˜åæ ‡ã€å­˜é€Ÿåº¦ã€å­˜
 
-		//½ÓÊÕµ½Êı¾İ³¤¶È
+		//æ¥æ”¶åˆ°æ•°æ®é•¿åº¦
 
 		int recvLength = datagram.length();
 		PackParam packData;
 
-		//Êı¾İ×ª±ä³ÉucharÀàĞÍµÄ»º´æ
+		//æ•°æ®è½¬å˜æˆucharç±»å‹çš„ç¼“å­˜
 		const int size = 512;
 		uchar recvBuf[size];
 		memset(recvBuf, 0, size);
 		int templen = datagram.size() > size ? size : datagram.size();
 		memcpy(&recvBuf[0], datagram, templen);
 
-		//-------------ÕıÈ·µÄ°ü£¬¿ªÊ¼½âÎö-------------------//
-		//ÃüÁîÀàĞÍ
-		packData.head = (recvBuf[0] << 8) | recvBuf[1];
+		//-------------æ­£ç¡®çš„åŒ…ï¼Œå¼€å§‹è§£æ-------------------//
+		// åŒ…å¤´ (å°ç«¯å­—èŠ‚åº)
+		packData.head = (recvBuf[1] << 8) | recvBuf[0];
 
-		//ÃüÁîÂë
+		// å‘½ä»¤ç±»å‹ (å°ç«¯å­—èŠ‚åº)
 		ushort operType;
-		operType = (recvBuf[2] << 8) | recvBuf[3];
+		operType = (recvBuf[3] << 8) | recvBuf[2];
 		packData.operType = operType;
 
-		//³¤¶È×Ö¶ÎÅĞ¶Ï
+		// å‘½ä»¤å­—æ®µåˆ¤æ–­ (å°ç«¯å­—èŠ‚åº)
 		ushort code;
-		code = (recvBuf[4] << 8) | recvBuf[5];
+		code = (recvBuf[5] << 8) | recvBuf[4];
 		packData.cmdFun = code;
 
-		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		// æ•°æ®é•¿åº¦ (å°ç«¯å­—èŠ‚åº)
 		ushort dataLen;
-		dataLen = (recvBuf[6] << 8) | recvBuf[7];
+		dataLen = (recvBuf[7] << 8) | recvBuf[6];
 		packData.dataLen = dataLen;
 		if (dataLen != datagram.length() - 10)
 		{
-			LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶Î´ï¿½ï¿½ï¿½"));
+			//LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_æ•°æ®åŒºé•¿åº¦"));
 			return;
 		}
 
-		// Æ´³ÉÒ»¸ö½á¹¹Ìå£¬½øĞĞºóĞøÂß¼­´¦Àí
+		// æ‹¼æˆä¸€ä¸ªç»“æ„ä½“ï¼Œè¿›è¡Œåç»­é€»è¾‘å¤„ç†
 
 		int copyLen = (dataLen < DATA_LEN_12) ? dataLen : DATA_LEN_12;
 		memcpy(&packData.data, &recvBuf[8], dataLen);
 
 		MoveAxisPos posData;
-		posData.xPos = (packData.data[0] << 24) | (packData.data[1] << 16) | (packData.data[2] << 8) | packData.data[3];
-		posData.yPos = (packData.data[4] << 24) | (packData.data[5] << 16) | (packData.data[6] << 8) | packData.data[7];
-		posData.zPos = (packData.data[8] << 24) | (packData.data[9] << 16) | (packData.data[10] << 8) | packData.data[11];
+		// æ•°æ®åŒºä½¿ç”¨å°ç«¯å­—èŠ‚åºè§£æ
+		posData.xPos = (packData.data[3] << 24) | (packData.data[2] << 16) | (packData.data[1] << 8) | packData.data[0];
+		posData.yPos = (packData.data[7] << 24) | (packData.data[6] << 16) | (packData.data[5] << 8) | packData.data[4];
+		posData.zPos = (packData.data[11] << 24) | (packData.data[10] << 16) | (packData.data[9] << 8) | packData.data[8];
 
-		// req´¦ÀíÂß¼­
+		// reqå¤„ç†é€»è¾‘
 		emit SigHandleFunOper(operType, code);
 		emit SigHandleFunOper1(packData);
 		emit SigHandleFunOper2(code, posData);
@@ -377,7 +376,7 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 
 }
 
-////´¦Àí²Ù×÷Ê§°ÜµÄ±¨ÎÄÊı¾İ
+////å¤„ç†æ“ä½œå¤±è´¥çš„æŠ¥æ–‡æ•°æ®
 //void ProtocolPrint::HandleFailedRespPackageData(QByteArray& datagram, PackageHeadType type)
 //{
 //
@@ -389,32 +388,32 @@ QByteArray ProtocolPrint::GetSendDatagram(ECmdType cmdType, FunCode cmd, QByteAr
 	uchar sendBuf[size];
 	memset(sendBuf, 0, size);
 
-	//°üÍ·+ÃüÁîÀàĞÍ+ÃüÁî+Êı¾İÇø³¤¶È+CRC
-	//°üÍ·
+	//åŒ…å¤´+å‘½ä»¤ç±»å‹+å‘½ä»¤+æ•°æ®åŒºé•¿åº¦+CRC
+	//åŒ…å¤´
 	sendBuf[0] = LO_OF_SHORT(Req_Package_Head);
 	sendBuf[1] = HI_OF_SHORT(Req_Package_Head);
 
-	// ÃüÁîÀàĞÍ
+	// å‘½ä»¤ç±»å‹
 	sendBuf[2] = HI_OF_SHORT(cmdType);
 	sendBuf[3] = LO_OF_SHORT(cmdType);
 
-	//ÃüÁî×Ö
+	//å‘½ä»¤å­—
 	sendBuf[4] = HI_OF_SHORT(cmd);
 	sendBuf[5] = LO_OF_SHORT(cmd);
 
-	//³¤¶È×Ö
-	// Êı¾İÇø³¤¶È
+	//é•¿åº¦å­—
+	// æ•°æ®åŒºé•¿åº¦
 	ushort length = data.size();
 	sendBuf[6] = LO_OF_SHORT(length);
 	sendBuf[7] = HI_OF_SHORT(length);
 	
-	//Êı¾İÄÚÈİ
+	//æ•°æ®å†…å®¹
 	if (data.size() > 0)
 	{
 		memcpy(&sendBuf[8], data.data(), data.size());
 	}
 
-	//Ğ£Ñé
+	//æ ¡éªŒ
 	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length + 8);
 	sendBuf[length + 8] = HI_OF_SHORT(crc);
 	sendBuf[length + 9] = LO_OF_SHORT(crc);
@@ -437,25 +436,25 @@ QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByt
 	uchar sendBuf[size];
 	memset(sendBuf, 0, size);
 
-	//°üÍ·
+	//åŒ…å¤´
 	sendBuf[0] = LO_OF_SHORT(Resp_Package_Head_Succ);
 	sendBuf[1] = HI_OF_SHORT(Resp_Package_Head_Succ);
 
-	//ÃüÁîÀàĞÍ
+	//å‘½ä»¤ç±»å‹
 	ProtocolPrint::ECmdType cmd = ProtocolPrint::ECmdType::SetParamCmd;
 	sendBuf[2] = LO_OF_SHORT(cmd);
 	sendBuf[3] = HI_OF_SHORT(cmd);
 
-	//ÃüÁî×Ö
+	//å‘½ä»¤å­—
 	sendBuf[4] = LO_OF_SHORT(code);
 	sendBuf[5] = HI_OF_SHORT(code);
 
-	//³¤¶È×Ö Êı¾İÇø³¤¶È
+	//é•¿åº¦å­— æ•°æ®åŒºé•¿åº¦
 	ushort length = data.size();
 	sendBuf[6] = LO_OF_SHORT(length);
 	sendBuf[7] = HI_OF_SHORT(length);
 
-	//Êı¾İÄÚÈİ
+	//æ•°æ®å†…å®¹
 	if (data.size() > 0)
 	{
 		memcpy(&sendBuf[8], data.data(), 102);
@@ -466,7 +465,7 @@ QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByt
 	sendBuf[length] = LO_OF_SHORT(crc);
 	sendBuf[length + 1] = HI_OF_SHORT(crc);
 
-	//°üÍ·
+	//åŒ…å¤´
 	//sendBuf[length + 2] = HI_OF_SHORT(Package_Tail);
 	//sendBuf[length + 3] = LO_OF_SHORT(Package_Tail);
 
@@ -488,26 +487,26 @@ void ProtocolPrint::HandlePeriodData(uchar* data, ushort length)
 
 void ProtocolPrint::HandleResponseData(ushort code, uchar* data, ushort length, QByteArray arr)
 {
-	//Èç¹ûÊÇĞÄÌø°ü
+	//å¦‚æœæ˜¯å¿ƒè·³åŒ…
 	if (code == ProtocolPrint::Get_Breath)
 	{
 		emit SigHeartBeat();
 		//return;
 	}
-	//Note: »Ø¸´°ü´¦ÀíÂß¼­»º´æ
-	////´íÎó·¢Éú£¬·µ»Ø´íÎó±àÂë£¬Ô­ÃüÁî×Ö+0x8000
+	//Note: å›å¤åŒ…å¤„ç†é€»è¾‘ç¼“å­˜
+	////é”™è¯¯å‘ç”Ÿï¼Œè¿”å›é”™è¯¯ç¼–ç ï¼ŒåŸå‘½ä»¤å­—+0x8000
 	//else if (code >= 0x8000)
 	//{
 	//	uchar errcode = data[0];
-	//	LOG_INFO(u8"ÏÂÎ»»ú·µ»Ø´íÎóÂë,´íÎóÎª: " + getErrString(errcode));
-	//	LOG_INFO(QString(u8"ÏÂÎ»»ú·µ»Ø´íÎóÂë´ÎÊıÍ³¼Æ£º%1").arg(++m_codeErrorNum));
+	//	LOG_INFO(u8"ä¸‹ä½æœºè¿”å›é”™è¯¯ç ,é”™è¯¯ä¸º: " + getErrString(errcode));
+	//	LOG_INFO(QString(u8"ä¸‹ä½æœºè¿”å›é”™è¯¯ç æ¬¡æ•°ç»Ÿè®¡ï¼š%1").arg(++m_codeErrorNum));
 	//	emit SigCmdReply(code - 0x8000, errcode);
 	//	return;
 	//}
-	////Èç¹ûÊÇ¶ÁÈ¡Êı¾İÇëÇó·µ»ØµÄÓ¦´ğÊı¾İ°ü
+	////å¦‚æœæ˜¯è¯»å–æ•°æ®è¯·æ±‚è¿”å›çš„åº”ç­”æ•°æ®åŒ…
 	//else if (code >= Read_Switch && code < Period_AllPara)
 	//{
-	//	//½âÎöÊı¾İÓò
+	//	//è§£ææ•°æ®åŸŸ
 	//	if (length < 1)
 	//	{
 	//		return;
@@ -529,7 +528,7 @@ void ProtocolPrint::HandleResponseData(ushort code, uchar* data, ushort length, 
 	//	//case Read_AllPara:
 	//	//	HandlePeriodData(data, length);
 	//	//	break;
-	//	//case Read_AllSetPara:    //¶ÁÈ¡²ÎÊıÉèÖÃ²ÎÊı
+	//	//case Read_AllSetPara:    //è¯»å–å‚æ•°è®¾ç½®å‚æ•°
 	//	//{
 
 	//	//}
@@ -544,15 +543,15 @@ static QString getErrString(uchar code)
 	switch (code)
 	{
 	case ProtocolPrint::Command_Err:
-		return QString(u8"ÃüÁîÂë´íÎó");
+		return QString("cmd_err");
 	case ProtocolPrint::DataField_Err:
-		return QString(u8"Êı¾İÓò´íÎó");
+		return QString("data_field_err");
 	case ProtocolPrint::Crc_Err:
-		return QString(u8"Ğ£Ñé´íÎó");
+		return QString("crc_err");
 	case ProtocolPrint::Status_Err:
-		return QString(u8"×´Ì¬´íÎó");
+		return QString("status_err");
 	default:
-		return QString(u8"Î´Öª´íÎó");
+		return QString("unknow_err");
 	}
 }
 

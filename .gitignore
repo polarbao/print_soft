@@ -20,8 +20,13 @@ tmp/
 /print_soft_0_0_1/project/.vs/
 /print_soft_0_0_1/project/.vs/manu_print_soft/
 /print_soft_0_0_1/project/x64/
-/print_soft_0_0_1/motionControlSDK/x64/
-/print_soft_0_0_1/printDeviceMoudle/x64/
+/print_soft_0_0_1/project/printDeviceMoudle/x64/
+/print_soft_0_0_1/project/printDeviceMoudle/x64/Release/
+/print_soft_0_0_1/project/motionControlSDK/x64/
+/print_soft_0_0_1/project/motionControlSDK/x64/Release/
+/print_soft_0_0_1/project/motionControlSDK/x64/Release/qmake/temp
+
+
 
 
 #屏蔽文件夹
@@ -30,3 +35,6 @@ build
 GeneratedFiles
 log
 
+/print_soft_0_0_1/src/sdk/protocol/ProtocolPrint - 副本.cpp
+/print_soft_0_0_1/src/sdk/protocol/ProtocolPrint - 副本.h
+/print_soft_0_0_1/project/motionControlSDK/x64/Release/qmake/temp
