@@ -101,6 +101,7 @@
     <ClCompile Include="..\..\src\sdk\comm\CLogThread.cpp" />
     <ClCompile Include="..\..\src\sdk\comm\utils.cpp" />
     <ClCompile Include="..\..\src\sdk\protocol\ProtocolPrint.cpp" />
+    <ClCompile Include="..\..\src\sdk\SDKPrintParam.cpp" />
     <QtMoc Include="..\..\src\sdk\SDKManager.h" />
     <ClCompile Include="..\..\src\sdk\motionControlSDK.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKCallback.cpp" />

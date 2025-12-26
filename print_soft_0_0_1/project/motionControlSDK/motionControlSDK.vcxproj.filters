@@ -115,6 +115,9 @@
     <ClCompile Include="..\..\src\sdk\SDKManager_Position.cpp">
       <Filter>Source Files\sdkLogic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKPrintParam.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\sdk\motioncontrolsdk_global.h">

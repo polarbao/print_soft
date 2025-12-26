@@ -1,7 +1,7 @@
 #include "CLogManager.h"
 
 #define LOG_FILE_MAX_SIZE 10*1024*1024
-#define LOG_FILE_NAME_0 "/print_motion_logic_test.txt"
+#define LOG_FILE_NAME_0 "/print_motion_logic_prj.txt"
 #define LOG_FILE_UTF8_HEADER1 0xEF
 #define LOG_FILE_UTF8_HEADER2 0xBB
 #define LOG_FILE_UTF8_HEADER3 0xBF

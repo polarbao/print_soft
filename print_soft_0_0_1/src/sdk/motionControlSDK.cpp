@@ -555,6 +555,16 @@ bool motionControlSDK::MC_StopPrint()
 	return true;
 }
 
+bool motionControlSDK::MC_CleanPrint()
+{
+	return true;
+}
+
+void motionControlSDK::MC_SendCmd(int operCmd, const QByteArray& arrData)
+{
+	SDKManager::instance()->sendCommand(operCmd, arrData);
+}
+
 // ==================== 回调函数（桥接C回调到Qt信号）====================
 
 void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)

@@ -70,6 +70,105 @@ ushort Utils::MakeCRCCheck(uchar* data, int datalen)
 	return crc;
 }
 
+/**
+ * @brief 将10000微米单位的字符串数据转换为4字节16进制数据
+ * @param strData 输入字符串（例如"5"代表5×10000微米=50000微米）
+ * @param isBigEndian 是否按大端序输出（设备通信默认大端，小端传false）
+ * @param isMicronDirect 输入字符串是否直接是微米数（true：需÷10000；false：已是10000微米单位，直接用）
+ * @return 4字节的16进制数据（QByteArray），转换失败返回空
+ */
+QByteArray Utils::MicroDisStrTo4BytesHex(const QString& strData, bool isBigEndian /*= true*/, bool isMicronDirect /*= true*/)
+{
+		// 步骤1：校验字符串是否为合法数字
+		bool isOk = false;
+		// 转double兼容小数（比如"5.5"代表55000微米）
+		double micronValue = strData.toDouble(&isOk);
+		if (!isOk) 
+		{
+			//qWarning() << "输入字符串不是合法数字：" << strData;
+			return QByteArray();
+		}
+
+		// 步骤2：单位换算（转为10000微米为单位的数值）
+		double unitValue = isMicronDirect ? (micronValue / 10000.0) : micronValue;
+
+		// 步骤3：转换为32位整数（4字节范围），这里取整（按需调整：四舍五入/向上取整）
+		// 无符号32位：0 ~ 4294967295；
+		// 有符号32位：-2147483648 ~ 2147483647
+		// 若需有符号，用int32_t：int32_t int32Value = static_cast<int32_t>(qRound(unitValue));
+		uint32_t uint32Value = static_cast<uint32_t>(qRound(unitValue)); // 四舍五入取整
+
+		// 步骤4：数值转4字节数组（处理大小端）
+		QByteArray byteData;
+		byteData.resize(4); // 固定4字节
+
+		if (isBigEndian) 
+		{
+			// 大端序（高位在前）：0x12345678 → [0x12, 0x34, 0x56, 0x78]
+			byteData[0] = (uint32Value >> 24) & 0xFF;
+			byteData[1] = (uint32Value >> 16) & 0xFF;
+			byteData[2] = (uint32Value >> 8) & 0xFF;
+			byteData[3] = uint32Value & 0xFF;
+		}
+		else 
+		{
+			// 小端序（低位在前）：0x12345678 → [0x78, 0x56, 0x34, 0x12]
+			byteData[0] = uint32Value & 0xFF;
+			byteData[1] = (uint32Value >> 8) & 0xFF;
+			byteData[2] = (uint32Value >> 16) & 0xFF;
+			byteData[3] = (uint32Value >> 24) & 0xFF;
+		}
+
+		return byteData;
+}
+
+/**
+ * @brief 处理逗号分隔的1~3个微米字符串，转换为拼接后的4/8/12字节QByteArray
+ * @param commaStr 逗号分隔输入字符串（例："50000"、"50000,60000"、"50000,60000,70000"）
+ * @param isBigEndian 是否大端序输出（所有数据字节序一致）
+ * @param isMicronDirect 输入子字符串是否直接是微米数（true：÷10000；false：已是10000微米单位）
+ * @return 拼接后的字节数组（4/8/12字节），转换失败返回空
+ */
+QByteArray Utils::MultiMicroDisStrTo12BytesHex(const QString& commaStr, bool isBigEndian /*= true*/, bool isMicronDirect /*= true*/)
+{
+	QByteArray resultBytes; // 最终拼接结果
+
+	// 步骤1：按逗号分割字符串，并过滤空元素（处理"5,,6"、",5,6"这类无效输入）
+	QStringList micronStrList = commaStr.split(',');
+
+	// 步骤2：校验子字符串数量（1~3个）
+	int strCount = micronStrList.count();
+	if (strCount < 1 || strCount > 3) 
+	{
+		//qWarning() << "无效的子字符串数量，必须1~3个，当前：" << strCount;
+		return QByteArray();
+	}
+
+	// 步骤3：遍历每个子字符串，逐个转换为4字节数组并拼接
+	for (int i = 0; i < strCount; ++i) 
+	{
+		QString subStr = micronStrList.at(i).trimmed(); // 去除前后空格（处理" 50000 , 60000 "）
+		QByteArray single4Bytes = MicroDisStrTo4BytesHex(subStr, isBigEndian, isMicronDirect);
+
+		// 任意一个子字符串转换失败，整体返回空
+		if (single4Bytes.isEmpty()) 
+		{
+			//qWarning() << "第" << (i + 1) << "个子字符串转换失败：" << subStr;
+			return QByteArray();
+		}
+
+		// 拼接当前4字节数组到结果中
+		resultBytes.append(single4Bytes);
+	}
+
+	//步骤4：（可选）若需要强制补全12字节（不足时补0），可启用以下代码
+	while (resultBytes.size() < 12) 
+	{
+	    resultBytes.append(static_cast<char>(0x00)); // 补0填充至12字节
+	}
+	return resultBytes;
+}
+
 const uchar Utils::gabyCRCHi[256] = 
 {
 	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
@@ -113,3 +212,4 @@ const uchar Utils::gabyCRCLo[256] =
 	0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
 	0x40
 };
+

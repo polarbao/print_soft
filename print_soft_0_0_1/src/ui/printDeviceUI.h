@@ -39,6 +39,7 @@ public:
 	enum PrintFun
 	{
 		EPF_Begin = ENF_End + 1,
+		EPF_SetPrinParam,
 		EPF_StartPrint,
 		EPF_StopPrint,
 		EPF_PausePrint,
@@ -91,6 +92,50 @@ public:
 		EAF_End
 	};
 
+	enum EPrintParamType
+	{
+		EPPT_Begin = EAF_End + 1,
+		EPPT_SetStartPos,
+		EPPT_SetStopPos,
+		EPPT_SetStepX,
+		EPPT_SetStepY,
+		EPPT_SetStepZ,
+		EPPT_SetClenaPos,
+		EPPT_SetLimitXPos,
+		EPPT_SetLimitYPos,
+		EPPT_SetLimitZPos,
+		EPPT_SetSpdX,
+		EPPT_SetSpdY,
+		EPPT_SetSpdZ,
+		EPPT_End
+	};
+
+
+	enum EPrintOperFun
+	{
+		EPOF_Begin = EPPT_End + 1,
+		EPOF_StartPrint,
+		EPOF_StopPrint,
+		EPOF_PausePrint,
+		EPOF_ContinuePrint,
+		EPOF_CleanPos,
+		EPOF_GoHomnePos,
+		EPOF_End
+	};
+
+
+	enum EPrintMoveOperFun
+	{
+		EPMOF_Begin = EPOF_End + 1,
+		EPMOF_XAxisLMove,	//L为正方向，R为负方向
+		EPMOF_XAxisRMove,
+		EPMOF_YAxisLMove,
+		EPMOF_YAxisRMove,
+		EPMOF_ZAxisLMove,
+		EPMOF_ZAxisRMove,
+		EPMOF_End
+	};
+
 
 	enum ImgType
 	{
@@ -114,6 +159,9 @@ public:
 
     ~PrintDeviceUI();
 
+	// 数据框显示当前信息
+	void ShowTextMsg(const QString& msg, int idx = 1);
+
 
 private:
 
@@ -123,12 +171,24 @@ private:
 
 	void HandlerMoveDeviceOper(const PrintFun& moveFun);
 
+
+
+
 	 
 public slots:
 	//UI
 	void OnPrintFunClicked(int idx);
 	void OnListenBtnClicked(int idx);
 	void OnAppendShowComm(const QString& msg, const ShowEditType& type, QByteArray arr);
+	
+	//add_UI操作界面处理逻辑
+	void OnShowOperCmd(const QString& msg, QByteArray arr, const ShowEditType& type);
+
+
+	//Btn
+	void OnHandlePrintOperFun(int idx);
+	void OnHandlePrintParamFun(int idx);
+	void OnHandlePrintMoveFun(int idx);
 
 
 	//protocol
@@ -143,6 +203,11 @@ signals:
 	void SigAddShowLog(const QString& logStr);
 	void SigHeartTimeout();
 	void SigShowOperComm(const QString& msg, const ShowEditType& type, QByteArray arr = QByteArray());
+	
+	//add
+	void SigAddShowOperCmd(const QString& msg, QByteArray arr = QByteArray(), const ShowEditType& type = ShowEditType::ESET_OperComm);
+	void SigShowTextMsg(const QString& msg);
+
 
 private:
 	//Data
@@ -155,6 +220,12 @@ private:
 
 	QButtonGroup* m_printBtnGroup;
 	QButtonGroup* m_funBtnGroup;
+
+
+	QButtonGroup* m_printOperBtnGroup;
+	QButtonGroup* m_printParamBtnGroup;
+	QButtonGroup* m_printMoveBtnGroup;
+
 
 	QMutex m_heartMtx;			//心跳互斥锁
 

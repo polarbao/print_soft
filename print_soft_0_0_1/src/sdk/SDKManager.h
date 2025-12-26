@@ -192,6 +192,21 @@ public:
      * @return 0=成功, -1=失败
      */
     int loadImageData(const QString& imagePath);
+
+	// ==================== 打印参数控制（实现在SDKPrintParam.cpp） ====================
+
+
+	int SetPrintStartPos(int operCode, const QByteArray& data = QByteArray());
+
+	int SetPrintEndPos(int operCode, const QByteArray& data = QByteArray());
+
+	int SetPrintCleanPos(int operCode, const QByteArray& data = QByteArray());
+
+	int SetAxisSpd(int operCode, const QByteArray& data = QByteArray());
+
+	int SetAxisUnitStep(int operCode, const QByteArray& data = QByteArray());
+
+
     
     // ==================== 辅助方法 ====================
     

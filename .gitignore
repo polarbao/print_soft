@@ -38,3 +38,4 @@ log
 /print_soft_0_0_1/src/sdk/protocol/ProtocolPrint - 副本.cpp
 /print_soft_0_0_1/src/sdk/protocol/ProtocolPrint - 副本.h
 /print_soft_0_0_1/project/motionControlSDK/x64/Release/qmake/temp
+*.7z

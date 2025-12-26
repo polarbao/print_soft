@@ -55,6 +55,12 @@ public:
 
 	ushort MakeCRCCheck(uchar* data, int datalen);
 
+	// 单个微米数据转换为4字节数据
+	QByteArray MicroDisStrTo4BytesHex(const QString& strData, bool isBigEndian = true, bool isMicronDirect = true);
+
+	// 多个微米数据转换为12字节数据
+	QByteArray MultiMicroDisStrTo12BytesHex(const QString& commaStr, bool isBigEndian = true, bool isMicronDirect = true);
+
 private:
 	/**  crc高字节  **/
 	static const uchar gabyCRCHi[256];

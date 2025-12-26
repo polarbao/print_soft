@@ -305,7 +305,23 @@ public:
 	 */
 	bool MC_StopPrint();
 
+	/**
+	 * @brief 清洗逻辑 add
+	 * @return true=命令发送成功, false=失败
+	 */
+	bool MC_CleanPrint();
 
+	/**
+	 * @brief 参数设置 add
+	 * @return true=命令发送成功, false=失败
+	 */
+	bool MC_SetPrintParam();
+
+	/**
+	 * @brief 停止打印
+	 * @return true=命令发送成功, false=失败
+	 */
+	void MC_SendCmd(int operCmd, const QByteArray& arrData);
 
 public slots:
 	/**
