@@ -13,7 +13,9 @@ typedef enum
 	EVENT_TYPE_ERROR,       // 错误事件
 	EVENT_TYPE_PRINT_STATUS,// 打印状态更新 (如: 进度, 层数)
 	EVENT_TYPE_MOVE_STATUS, // 运动状态更新 (如: "Moving", "Idle")
-	EVENT_TYPE_LOG          // 内部日志事件
+	EVENT_TYPE_LOG,          // 内部日志事件
+	EVENT_TYPE_SEND_MSG,
+	EVENT_TYPE_RECV_MSG
 } SdkEventType;
 
 /**
@@ -380,6 +382,19 @@ signals:
 	 * @param message 日志文本
 	 */
 	void MC_SigLogMsg(const QString& message);
+
+	/**
+	 * @brief 下发至设备的详细命令
+	 * @param message 详细命令
+	 */
+	void MC_SigSend2DevCmdMsg(const QString& message);
+
+	/**
+	 * @brief 设备返回的详细命令
+	 * @param message 详细命令
+	 */
+	void MC_SigRecv2DevCmdMsg(const QString& message);
+
 
 	// ==================== 打印相关信号 ====================
 

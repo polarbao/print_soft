@@ -150,6 +150,8 @@ void SDKManager::sendCommand(int code, const QByteArray& data)
     
     // 发送数据
     m_tcpClient->sendData(packet);
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().constData());
+
 }
 
 //重发数据
@@ -157,6 +159,8 @@ void SDKManager::sendCommand(const QByteArray& data /*= QByteArray()*/)
 {
 	// 重发失败数据
 	m_tcpClient->sendData(data);
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, data.toHex().constData());
+
 }
 
 //fc类型+坐标数据
@@ -226,6 +230,7 @@ void SDKManager::sendCommand(int code, const MoveAxisPos& posData)
 	// 使用协议打包数据
 	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, senddata);
 	m_tcpClient->sendData(packet);
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().constData());
 
 }
 

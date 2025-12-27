@@ -36,65 +36,9 @@ public:
 		ENF_End
 	};
 
-	enum PrintFun
-	{
-		EPF_Begin = ENF_End + 1,
-		EPF_SetPrinParam,
-		EPF_StartPrint,
-		EPF_StopPrint,
-		EPF_PausePrint,
-		EPF_ContinuePrint,
-		EPF_TransData,
-		EPF_ResetPrint,
-		EPF_End
-	};
-
-	enum AxisFun
-	{
-		EAF_Begin = EPF_End + 1,
-		//x
-		EAF_AutoForward,
-		EAF_AutoBack,
-		EAF_Forward1CM,
-		EAF_Back1CM,
-		EAF_Reset,
-		EAF_MovePrintPos,
-
-		//x
-		EAF_XAxisAutoForward,
-		EAF_XAxisAutoBack,
-		EAF_XAxisForward1CM,
-		EAF_XAxisBack1CM,
-		EAF_XAxisReset,
-		EAF_XAxisMovePrintPos,
-		//x
-		EAF_YAxisAutoForward,
-		EAF_YAxisAutoBack,
-		EAF_YAxisForward1CM,
-		EAF_YAxisBack1CM,
-		EAF_YAxisReset,
-		EAF_YAxisMovePrintPos,
-
-		//x
-		EAF_ZAxisAutoForward,
-		EAF_ZAxisAutoBack,
-		EAF_ZAxisForward1CM,
-		EAF_ZAxisBack1CM,
-		EAF_ZAxisReset,
-		EAF_ZAxisMovePrintPos,
-
-		//EAF_YAxisForward,
-		//EAF_ZAxisForward,
-		//EAF_XAxisBack,
-		//EAF_YAxisBack,
-		//EAF_ZAxisBack,
-		//EAF_AxisReset,
-		EAF_End
-	};
-
 	enum EPrintParamType
 	{
-		EPPT_Begin = EAF_End + 1,
+		EPPT_Begin = ENF_End + 1,
 		EPPT_SetStartPos,
 		EPPT_SetStopPos,
 		EPPT_SetStepX,
@@ -137,16 +81,6 @@ public:
 	};
 
 
-	enum ImgType
-	{
-		EIT_JPG = 0x01,		// JPG格式
-		EIT_PNG = 0x02,		// 可扩展其他格式
-		EIT_BMP = 0x03,		// JPG格式
-		EIT_RAW = 0x04,		// 可扩展其他格式
-		EIT_Other = 0x05
-	};
-
-
 	enum ShowEditType
 	{
 		ESET_OperComm = 0x01,		// 操作命令
@@ -159,9 +93,6 @@ public:
 
     ~PrintDeviceUI();
 
-	// 数据框显示当前信息
-	void ShowTextMsg(const QString& msg, int idx = 1);
-
 
 private:
 
@@ -169,17 +100,11 @@ private:
 
 	void InitUI();
 
-	void HandlerMoveDeviceOper(const PrintFun& moveFun);
-
-
-
 
 	 
 public slots:
 	//UI
-	void OnPrintFunClicked(int idx);
 	void OnListenBtnClicked(int idx);
-	void OnAppendShowComm(const QString& msg, const ShowEditType& type, QByteArray arr);
 	
 	//add_UI操作界面处理逻辑
 	void OnShowOperCmd(const QString& msg, QByteArray arr, const ShowEditType& type);
@@ -190,23 +115,15 @@ public slots:
 	void OnHandlePrintParamFun(int idx);
 	void OnHandlePrintMoveFun(int idx);
 
-
-	//protocol
-	void OnProtocolReply(int cmd, uchar errCode, QByteArray arr = QByteArray());
-
 	//heart 
-	void OnRecvHeartTimeout();
 	void OnSendHeartComm();
-	void OnRecvHeartComm();
 
 signals:
 	void SigAddShowLog(const QString& logStr);
-	void SigHeartTimeout();
 	void SigShowOperComm(const QString& msg, const ShowEditType& type, QByteArray arr = QByteArray());
 	
 	//add
-	void SigAddShowOperCmd(const QString& msg, QByteArray arr = QByteArray(), const ShowEditType& type = ShowEditType::ESET_OperComm);
-	void SigShowTextMsg(const QString& msg);
+	void SigAddShowOperCmd(const QString& msg, QByteArray arr = QByteArray(), const ShowEditType& type = ShowEditType::ESET_Sendomm);
 
 
 private:
@@ -218,8 +135,7 @@ private:
 	//QTimer m_heartOutTimer;		//超时
 	//int m_heartOutCnt;			//心跳超时计数
 
-	QButtonGroup* m_printBtnGroup;
-	QButtonGroup* m_funBtnGroup;
+	QButtonGroup* m_netBtnGroup;
 
 
 	QButtonGroup* m_printOperBtnGroup;

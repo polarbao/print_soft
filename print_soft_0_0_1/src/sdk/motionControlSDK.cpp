@@ -659,7 +659,16 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 			// qDebug() << "SDK Log:" << message;  // 可选：打印到调试输出
 			break;
 		}
-
+		case EVENT_TYPE_SEND_MSG:
+		{
+			emit s_instance->MC_SigSend2DevCmdMsg(message);
+			break;
+		}
+		case EVENT_TYPE_RECV_MSG:
+		{
+			emit s_instance->MC_SigRecv2DevCmdMsg(message);
+			break;
+		}
 		default: 
 		{
 			qWarning() << "Unknown event type:" << type;
