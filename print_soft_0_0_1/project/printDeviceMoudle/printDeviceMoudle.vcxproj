@@ -99,6 +99,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(QTDIR);$(SolutionDir)..\src\;$(SolutionDir)..\src\ui\;$(SolutionDir)..\src\comm\;$(SolutionDir)..\src\service\;$(SolutionDir)..\src\protocol\;$(SolutionDir)..\src\communicate\;$(SolutionDir)..\ext\inc\;$(SolutionDir)..\src\sdk\;$(SolutionDir)..\src\sdk\protocol\;$(SolutionDir)..\ext\inc\spdlog;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
