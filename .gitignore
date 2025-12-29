@@ -40,3 +40,4 @@ log
 /print_soft_0_0_1/project/motionControlSDK/x64/Release/qmake/temp
 *.7z
 /print_soft_0_0_1/src - 副本
+*.py
