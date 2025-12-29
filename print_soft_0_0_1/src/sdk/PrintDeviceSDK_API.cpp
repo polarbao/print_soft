@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file PrintDeviceSDK_API.cpp
  * @brief SDK C语言接口实现
  * @details 提供标准C接口，包装内部的C++ SDKManager类

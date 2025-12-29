@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <QtCore/QtCore>
 #include <QtNetwork/QtNetwork>
 
@@ -7,7 +7,7 @@ class TcpClientImpl;
 /** 
 *  @author      
 *  @class       TcpClient 
-*  @brief       tcp¿Í»§¶Ë²Ù×÷Àà 
+*  @brief       tcpå®¢æˆ·ç«¯æ“ä½œç±» 
 */
 class TcpClient : public QObject
 {
@@ -18,7 +18,7 @@ public:
 	~TcpClient();
 
 	/** 
-	*  @brief       ÉèÖÃipºÍ¶Ë¿Ú 
+	*  @brief       è®¾ç½®ipå’Œç«¯å£ 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -26,7 +26,7 @@ public:
 	void setIpAndPort(QString strIp, ushort port);
 
 	/** 
-	*  @brief       Á¬½Óµ½·şÎñÆ÷ 
+	*  @brief       è¿æ¥åˆ°æœåŠ¡å™¨ 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -34,7 +34,7 @@ public:
 	void connectToHost();
 
 	/** 
-	*  @brief       ¶Ï¿ªÁ¬½Ó 
+	*  @brief       æ–­å¼€è¿æ¥ 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -42,7 +42,7 @@ public:
 	void disconnectFromHost();
 
 	/** 
-	*  @brief       Á¬½Ó×´Ì¬ 
+	*  @brief       è¿æ¥çŠ¶æ€ 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -50,7 +50,7 @@ public:
 	bool isConnected();
 
 	/** 
-	*  @brief       ·¢ËÍÊı¾İ 
+	*  @brief       å‘é€æ•°æ® 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -59,13 +59,13 @@ public:
 
 
 signals:
-	//ĞÂµÄÊı¾İµ½À´ĞÅºÅ
+	//æ–°çš„æ•°æ®åˆ°æ¥ä¿¡å·
 	void sigNewData(QByteArray msg);
 
-	//´íÎóĞÅºÅ
+	//é”™è¯¯ä¿¡å·
 	void sigError(QAbstractSocket::SocketError socketError);
 
-	//Á¬½ÓĞÅºÅ±ä»¯
+	//è¿æ¥ä¿¡å·å˜åŒ–
 	void sigSocketStateChanged(QAbstractSocket::SocketState state);
 
 private:
@@ -77,7 +77,7 @@ private:
 /** 
 *  @author      
 *  @class       TcpClientImpl 
-*  @brief       Tcp¿Í»§¶ËÊµÏÖÀà 
+*  @brief       Tcpå®¢æˆ·ç«¯å®ç°ç±» 
 */
 class TcpClientImpl : public QObject
 {

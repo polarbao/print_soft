@@ -1,4 +1,4 @@
-#include "printDeviceMoudle.h"
+﻿#include "printDeviceMoudle.h"
 #include <QPushButton>
 #include <QSplitter>
 #include <qapplication.h>

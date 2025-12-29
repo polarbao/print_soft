@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKConnection.cpp
  * @brief 连接管理实现
  * @details 处理TCP连接、断开、状态查询等功能

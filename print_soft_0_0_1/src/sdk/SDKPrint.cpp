@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKPrint.cpp
  * @brief 打印控制实现
  * @details 处理打印相关功能：开始、停止、暂停、恢复、图像加载等

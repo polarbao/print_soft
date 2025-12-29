@@ -1,4 +1,4 @@
-#include "SerialPortData.h"
+ï»¿#include "SerialPortData.h"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QApplication>
 #include <QDir>
@@ -52,13 +52,13 @@ bool SerialPortData::openStatus()
 
 void SerialPortData::openSerialPort()
 {
-	//×èÈûµÈ´ý½á¹û
+	//é˜»å¡žç­‰å¾…ç»“æžœ
 	/*bool ret = false;
 	QMetaObject::invokeMethod(m_impl, "onOpen", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, ret), Q_ARG(QString, m_serialPortName),
 		Q_ARG(QSerialPort::BaudRate, m_eBaudRate),Q_ARG(QSerialPort::DataBits, m_eDataBit),Q_ARG(QSerialPort::Parity, m_eParityBit),
 		Q_ARG(QSerialPort::StopBits, m_eStopBit), Q_ARG(QSerialPort::FlowControl, m_eFlowControl) );*/
 
-	//·Ç×èÈû²»ÓÃµÈ´ý½á¹û
+	//éžé˜»å¡žä¸ç”¨ç­‰å¾…ç»“æžœ
 	QMetaObject::invokeMethod(m_impl, [=]() {
 		m_impl->onOpen(m_serialPortName, m_eBaudRate, m_eDataBit, m_eParityBit, m_eStopBit, m_eFlowControl);
 	}, Qt::QueuedConnection);
@@ -173,12 +173,12 @@ bool SerialPortImpl::onOpen(QString serialPortName, QSerialPort::BaudRate baudra
 		m_pSerialPort->close();
 	}
 
-	m_pSerialPort->setPortName(serialPortName);   // ´®¿ÚºÅ
-	m_pSerialPort->setBaudRate(baudrate);        // ²¨ÌØÂÊ
-	m_pSerialPort->setDataBits(databit);         // Êý¾ÝÎ»
-	m_pSerialPort->setParity(parity);         // ÆæÅ¼Ð£ÑéÎ»
-	m_pSerialPort->setStopBits(stopBit);         // Í£Ö¹Î»
-	m_pSerialPort->setFlowControl(flowControl);  // Á÷¿ØÖÆ
+	m_pSerialPort->setPortName(serialPortName);   // ä¸²å£å·
+	m_pSerialPort->setBaudRate(baudrate);        // æ³¢ç‰¹çŽ‡
+	m_pSerialPort->setDataBits(databit);         // æ•°æ®ä½
+	m_pSerialPort->setParity(parity);         // å¥‡å¶æ ¡éªŒä½
+	m_pSerialPort->setStopBits(stopBit);         // åœæ­¢ä½
+	m_pSerialPort->setFlowControl(flowControl);  // æµæŽ§åˆ¶
 
 	bool bRtn = m_pSerialPort->open(QIODevice::ReadWrite);
 	if (false == bRtn)

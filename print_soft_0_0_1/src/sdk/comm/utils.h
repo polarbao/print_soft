@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <atomic>
 #include <iostream>
@@ -33,22 +33,22 @@ public:
 
 	~Utils();
 	
-	// ½«ÊäÈëÎÄ±¾×ª»»ÎªQByteArray(Ô­Ê¼×Ö½Ú)
+	// å°†è¾“å…¥æ–‡æœ¬è½¬æ¢ä¸ºQByteArray(åŸå§‹å­—èŠ‚)
 	QByteArray Text2ByteArr(const QString& text);
 
-	// ½«QByteArray×ª»»Îª16½øÖÆ×Ö·û´®(ÓÃÓÚÏÔÊ¾)
+	// å°†QByteArrayè½¬æ¢ä¸º16è¿›åˆ¶å­—ç¬¦ä¸²(ç”¨äºæ˜¾ç¤º)
 	QString ByteArr2HexText(const QByteArray& arr);
 	
-	// ½«16½øÖÆ×Ö·û´®×ª»»»ØQByteArray
+	// å°†16è¿›åˆ¶å­—ç¬¦ä¸²è½¬æ¢å›QByteArray
 	QByteArray HexText2ByteArr(const QString& text);
 
-	// Ö±½Ó½«ÎÄ±¾×ª»»Îª16½øÖÆ±íÊ¾µÄQByteArray
+	// ç›´æ¥å°†æ–‡æœ¬è½¬æ¢ä¸º16è¿›åˆ¶è¡¨ç¤ºçš„QByteArray
 	QByteArray Text2HexByteArr(const QString& text);
 
 
 	bool readAndConvertImage(const QString &filePath, QByteArray &hexData, quint16 &w, quint16 &h);
 
-	// ×é×°Ğ­Òé±¨ÎÄ
+	// ç»„è£…åè®®æŠ¥æ–‡
 	QList<QByteArray> assemblePackets(quint16 width, quint16 height, quint8 imageType, const QByteArray &hexData);
 
 	bool CheckCRC(uchar* data, int datalen);
@@ -56,9 +56,9 @@ public:
 	ushort MakeCRCCheck(uchar* data, int datalen);
 
 private:
-	/**  crc¸ß×Ö½Ú  **/
+	/**  crcé«˜å­—èŠ‚  **/
 	static const uchar gabyCRCHi[256];
-	/**  crcµÍ×Ö½Ú  **/
+	/**  crcä½å­—èŠ‚  **/
 	static const uchar gabyCRCLo[256];
 
 

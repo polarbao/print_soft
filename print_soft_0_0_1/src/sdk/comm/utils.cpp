@@ -1,7 +1,7 @@
-#include "utils.h"
-//»ñÈ¡shortÀàĞÍµÄ¸ß×Ö½Ú
+ï»¿#include "utils.h"
+//è·å–shortç±»å‹çš„é«˜å­—èŠ‚
 #define HI_OF_SHORT(X) (X >> 8)
-//»ñÈ¡shortÀàĞÍµÄµÍ×Ö½Ú
+//è·å–shortç±»å‹çš„ä½å­—èŠ‚
 #define LO_OF_SHORT(X) (X & 0xFF)
 
 Utils::Utils()
@@ -41,7 +41,7 @@ bool Utils::CheckCRC(uchar* data, int datalen)
 	ushort crc = MakeCRCCheck(data, datalen - 2);
 	uchar lo = LO_OF_SHORT(crc);
 	uchar hi = HI_OF_SHORT(crc);
-	//°üÖĞÊı¾İcrcÒ²ÊÇÏÈ¸ß×Ö½Ú£¬ÔÙµÍ×Ö½Ú
+	//åŒ…ä¸­æ•°æ®crcä¹Ÿæ˜¯å…ˆé«˜å­—èŠ‚ï¼Œå†ä½å­—èŠ‚
 	if (hi == data[datalen - 2] && lo == data[datalen - 1])
 	{
 		return true;

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "motioncontrolsdk_global.h"
 #define DATA_LEN_12 12

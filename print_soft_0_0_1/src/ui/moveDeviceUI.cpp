@@ -1,4 +1,4 @@
-#include "moveDeviceUI.h"
+Ôªø#include "moveDeviceUI.h"
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -76,20 +76,20 @@ void MoveDeviceUI::InitUI()
 			pv_combox->addLayout(pv_title);
 		};
 		
-		//≤È∂Àø⁄
+		//Êü•Á´ØÂè£
 		QStringList list;
 		for (auto& it : QSerialPortInfo::availablePorts())
 		{
 			list.append(it.portName());
 		}
 
-		addCombox(QString::fromLocal8Bit("∂À ø⁄"), list);
-		addCombox(QString::fromLocal8Bit("≤®Ãÿ¬ "), { "2400", "4800", "9600" ,"19200" ,"38400" ,"57600", "115200" });
-		addCombox(QString::fromLocal8Bit(" ˝æ›Œª"), { "5", "6" ,"7", "8" });
-		addCombox(QString::fromLocal8Bit("Õ£÷πŒª"), { "1", "1.5" ,"2" });
-		addCombox(QString::fromLocal8Bit("–£—ÈŒª"), { "none", "odd" ,"even" });
+		addCombox(QString::fromLocal8Bit("Á´Ø Âè£"), list);
+		addCombox(QString::fromLocal8Bit("Ê≥¢ÁâπÁéá"), { "2400", "4800", "9600" ,"19200" ,"38400" ,"57600", "115200" });
+		addCombox(QString::fromLocal8Bit("Êï∞ÊçÆ‰Ωç"), { "5", "6" ,"7", "8" });
+		addCombox(QString::fromLocal8Bit("ÂÅúÊ≠¢‰Ωç"), { "1", "1.5" ,"2" });
+		addCombox(QString::fromLocal8Bit("Ê†°È™å‰Ωç"), { "none", "odd" ,"even" });
 
-		pv_param->addWidget(new QLabel(QString::fromLocal8Bit("¥Æø⁄≤Œ ˝…Ë÷√")), 0, 1);
+		pv_param->addWidget(new QLabel(QString::fromLocal8Bit("‰∏≤Âè£ÂèÇÊï∞ËÆæÁΩÆ")), 0, 1);
 		pv_param->addLayout(pv_combox,1, 1);
 	}
 ;
@@ -100,8 +100,8 @@ void MoveDeviceUI::InitUI()
 
 	QHBoxLayout* ph_comm = new QHBoxLayout(this);
 	{
-		m_inputComm.setPlaceholderText(QString::fromLocal8Bit("«Î ‰»Î∑¢ÀÕ÷∏¡Ó"));
-		QPushButton* sendBtn = new QPushButton(QString::fromLocal8Bit("∑¢ÀÕ"));
+		m_inputComm.setPlaceholderText(QString::fromLocal8Bit("ËØ∑ËæìÂÖ•ÂèëÈÄÅÊåá‰ª§"));
+		QPushButton* sendBtn = new QPushButton(QString::fromLocal8Bit("ÂèëÈÄÅ"));
 		connect(sendBtn, &QPushButton::clicked, this, [&](bool bClicked)
 		{
 			auto serialStr = m_inputComm.text();
@@ -119,16 +119,16 @@ void MoveDeviceUI::InitUI()
 	QHBoxLayout* ph_showOper = new QHBoxLayout(this);
 	{
 		m_logShow.setReadOnly(true);
-		QPushButton* clearBtn = new QPushButton(QString::fromLocal8Bit("«Âø’"));
+		QPushButton* clearBtn = new QPushButton(QString::fromLocal8Bit("Ê∏ÖÁ©∫"));
 
 		connect(clearBtn, &QPushButton::clicked, this, [&](bool bClicked) 
 		{
 			m_logShow.clear();
 			m_logShow.append(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-			m_logShow.append(QString::fromLocal8Bit("ÕÍ≥…«Â¿Ì»’÷æ≤Ÿ◊˜"));
+			m_logShow.append(QString::fromLocal8Bit("ÂÆåÊàêÊ∏ÖÁêÜÊó•ÂøóÊìç‰Ωú"));
 		});
 
-		m_inputComm.setPlaceholderText(QString::fromLocal8Bit("«Î ‰»Î∑¢ÀÕ÷∏¡Ó"));
+		m_inputComm.setPlaceholderText(QString::fromLocal8Bit("ËØ∑ËæìÂÖ•ÂèëÈÄÅÊåá‰ª§"));
 
 		ph_showOper->setContentsMargins(0, 0, 0, 0);
 		ph_showOper->setSpacing(15);
@@ -138,7 +138,7 @@ void MoveDeviceUI::InitUI()
 	}
 
 	
-	pv->addWidget(new QLabel(QString::fromLocal8Bit("¥Ú”°ª˙øÿ÷∆ƒ£øÈ")));
+	pv->addWidget(new QLabel(QString::fromLocal8Bit("ÊâìÂç∞Êú∫ÊéßÂà∂Ê®°Âùó")));
 	pv->addLayout(pv_param, 2);
 	pv->addLayout(ph_btn, 3);
 	pv->addLayout(ph_comm, 2);
@@ -217,7 +217,7 @@ void MoveDeviceUI::OnBtnClicked(int id)
 {
 	auto btnType = static_cast<EUI::EMUIBT>(id);
 	auto x = ELogic::EDMDT_Begin;
-	QString logStr(QString::fromLocal8Bit("µ±«∞≤Ÿ◊˜£∫"));
+	QString logStr(QString::fromLocal8Bit("ÂΩìÂâçÊìç‰ΩúÔºö"));
 	switch (btnType)
 	{
 		case EUI::EMUIBT_XAxisForward:
@@ -258,7 +258,7 @@ void MoveDeviceUI::OnBtnToggled(int id, bool bToggle)
 	case EUI::EMUIBT_XAxisForward:
 	case EUI::EMUIBT_XAxisBackward:
 	{
-		//¬ﬂº≠¥¶¿Ì
+		//ÈÄªËæëÂ§ÑÁêÜ
 		
 		break;
 	}
@@ -285,7 +285,7 @@ void MoveDeviceUI::OnBtnToggled(int id, bool bToggle)
 void MoveDeviceUI::OnAddOperLog(const QString& logStr)
 {
 	m_logShow.append("\n");
-	//ÃÌº” ±º‰
+	//Ê∑ªÂä†Êó∂Èó¥
 	m_logShow.append(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 	m_logShow.append(logStr);
 }

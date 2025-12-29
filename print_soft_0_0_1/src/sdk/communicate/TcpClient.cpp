@@ -1,4 +1,4 @@
-#include "TcpClient.h"
+﻿#include "TcpClient.h"
 
 TcpClient::TcpClient(QObject* parent /*= 0*/)
 	:QObject(parent)

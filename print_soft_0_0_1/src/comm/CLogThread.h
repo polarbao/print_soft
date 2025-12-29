@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <QtCore/QThread>
 
@@ -7,7 +7,7 @@ class CLogThread;
 /** 
 *  @author      
 *  @class       CLogThreadCallBack 
-*  @brief       ÈÕÖ¾Ïß³Ì»Øµ÷Àà
+*  @brief       æ—¥å¿—çº¿ç¨‹å›žè°ƒç±»
 */
 class CLogThreadCallBack
 {
@@ -16,7 +16,7 @@ public:
     virtual ~CLogThreadCallBack() { };
 
 	/** 
-	*  @brief       ¶àÏß³ÌÈÕÖ¾Ö´ÐÐº¯Êý 
+	*  @brief       å¤šçº¿ç¨‹æ—¥å¿—æ‰§è¡Œå‡½æ•° 
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -27,7 +27,7 @@ public:
 /** 
 *  @author      
 *  @class       CLogThread 
-*  @brief       ¶àÏß³ÌÈÕÖ¾Àà
+*  @brief       å¤šçº¿ç¨‹æ—¥å¿—ç±»
 */
 class CLogThread : public QThread
 {

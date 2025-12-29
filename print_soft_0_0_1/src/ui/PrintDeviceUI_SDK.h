@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file PrintDeviceUI_SDK.h
  * @brief 使用PrintDeviceSDK的打印设备UI类
  * @details 这是原PrintDeviceUI的SDK版本，使用封装的SDK库而不是直接使用TcpClient

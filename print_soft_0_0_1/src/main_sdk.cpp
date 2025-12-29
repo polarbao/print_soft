@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file main_sdk.cpp
  * @brief 使用PrintDeviceSDK的主程序
  * @details 演示如何在Qt Widget应用程序中使用PrintDeviceSDK

@@ -1,4 +1,4 @@
-<UI version="4.0" >
+﻿<UI version="4.0" >
  <class>printDeviceMoudleClass</class>
  <widget class="QMainWindow" name="printDeviceMoudleClass" >
   <property name="objectName" >

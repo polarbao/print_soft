@@ -1,17 +1,17 @@
-#pragma once
+ï»¿#pragma once
 
 template <typename T>
 class CSingleton 
 {
 public:
-	// »ñÈ¡µ¥ÀıÊµÀı£¨Ïß³Ì°²È«£©
+	// è·å–å•ä¾‹å®ä¾‹ï¼ˆçº¿ç¨‹å®‰å…¨ï¼‰
 	static T& GetInstance() 
 	{
 		static T instance;
 		return instance;
 	}
 
-	// ½ûÓÃ¿½±´¹¹ÔìºÍ¸³Öµ²Ù×÷
+	// ç¦ç”¨æ‹·è´æ„é€ å’Œèµ‹å€¼æ“ä½œ
 	/** 
 	*  @brief       brief 
 	*  @param[in]    
@@ -29,7 +29,7 @@ public:
 	CSingleton& operator=(const CSingleton&) = delete;
 
 protected:
-	// ±£»¤¹¹Ôìº¯Êı£¬·ÀÖ¹Íâ²¿ÊµÀı»¯
+	// ä¿æŠ¤æ„é€ å‡½æ•°ï¼Œé˜²æ­¢å¤–éƒ¨å®ä¾‹åŒ–
 	/**
 	*  @brief       brief
 	*  @param[in]

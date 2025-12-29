@@ -1,4 +1,4 @@
-#include "printDeviceUI.h"
+ï»¿#include "printDeviceUI.h"
 #include <QPushButton>
 #include "global.h"
 #include "utils.h"
@@ -34,29 +34,29 @@ void PrintDeviceUI::Init()
 
 	connect(m_motionSDK, &motionControlSDK::connected, this, [this]()
 	{
-		m_connStateLab->setText(QString::fromLocal8Bit("Á¬½Ó³É¹¦"));
+		m_connStateLab->setText(QString::fromLocal8Bit("è¿æ¥æˆåŠŸ"));
 
-		emit SigAddShowOperCmd(QString::fromLocal8Bit("Á¬½Ó³É¹¦"), "", ShowEditType::ESET_RecvComm);
+		emit SigAddShowOperCmd(QString::fromLocal8Bit("è¿æ¥æˆåŠŸ"), "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString(u8"motion_SDK_moudle, Á´½Ó³É¹¦"));
+		LOG_INFO(QString(u8"motion_SDK_moudle, é“¾æ¥æˆåŠŸ"));
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigDisconnected, this, [this]()
 	{
-		m_connStateLab->setText(QString::fromLocal8Bit("¶Ï¿ªÁ¬½Ó"));
+		m_connStateLab->setText(QString::fromLocal8Bit("æ–­å¼€è¿æ¥"));
 
-		emit SigAddShowOperCmd(QString::fromLocal8Bit("¶Ï¿ªÁ¬½Ó"), "", ShowEditType::ESET_RecvComm);
+		emit SigAddShowOperCmd(QString::fromLocal8Bit("æ–­å¼€è¿æ¥"), "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString(u8"motion_SDK_moudle, ¶Ï¿ª³É¹¦"));
+		LOG_INFO(QString(u8"motion_SDK_moudle, æ–­å¼€æˆåŠŸ"));
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigConnectedChanged, this, [this](bool bConn)
 	{
-		auto logInfo = QString(u8"motion_SDK_moudle, Á´½Ó×´Ì¬%1").arg(bConn);
+		auto logInfo = QString(u8"motion_SDK_moudle, é“¾æ¥çŠ¶æ€%1").arg(bConn);
 
 		emit SigAddShowOperCmd(logInfo, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString(u8"motion_SDK_moudle, Á´½Ó×´Ì¬%1").arg(bConn));
+		LOG_INFO(QString(u8"motion_SDK_moudle, é“¾æ¥çŠ¶æ€%1").arg(bConn));
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigPrintProgUpdated, [this]()
@@ -66,15 +66,15 @@ void PrintDeviceUI::Init()
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigErrOccurred, this, [this](int ec, const QString& emsg)
 	{
-		QString logStr = QString(u8"motion_SDK_moudle, µ±Ç°´íÎócode: %1, µ±Ç°´íÎómsg: %2").arg(ec).arg(emsg);
+		QString logStr = QString(u8"motion_SDK_moudle, å½“å‰é”™è¯¯code: %1, å½“å‰é”™è¯¯msg: %2").arg(ec).arg(emsg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString(u8"motion_SDK_µ±Ç°´íÎócode:%1, µ±Ç°´íÎómsg: %2").arg(ec).arg(emsg));
+		LOG_INFO(QString(u8"motion_SDK_å½“å‰é”™è¯¯code:%1, å½“å‰é”™è¯¯msg: %2").arg(ec).arg(emsg));
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigInfoMsg, this, [this](const QString& emsg)
 	{
-		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, µ±Ç°msg: %1").arg(emsg);
+		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, å½“å‰msg: %1").arg(emsg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
 		LOG_INFO(logStr);
@@ -82,7 +82,7 @@ void PrintDeviceUI::Init()
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigLogMsg, this, [this](const QString& msg)
 	{
-		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, µ±Ç°´òÓ¡ÈÕÖ¾msg: %1").arg(msg);
+		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, å½“å‰æ‰“å°æ—¥å¿—msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
 		LOG_INFO(logStr);
@@ -91,7 +91,7 @@ void PrintDeviceUI::Init()
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigSend2DevCmdMsg, this, [this](const QString& msg)
 	{
-		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, ÏÂ·¢Éè±¸msg: %1").arg(msg);
+		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, ä¸‹å‘è®¾å¤‡msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_Sendomm);
 
 		LOG_INFO(logStr);
@@ -99,7 +99,7 @@ void PrintDeviceUI::Init()
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigRecv2DevCmdMsg, this, [this](const QString& msg)
 	{
-		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, ½ÓÊÕÉè±¸msg: %1").arg(msg);
+		QString logStr = QString::fromLocal8Bit("motion_SDK_moudle, æ¥æ”¶è®¾å¤‡msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
 		LOG_INFO(logStr);
@@ -125,17 +125,17 @@ void PrintDeviceUI::Init()
 
 void PrintDeviceUI::InitUI()
 {
-	setWindowTitle(QStringLiteral("´òÓ¡»úÄ£¿éÉèÖÃ"));
+	setWindowTitle(QStringLiteral("æ‰“å°æœºæ¨¡å—è®¾ç½®"));
 
-	QGroupBox* box1 = new QGroupBox(QStringLiteral("ÍøÂçÍ¨ĞÅÉèÖÃ"));
+	QGroupBox* box1 = new QGroupBox(QStringLiteral("ç½‘ç»œé€šä¿¡è®¾ç½®"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box1->setLayout(layout);
 
 		QLabel* ipLab = new QLabel(u8"IP");
 		QLabel* portLab = new QLabel(u8"Port");
-		QLabel* stateLab = new QLabel(u8"Á¬½Ó×´Ì¬");
-		m_connStateLab = new QLabel(u8"Î´Á´½Ó");
+		QLabel* stateLab = new QLabel(u8"è¿æ¥çŠ¶æ€");
+		m_connStateLab = new QLabel(u8"æœªé“¾æ¥");
 
 		m_ipLine = new QLineEdit();
 		//m_ipLine->setText("192.168.100.175");
@@ -147,9 +147,9 @@ void PrintDeviceUI::InitUI()
 
 
 
-		QPushButton* connBtn = new QPushButton(QStringLiteral("¿ªÊ¼Á¬½Ó"));
-		QPushButton* disConnBtn = new QPushButton(QStringLiteral("¶Ï¿ªÁ¬½Ó"));
-		QPushButton* clearBtn = new QPushButton(QStringLiteral("ÃüÁîÇå³ı"));
+		QPushButton* connBtn = new QPushButton(QStringLiteral("å¼€å§‹è¿æ¥"));
+		QPushButton* disConnBtn = new QPushButton(QStringLiteral("æ–­å¼€è¿æ¥"));
+		QPushButton* clearBtn = new QPushButton(QStringLiteral("å‘½ä»¤æ¸…é™¤"));
 		m_netBtnGroup->addButton(connBtn, ENF_StartConn);
 		m_netBtnGroup->addButton(disConnBtn, ENF_DisConn);
 		m_netBtnGroup->addButton(clearBtn, ENF_DisConn);
@@ -167,7 +167,7 @@ void PrintDeviceUI::InitUI()
 	}
 
 
-	QGroupBox* box2 = new QGroupBox(QStringLiteral("´òÓ¡¹¦ÄÜ²Ù×÷"));
+	QGroupBox* box2 = new QGroupBox(QStringLiteral("æ‰“å°åŠŸèƒ½æ“ä½œ"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box2->setLayout(layout);
@@ -179,12 +179,12 @@ void PrintDeviceUI::InitUI()
 			layout->addWidget(btn, row, col, 1, 1);
 		};
 
-		addBtn(u8"¿ªÊ¼´òÓ¡", EPOF_StartPrint, 0, 0);
-		addBtn(u8"Í£Ö¹´òÓ¡", EPOF_StopPrint, 0, 1);
-		addBtn(u8"ÔİÍ£´òÓ¡", EPOF_PausePrint, 0, 3);
-		addBtn(u8"¼ÌĞø´òÓ¡", EPOF_ContinuePrint, 0, 4);
-		addBtn(u8"ÇåÏ´Î»ÖÃ", EPOF_CleanPos, 0, 5);
-		addBtn(u8"È«Öá¸´Î»", EPOF_GoHomnePos, 0, 6);
+		addBtn(u8"å¼€å§‹æ‰“å°", EPOF_StartPrint, 0, 0);
+		addBtn(u8"åœæ­¢æ‰“å°", EPOF_StopPrint, 0, 1);
+		addBtn(u8"æš‚åœæ‰“å°", EPOF_PausePrint, 0, 3);
+		addBtn(u8"ç»§ç»­æ‰“å°", EPOF_ContinuePrint, 0, 4);
+		addBtn(u8"æ¸…æ´—ä½ç½®", EPOF_CleanPos, 0, 5);
+		addBtn(u8"å…¨è½´å¤ä½", EPOF_GoHomnePos, 0, 6);
 
 
 
@@ -198,7 +198,7 @@ void PrintDeviceUI::InitUI()
 	}
 
 
-	QGroupBox* box21 = new QGroupBox(QStringLiteral("´òÓ¡²ÎÊıÉèÖÃ"));
+	QGroupBox* box21 = new QGroupBox(QStringLiteral("æ‰“å°å‚æ•°è®¾ç½®"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box21->setLayout(layout);
@@ -207,18 +207,18 @@ void PrintDeviceUI::InitUI()
 		{
 			QLabel* titleLab = new QLabel(text);
 			QLineEdit* dataLine = new QLineEdit();
-			QPushButton* btn = new QPushButton(u8"¸üĞÂ");
+			QPushButton* btn = new QPushButton(u8"æ›´æ–°");
 			
 			titleLab->setMaximumWidth(60);
 			dataLine->setMinimumWidth(80);
-			dataLine->setPlaceholderText(u8"ÇëÊäÈëÊı¾İ");
+			dataLine->setPlaceholderText(u8"è¯·è¾“å…¥æ•°æ®");
 			dataLine->setObjectName(objText);
 			btn->setMaximumWidth(40);
 
 
 #ifdef TurnOffHeartBeat			
 
-			//ÉèÖÃ°´Å¥²»¿É´¥·¢
+			//è®¾ç½®æŒ‰é’®ä¸å¯è§¦å‘
 			//xBtn->setEnabled(false);
 			//yBtn->setEnabled(false);
 			//zBtn->setEnabled(false);
@@ -231,26 +231,26 @@ void PrintDeviceUI::InitUI()
 			layout->addWidget(btn, row, col + 2, 1, 1);
 		};
 
-		addUI(u8"´òÓ¡Æğµã", "EPPT_SetStartPos", EPPT_SetStartPos, 0, 0);
-		addUI(u8"´òÓ¡ÖÕµã", "EPPT_SetStopPos", EPPT_SetStopPos, 0, 3);
-		addUI(u8"ÇåÏ´Î»ÖÃ", "EPPT_SetClenaPos", EPPT_SetClenaPos, 0, 6);
+		addUI(u8"æ‰“å°èµ·ç‚¹", "EPPT_SetStartPos", EPPT_SetStartPos, 0, 0);
+		addUI(u8"æ‰“å°ç»ˆç‚¹", "EPPT_SetStopPos", EPPT_SetStopPos, 0, 3);
+		addUI(u8"æ¸…æ´—ä½ç½®", "EPPT_SetClenaPos", EPPT_SetClenaPos, 0, 6);
 
-		addUI(u8"XÖá²½½ø", "EPPT_SetStepX", EPPT_SetStepX, 1, 0);
-		addUI(u8"YÖá²½½ø", "EPPT_SetStepY", EPPT_SetStepY, 1, 3);
-		addUI(u8"ZÖá²½½ø", "EPPT_SetStepZ",EPPT_SetStepZ, 1, 6);
+		addUI(u8"Xè½´æ­¥è¿›", "EPPT_SetStepX", EPPT_SetStepX, 1, 0);
+		addUI(u8"Yè½´æ­¥è¿›", "EPPT_SetStepY", EPPT_SetStepY, 1, 3);
+		addUI(u8"Zè½´æ­¥è¿›", "EPPT_SetStepZ",EPPT_SetStepZ, 1, 6);
 
-		addUI(u8"ZÖáÏŞÎ»", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 6);
-		addUI(u8"XÖáÏŞÎ»", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 0);
-		addUI(u8"YÖáÏŞÎ»", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 3);
+		addUI(u8"Zè½´é™ä½", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 6);
+		addUI(u8"Xè½´é™ä½", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 0);
+		addUI(u8"Yè½´é™ä½", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 3);
 		
-		addUI(u8"XÖáËÙ¶È", "EPPT_SetSpdX", EPPT_SetSpdX, 3, 0);
-		addUI(u8"YÖáËÙ¶È", "EPPT_SetSpdY", EPPT_SetSpdY, 3, 3);
-		addUI(u8"ZÖáËÙ¶È", "EPPT_SetSpdZ", EPPT_SetSpdZ, 3, 6);
+		addUI(u8"Xè½´é€Ÿåº¦", "EPPT_SetSpdX", EPPT_SetSpdX, 3, 0);
+		addUI(u8"Yè½´é€Ÿåº¦", "EPPT_SetSpdY", EPPT_SetSpdY, 3, 3);
+		addUI(u8"Zè½´é€Ÿåº¦", "EPPT_SetSpdZ", EPPT_SetSpdZ, 3, 6);
 
 	}
 
 
-	QGroupBox* box31 = new QGroupBox(QStringLiteral("´òÓ¡ÒÆ¶¯²Ù×÷"));
+	QGroupBox* box31 = new QGroupBox(QStringLiteral("æ‰“å°ç§»åŠ¨æ“ä½œ"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box31->setLayout(layout);
@@ -259,12 +259,12 @@ void PrintDeviceUI::InitUI()
 		{
 			QLabel* titleLab = new QLabel(text);
 			QLineEdit* dataLine = new QLineEdit();
-			QPushButton* lBtn = new QPushButton(u8"×óÒÆ");
-			QPushButton* rBtn = new QPushButton(u8"ÓÒÒÆ");
+			QPushButton* lBtn = new QPushButton(u8"å·¦ç§»");
+			QPushButton* rBtn = new QPushButton(u8"å³ç§»");
 			titleLab->setMaximumWidth(60);
 			dataLine->setObjectName(objText);
 			dataLine->setMinimumWidth(100);
-			dataLine->setPlaceholderText(u8"ÇëÊäÈëÊı¾İ");
+			dataLine->setPlaceholderText(u8"è¯·è¾“å…¥æ•°æ®");
 			lBtn->setMaximumWidth(50);
 			rBtn->setMaximumWidth(50);
 
@@ -277,14 +277,14 @@ void PrintDeviceUI::InitUI()
 			layout->addWidget(rBtn, row, col + 3, 1, 1);
 
 		};
-		addUI(u8"XÖá", "EPMOF_XAxisLMove", EPMOF_XAxisLMove, 0, 0);
-		addUI(u8"YÖá", "EPMOF_YAxisLMove", EPMOF_YAxisLMove, 0, 4);
-		addUI(u8"ZÖá", "EPMOF_ZAxisLMove", EPMOF_ZAxisLMove, 1, 0);
+		addUI(u8"Xè½´", "EPMOF_XAxisLMove", EPMOF_XAxisLMove, 0, 0);
+		addUI(u8"Yè½´", "EPMOF_YAxisLMove", EPMOF_YAxisLMove, 0, 4);
+		addUI(u8"Zè½´", "EPMOF_ZAxisLMove", EPMOF_ZAxisLMove, 1, 0);
 	}
 
 
 
-	QGroupBox* box4 = new QGroupBox(QStringLiteral("²Ù×÷ĞÅÏ¢"));
+	QGroupBox* box4 = new QGroupBox(QStringLiteral("æ“ä½œä¿¡æ¯"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box4->setLayout(layout);
@@ -295,13 +295,13 @@ void PrintDeviceUI::InitUI()
 	}
 
 
-	QGroupBox* box5 = new QGroupBox(QStringLiteral("·¢ËÍ/½ÓÊÕĞÅÏ¢"));
+	QGroupBox* box5 = new QGroupBox(QStringLiteral("å‘é€/æ¥æ”¶ä¿¡æ¯"));
 	{
 		QGridLayout* layout = new QGridLayout;
 		box5->setLayout(layout);
 
-		QLabel* inputLab = new QLabel(u8"·¢ËÍHexÃüÁî");
-		QLabel* outputLab = new QLabel(u8"½ÓÊÕHexÃüÁî");
+		QLabel* inputLab = new QLabel(u8"å‘é€Hexå‘½ä»¤");
+		QLabel* outputLab = new QLabel(u8"æ¥æ”¶Hexå‘½ä»¤");
 
 		m_sendCommText = new QTextEdit();
 		m_sendCommText->setMinimumWidth(300);
@@ -350,22 +350,22 @@ void PrintDeviceUI::OnListenBtnClicked(int idx)
 
 		if (m_motionSDK->MC_IsConnected())
 		{
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼Á¬½Ó·şÎñÆ÷£¬µ«ÒÑ´¦ÓÚÔÚÏß×´Ì¬"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹è¿æ¥æœåŠ¡å™¨ï¼Œä½†å·²å¤„äºåœ¨çº¿çŠ¶æ€"));
 			return;
 		}
 		m_motionSDK->MC_Connect2Dev(m_ipLine->text(), m_portLine->text().toShort());
-		logStr.append(QString::fromLocal8Bit("Á¬½Ó·şÎñÆ÷"));
+		logStr.append(QString::fromLocal8Bit("è¿æ¥æœåŠ¡å™¨"));
 		break;
 	}
 	case ENF_DisConn:
 	{
 		if (!m_motionSDK->MC_IsConnected())
 		{
-			logStr.append(QString::fromLocal8Bit("´¦ÓÚÀëÏß×´Ì¬"));
+			logStr.append(QString::fromLocal8Bit("å¤„äºç¦»çº¿çŠ¶æ€"));
 			return;
 		}
 		m_motionSDK->MC_DisconnectDev();
-		logStr.append(QString::fromLocal8Bit("¶ÏÁ¬·şÎñÆ÷"));
+		logStr.append(QString::fromLocal8Bit("æ–­è¿æœåŠ¡å™¨"));
 		break;
 	}
 	case ENF_ChangePort:
@@ -373,7 +373,7 @@ void PrintDeviceUI::OnListenBtnClicked(int idx)
 		auto newPort = m_portLine->text();
 		m_motionSDK->MC_DisconnectDev();
 		m_motionSDK->MC_Connect2Dev(m_ipLine->text(), m_portLine->text().toShort());
-		logStr.append(QString::fromLocal8Bit("¸Ä±äÁ¬½Ó·şÎñÆ÷×´Ì¬"));
+		logStr.append(QString::fromLocal8Bit("æ”¹å˜è¿æ¥æœåŠ¡å™¨çŠ¶æ€"));
 		break;
 	}
 	case ENF_ClearAllText:
@@ -398,14 +398,14 @@ void PrintDeviceUI::OnShowOperCmd(const QString& msg, QByteArray arr, const Show
 	{
 	case PrintDeviceUI::ESET_OperComm:
 	{
-		showStr.append(QString::fromLocal8Bit("µ±Ç°²Ù×÷£º"));
+		showStr.append(QString::fromLocal8Bit("å½“å‰æ“ä½œï¼š"));
 		showStr.append(msg + "\n");
 		m_operLogText->append(showStr);
 		break;
 	}
 	case PrintDeviceUI::ESET_Sendomm:
 	{
-		showStr.append(QString::fromLocal8Bit("µ±Ç°²Ù×÷£º"));
+		showStr.append(QString::fromLocal8Bit("å½“å‰æ“ä½œï¼š"));
 		showStr.append(msg + "\n");
 		showStr.append(arr + "\n");
 		m_sendCommText->append(showStr);
@@ -413,9 +413,9 @@ void PrintDeviceUI::OnShowOperCmd(const QString& msg, QByteArray arr, const Show
 	}
 	case PrintDeviceUI::ESET_RecvComm:
 	{
-		showStr.append(QString::fromLocal8Bit("½ÓÊÕÃüÁî£º"));
+		showStr.append(QString::fromLocal8Bit("æ¥æ”¶å‘½ä»¤ï¼š"));
 		showStr.append(msg + "\n");
-		//showStr.append(QString::fromLocal8Bit("½ÓÊÕHexÃüÁî£º"));
+		//showStr.append(QString::fromLocal8Bit("æ¥æ”¶Hexå‘½ä»¤ï¼š"));
 		if (!arr.isEmpty())
 		{
 			showStr.append(arr.toHex().toUpper());
@@ -437,13 +437,13 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 	QByteArray sendData;
 	int cmdType = 0;
 	
-	// 1.ÅĞ¶ÏÊÇ·ñÁ¬½ÓÔË¶¯¿ØÖÆÄ£¿é
-	// 2.ÅĞ¶ÏÊÇ·ñÉèÖÃ»ù´¡²ÎÊı£¨ÆğÊ¼¡¢ÖÕµã¡¢ÇåÏ´¡¢²½½ø¡¢ËÙ¶È¡¢
+	// 1.åˆ¤æ–­æ˜¯å¦è¿æ¥è¿åŠ¨æ§åˆ¶æ¨¡å—
+	// 2.åˆ¤æ–­æ˜¯å¦è®¾ç½®åŸºç¡€å‚æ•°ï¼ˆèµ·å§‹ã€ç»ˆç‚¹ã€æ¸…æ´—ã€æ­¥è¿›ã€é€Ÿåº¦ã€
 	//if (m_motionSDK->MC_IsConnected() && m_motionSDK->MC_IsSetParam())
 
 	if (!m_motionSDK->MC_IsConnected())
 	{
-		auto logStr = QString(u8"Î´Á¬½ÓÔË¶¯Ä£¿é£¬ÎŞ·¨½øĞĞÏà¹Ø²Ù×÷");
+		auto logStr = QString(u8"æœªè¿æ¥è¿åŠ¨æ¨¡å—ï¼Œæ— æ³•è¿›è¡Œç›¸å…³æ“ä½œ");
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_OperComm);
 		LOG_INFO(logStr);
 		return;
@@ -455,57 +455,57 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 	case EPOF_StartPrint:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_StartPrint);
-		logStr.append(QString::fromLocal8Bit("¿ªÊ¼´òÓ¡²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("å¼€å§‹æ‰“å°æ“ä½œ"));
 
 		m_motionSDK->MC_StartPrint();
-		LOG_INFO(QString(u8"¿ªÊ¼´òÓ¡²Ù×÷"));
+		LOG_INFO(QString(u8"å¼€å§‹æ‰“å°æ“ä½œ"));
 		break;
 	}
 	case EPOF_StopPrint:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_StopPrint);	
-		logStr.append(QString::fromLocal8Bit("Í£Ö¹´òÓ¡²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("åœæ­¢æ‰“å°æ“ä½œ"));
 
 		m_motionSDK->MC_StopPrint();
-		LOG_INFO(QString(u8"Í£Ö¹´òÓ¡²Ù×÷"));
+		LOG_INFO(QString(u8"åœæ­¢æ‰“å°æ“ä½œ"));
 
 		break;
 	}
 	case EPOF_PausePrint:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_PasusePrint);
-		logStr.append(QString::fromLocal8Bit("ÔİÍ£´òÓ¡²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("æš‚åœæ‰“å°æ“ä½œ"));
 
 		m_motionSDK->MC_PausePrint();
-		LOG_INFO(QString(u8"ÔİÍ£´òÓ¡²Ù×÷"));
+		LOG_INFO(QString(u8"æš‚åœæ‰“å°æ“ä½œ"));
 
 		break;
 	}
 	case EPOF_ContinuePrint:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ContinuePrint);
-		logStr.append(QString::fromLocal8Bit("¼ÌĞø´òÓ¡²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("ç»§ç»­æ‰“å°æ“ä½œ"));
 
 		m_motionSDK->MC_ResumePrint();
-		LOG_INFO(QString(u8"¼ÌĞø´òÓ¡²Ù×÷"));
+		LOG_INFO(QString(u8"ç»§ç»­æ‰“å°æ“ä½œ"));
 		break;
 	}
 	case EPOF_CleanPos:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ContinuePrint);
-		logStr.append(QString::fromLocal8Bit("ÒÆ¶¯ÖÁÇåÏ´Î»ÖÃ²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("ç§»åŠ¨è‡³æ¸…æ´—ä½ç½®æ“ä½œ"));
 
 		m_motionSDK->MC_CleanPrint();
-		LOG_INFO(QString(u8"ÒÆ¶¯ÖÁÇåÏ´Î»ÖÃ²Ù×÷"));
+		LOG_INFO(QString(u8"ç§»åŠ¨è‡³æ¸…æ´—ä½ç½®æ“ä½œ"));
 		break;
 	}
 	case EPOF_GoHomnePos:
 	{
 		cmdType = static_cast<int>(ProtocolPrint::Ctrl_ResetPos);
-		logStr.append(QString::fromLocal8Bit("¸÷Öá¸´Î»²Ù×÷"));
+		logStr.append(QString::fromLocal8Bit("å„è½´å¤ä½æ“ä½œ"));
 
 		m_motionSDK->MC_GoHome();
-		LOG_INFO(QString(u8"¸÷Öá¸´Î»²Ù×÷"));
+		LOG_INFO(QString(u8"å„è½´å¤ä½æ“ä½œ"));
 		break;
 	}
 
@@ -527,10 +527,10 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 	auto bTransData = false;
 	int cmdType = 0;
 
-	//ÅĞ¶ÏÊÇ·ñÓĞÄ¬ÈÏ²ÎÊıÉèÖÃ
+	//åˆ¤æ–­æ˜¯å¦æœ‰é»˜è®¤å‚æ•°è®¾ç½®
 	if (!m_motionSDK->MC_IsConnected())
 	{
-		auto logStr = QString(u8"Î´Á¬½ÓÔË¶¯Ä£¿é£¬ÎŞ·¨½øĞĞÏà¹Ø²Ù×÷");
+		auto logStr = QString(u8"æœªè¿æ¥è¿åŠ¨æ¨¡å—ï¼Œæ— æ³•è¿›è¡Œç›¸å…³æ“ä½œ");
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_OperComm);
 		LOG_INFO(logStr);
 		return;
@@ -542,13 +542,13 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		case EPPT_SetStartPos:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_PrintStartPos);
-			// »ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
-			// ¸ù¾İ,²ğ·ÖÊı¾İ£¬ÍùÏÂ·Ö·¢
+			// è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
+			// æ ¹æ®,æ‹†åˆ†æ•°æ®ï¼Œå¾€ä¸‹åˆ†å‘
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStartPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÆğµãĞÅÏ¢\n"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÆğµãĞÅÏ¢\n"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(QString(hexArr.toHex(' ').toUpper()))));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°èµ·ç‚¹ä¿¡æ¯\n"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°èµ·ç‚¹ä¿¡æ¯\n"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(QString(hexArr.toHex(' ').toUpper()))));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 
@@ -557,12 +557,12 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		case EPPT_SetStopPos:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_PrintEndPos);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStopPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);			break;
 		}
@@ -571,9 +571,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepX")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃXÖá²½½øÖµ"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Xè½´æ­¥è¿›å€¼"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -583,9 +583,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepY")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃYÖá²½½øÖµ"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Yè½´æ­¥è¿›å€¼"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -595,9 +595,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepZ")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃZÖá²½½øÖµ"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Zè½´æ­¥è¿›å€¼"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -607,9 +607,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_CleanPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetClenaPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃÇåÏ´Î»ÖÃ"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®æ¸…æ´—ä½ç½®"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -619,9 +619,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitXPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃXÖáÏŞÎ»"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Xè½´é™ä½"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -631,9 +631,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitYPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃYÖáÏŞÎ»"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Yè½´é™ä½"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -643,9 +643,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitZPos")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃZÖáÏŞÎ»"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Zè½´é™ä½"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -655,9 +655,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdX")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃXÖáËÙ¶È"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Xè½´é€Ÿåº¦"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -667,9 +667,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdY")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃYÖáËÙ¶È"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Yè½´é€Ÿåº¦"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -679,9 +679,9 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdZ")->text();
 			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString::fromLocal8Bit("ÉèÖÃZÖáËÙ¶È"));
-			logStr.append(QString::fromLocal8Bit("ÉèÖÃ´òÓ¡ÖÕµãĞÅÏ¢"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("è®¾ç½®Zè½´é€Ÿåº¦"));
+			logStr.append(QString::fromLocal8Bit("è®¾ç½®æ‰“å°ç»ˆç‚¹ä¿¡æ¯"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(hexArr.toHex(' ').toUpper())));
 			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 			break;
@@ -710,92 +710,92 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 		case EPMOF_XAxisLMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_XAxisLMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false,false);
 			sendData.append(data);
-			sendData.append(static_cast<char>(0x00));		// YÖá²¹0
-			sendData.append(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.append(static_cast<char>(0x00));		// Yè½´è¡¥0
+			sendData.append(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼XÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼XÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Xè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Xè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 			break;
 		}
 		case EPMOF_XAxisRMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_XAxisRMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
-			sendData.append(static_cast<char>(0x00));		// YÖá²¹0
-			sendData.append(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.append(static_cast<char>(0x00));		// Yè½´è¡¥0
+			sendData.append(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼XÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼XÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Xè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Xè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 			break;
 		}
 		case EPMOF_YAxisLMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_YAxisLMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
-			sendData.prepend(static_cast<char>(0x00));		// XÖá²¹0
-			sendData.append(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.prepend(static_cast<char>(0x00));		// Xè½´è¡¥0
+			sendData.append(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼YÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼YÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Yè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Yè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 
 			break;
 		}
 		case EPMOF_YAxisRMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_YAxisRMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_YAxisRMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
-			sendData.prepend(static_cast<char>(0x00));		// XÖá²¹0
-			sendData.append(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.prepend(static_cast<char>(0x00));		// Xè½´è¡¥0
+			sendData.append(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼YÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼YÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Yè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Yè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 			break;
 		}
 		case EPMOF_ZAxisLMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisLMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_ZAxisLMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
-			sendData.prepend(static_cast<char>(0x00));		// XÖá²¹0
-			sendData.prepend(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.prepend(static_cast<char>(0x00));		// Xè½´è¡¥0
+			sendData.prepend(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼ZÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼ZÖáLÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Zè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Zè½´Lç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 			break;
 		}
 		case EPMOF_ZAxisRMove:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisRMove);
-			//»ñÈ¡ÒÆ¶¯µÄÊı¾İ£¬µ¥Î»um
+			//è·å–ç§»åŠ¨çš„æ•°æ®ï¼Œå•ä½um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_ZAxisRMove")->text();
 			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
-			sendData.prepend(static_cast<char>(0x00));		// XÖá²¹0
-			sendData.prepend(static_cast<char>(0x00));		// ZÖá²¹0
+			sendData.prepend(static_cast<char>(0x00));		// Xè½´è¡¥0
+			sendData.prepend(static_cast<char>(0x00));		// Zè½´è¡¥0
 
-			operStr.append(QString::fromLocal8Bit("¿ªÊ¼ZÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("¿ªÊ¼ZÖáRÒÆ²Ù×÷"));
-			logStr.append(QString::fromLocal8Bit("Êı¾İÇø·¢ËÍÊı¾İ£º%1").arg(QString(sendData.toHex(' ').toUpper())));
+			operStr.append(QString::fromLocal8Bit("å¼€å§‹Zè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("å¼€å§‹Zè½´Rç§»æ“ä½œ"));
+			logStr.append(QString::fromLocal8Bit("æ•°æ®åŒºå‘é€æ•°æ®ï¼š%1").arg(QString(sendData.toHex(' ').toUpper())));
 			break;
 		}
 		default:
@@ -818,7 +818,7 @@ void PrintDeviceUI::OnSendHeartComm()
 //	emit SigShowOperComm(sendData.toHex().toUpper(), ShowEditType::ESET_Sendomm);
 //
 //#else
-//	//·¢ËÍĞÄÌøcomm
+//	//å‘é€å¿ƒè·³comm
 //	if (m_heartOutCnt <= 2)
 //	{
 //		m_heartOutTimer.start();
@@ -829,9 +829,9 @@ void PrintDeviceUI::OnSendHeartComm()
 //	{
 //		if (!m_tcpClient->isConnected())
 //		{
-//			m_connStateLab->setText(QString::fromLocal8Bit("Î´Á¬½Ó"));
-//			//logStr.append(QString::fromLocal8Bit("´¦ÓÚÀëÏß×´Ì¬"));
-//			//¸ü¸Ä×´Ì¬ÏÔÊ¾
+//			m_connStateLab->setText(QString::fromLocal8Bit("æœªè¿æ¥"));
+//			//logStr.append(QString::fromLocal8Bit("å¤„äºç¦»çº¿çŠ¶æ€"));
+//			//æ›´æ”¹çŠ¶æ€æ˜¾ç¤º
 //			//return;
 //		}
 //		m_tcpClient->disconnectFromHost();

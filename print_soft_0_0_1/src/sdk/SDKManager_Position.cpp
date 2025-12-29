@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKManager_Position.cpp
  * @brief 位置管理实现
  * @details 管理目标位置和当前位置（单位：微米）

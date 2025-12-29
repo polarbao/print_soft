@@ -1,4 +1,4 @@
-#include "ProtocolPrint.h"
+﻿#include "ProtocolPrint.h"
 //#include "globalHeader.h"
 //#include "SerialPortData.h"
 #include "CLogManager.h"

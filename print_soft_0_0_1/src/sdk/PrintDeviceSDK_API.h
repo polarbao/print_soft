@@ -1,4 +1,4 @@
-#ifndef PRINT_DEVICE_SDK_API_H
+﻿#ifndef PRINT_DEVICE_SDK_API_H
 #define PRINT_DEVICE_SDK_API_H
 
 #ifdef __cplusplus

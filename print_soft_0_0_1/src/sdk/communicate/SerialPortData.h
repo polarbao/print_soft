@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <QtCore/QMap>
 #include <QtCore/QThread>
 #include <QtCore/QTimer>
@@ -10,15 +10,15 @@ class SerialPortImpl;
 /** 
 *  @author      
 *  @class       SerialPortData 
-*  @brief       ´®¿ÚÍ¨Ñ¶¶ÔÏó 
+*  @brief       ä¸²å£é€šè®¯å¯¹è±¡ 
 */
 class SerialPortData : public QObject
 {
 	Q_OBJECT
 public:
 	/** 
-	*  @brief       ¹¹Ôìº¯Êı 
-	*  @param[in]    parent: ¸¸¶ÔÏó   configFileName:ÅäÖÃÎÄ¼ş
+	*  @brief       æ„é€ å‡½æ•° 
+	*  @param[in]    parent: çˆ¶å¯¹è±¡   configFileName:é…ç½®æ–‡ä»¶
 	*  @param[out]   
 	*  @return                    
 	*/
@@ -26,51 +26,51 @@ public:
 
 	~SerialPortData();
 
-	//´®¿Ú´ò¿ª×´Ì¬
+	//ä¸²å£æ‰“å¼€çŠ¶æ€
 	bool openStatus();
 
-	//´ò¿ª´®¿Ú
+	//æ‰“å¼€ä¸²å£
 	void openSerialPort();
 
-	//¹Ø±Õ´®¿Ú
+	//å…³é—­ä¸²å£
 	void closeSerialPort();
 
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	void sendData(QByteArray data);
 
 signals:
-	//ĞÂÏûÏ¢ĞÅºÅ
+	//æ–°æ¶ˆæ¯ä¿¡å·
 	void sigNewData(QByteArray msg);
 
-	//´íÎóĞÅºÅ
+	//é”™è¯¯ä¿¡å·
 	void sigError(QSerialPort::SerialPortError error);
 	
 
 private:
-	//¶ÁÈ¡ÅäÖÃ
+	//è¯»å–é…ç½®
 	void readConfig();
 
 public:
-	/** ´®¿ÚÃû³Æ  */
+	/** ä¸²å£åç§°  */
 	QString                m_serialPortName;
 
-	/** ²¨ÌØÂÊ  */
+	/** æ³¢ç‰¹ç‡  */
 	QSerialPort::BaudRate  m_eBaudRate;
 
-	/** Êı¾İÎ»  */
+	/** æ•°æ®ä½  */
 	QSerialPort::DataBits  m_eDataBit;
 
-	/** ÆæÅ¼Ğ£ÑéÎ» */
+	/** å¥‡å¶æ ¡éªŒä½ */
 	QSerialPort::Parity    m_eParityBit;
 
-	/** Í£Ö¹Î»  */
+	/** åœæ­¢ä½  */
 	QSerialPort::StopBits  m_eStopBit;
 
-	/** ¿ØÖÆÁ÷  */
+	/** æ§åˆ¶æµ  */
 	QSerialPort::FlowControl m_eFlowControl;
 
 private:
-	//ÅäÖÃÎÄ¼şÃû³Æ
+	//é…ç½®æ–‡ä»¶åç§°
 	QString m_configFileName;
 
 	SerialPortImpl* m_impl;
@@ -87,7 +87,7 @@ public:
 	~SerialPortImpl();
 
 	/**
-	*  @brief       Ë¢ĞÂ´®¿Ú
+	*  @brief       åˆ·æ–°ä¸²å£
 	*  @param[in]
 	*  @param[out]
 	*  @return
@@ -95,15 +95,15 @@ public:
 	void RefreshPorts();
 
 signals:
-	//ĞÂÏûÏ¢ĞÅºÅ
+	//æ–°æ¶ˆæ¯ä¿¡å·
 	void sigNewData(QByteArray msg);
 
-	//Á¬½Ó·µ»ØµÄĞÅºÅ
+	//è¿æ¥è¿”å›çš„ä¿¡å·
 	void sigError(QSerialPort::SerialPortError error);
 
 public slots:
 	/**
-	*  @brief       ·¢ËÍÊı¾İ
+	*  @brief       å‘é€æ•°æ®
 	*  @param[in]
 	*  @param[out]
 	*  @return
@@ -120,13 +120,13 @@ protected slots:
 	void onTimeout();
 	
 private:
-	/**  ´®¿Ú¶ÔÏó  */
+	/**  ä¸²å£å¯¹è±¡  */
 	QSerialPort*           m_pSerialPort;
 	
-	//Ïß³Ì¶¨Ê±Æ÷
+	//çº¿ç¨‹å®šæ—¶å™¨
 	QTimer* m_Timer;
 
-	//·¢ËÍ¶ÓÁĞ
+	//å‘é€é˜Ÿåˆ—
 	QList<QByteArray> m_sendLists;
 
 	QMutex m_sendMutex;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKMotion.cpp
  * @brief 运动控制实现（使用微米单位）
  * @details 处理X/Y/Z轴的移动和复位功能，使用MoveAxisPos结构体

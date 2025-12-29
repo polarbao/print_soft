@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <QWidget>
 #include <QButtonGroup>
@@ -54,7 +54,7 @@ private:
 	QTextEdit m_logShow;
 
 
-	//¶¨Òå´®¿ÚÖ¸Õë
+	//å®šä¹‰ä¸²å£æŒ‡é’ˆ
 	QSerialPort *serialPort;
 
 

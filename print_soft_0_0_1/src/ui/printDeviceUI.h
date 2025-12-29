@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "QtWidgets/QtWidgets"
 #include <QMutex>
@@ -71,7 +71,7 @@ public:
 	enum EPrintMoveOperFun
 	{
 		EPMOF_Begin = EPOF_End + 1,
-		EPMOF_XAxisLMove,	//LÎªÕı·½Ïò£¬RÎª¸º·½Ïò
+		EPMOF_XAxisLMove,	//Lä¸ºæ­£æ–¹å‘ï¼ŒRä¸ºè´Ÿæ–¹å‘
 		EPMOF_XAxisRMove,
 		EPMOF_YAxisLMove,
 		EPMOF_YAxisRMove,
@@ -83,9 +83,9 @@ public:
 
 	enum ShowEditType
 	{
-		ESET_OperComm = 0x01,		// ²Ù×÷ÃüÁî
-		ESET_Sendomm = 0x02,		// ·¢ËÍÃüÁî
-		ESET_RecvComm = 0x03		// ½ÓÊÕÃüÁî
+		ESET_OperComm = 0x01,		// æ“ä½œå‘½ä»¤
+		ESET_Sendomm = 0x02,		// å‘é€å‘½ä»¤
+		ESET_RecvComm = 0x03		// æ¥æ”¶å‘½ä»¤
 	};
 
 	PrintDeviceUI(QWidget *parent = nullptr);
@@ -106,7 +106,7 @@ public slots:
 	//UI
 	void OnListenBtnClicked(int idx);
 	
-	//add_UI²Ù×÷½çÃæ´¦ÀíÂß¼­
+	//add_UIæ“ä½œç•Œé¢å¤„ç†é€»è¾‘
 	void OnShowOperCmd(const QString& msg, QByteArray arr, const ShowEditType& type);
 
 
@@ -131,9 +131,9 @@ private:
 	motionControlSDK* m_motionSDK;
 	//std::unique_ptr<TcpClient>		m_tcpClient;
 	//std::unique_ptr<ProtocolPrint>	m_protocol;
-	//QTimer m_heartSendTimer;	//ĞÄÌø¶¨Ê±Æ÷	
-	//QTimer m_heartOutTimer;		//³¬Ê±
-	//int m_heartOutCnt;			//ĞÄÌø³¬Ê±¼ÆÊı
+	//QTimer m_heartSendTimer;	//å¿ƒè·³å®šæ—¶å™¨	
+	//QTimer m_heartOutTimer;		//è¶…æ—¶
+	//int m_heartOutCnt;			//å¿ƒè·³è¶…æ—¶è®¡æ•°
 
 	QButtonGroup* m_netBtnGroup;
 
@@ -143,7 +143,7 @@ private:
 	QButtonGroup* m_printMoveBtnGroup;
 
 
-	QMutex m_heartMtx;			//ĞÄÌø»¥³âËø
+	QMutex m_heartMtx;			//å¿ƒè·³äº’æ–¥é”
 
 
 

@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include <QtCore/QtCore>
 #include "communicate/TcpClient.h"
 
 
-// µ¼ÈëÊÂ¼şÀàĞÍ¶¨Òå
+// å¯¼å…¥äº‹ä»¶ç±»å‹å®šä¹‰
 #include "motionControlSDK.h"
 
 
@@ -38,7 +38,7 @@ class DataFieldInfo1;
 /** 
 *  @author      
 *  @class       ProtocolPrint
-*  @brief       ´òÓ¡»úĞ­Òé
+*  @brief       æ‰“å°æœºåè®®
 */
 class ProtocolPrint : public QObject
 {
@@ -47,7 +47,7 @@ public:
 	ProtocolPrint(QObject* parent = 0);
 
 
-	/**  ÃüÁî×é¹¦ÄÜÂë  **/
+	/**  å‘½ä»¤ç»„åŠŸèƒ½ç   **/
 	enum PackageHeadType 
 	{
 		Head_AABB = 0xAABB,
@@ -65,12 +65,12 @@ public:
 
 	enum FunCode
 	{
-		// ÉèÖÃ²ÎÊı
+		// è®¾ç½®å‚æ•°
 		SetParam_CleanPos = 0x1000,
 		SetParam_PrintStartPos = 0x1001,
 		SetParam_PrintEndPos = 0x1002,
 		
-		//ÉèÖÃ¾­ÑéÖµ²½½øÒÆ¶¯£¨Y Z
+		//è®¾ç½®ç»éªŒå€¼æ­¥è¿›ç§»åŠ¨ï¼ˆY Z
 		SetParam_AxisUnitMove = 0x1010,
 
 		SetParam_MaxLimitPos = 0x1020,
@@ -78,14 +78,14 @@ public:
 		SetParam_AxistSpd = 0x1030,
 		SetParam_End = 0x1FFF,
 
-		// »ñÈ¡ÃüÁî
+		// è·å–å‘½ä»¤
 		Get_AxisPos = 0x2000,
 
 		Get_Breath = 0x2010,
 		Get_End = 0x2FFF,
 
 		
-		// ¿ØÖÆÃüÁî
+		// æ§åˆ¶å‘½ä»¤
 		Ctrl_StartPrint = 0x3000,
 		Ctrl_PasusePrint = 0x3001,
 		Ctrl_ContinuePrint = 0x3002,
@@ -93,7 +93,7 @@ public:
 
 		Ctrl_ResetPos = 0x3004,
 
-		//[ÊÖ¶¯¿ØÖÆ] x ×óÓÒ y Ç°ºó z ÉÏÏÂ
+		//[æ‰‹åŠ¨æ§åˆ¶] x å·¦å³ y å‰å z ä¸Šä¸‹
 		Ctrl_XAxisLMove = 0x3101,
 		Ctrl_XAxisRMove = 0x3102,
 		Ctrl_YAxisLMove = 0x3103,
@@ -101,13 +101,13 @@ public:
 		Ctrl_ZAxisLMove = 0x3105,
 		Ctrl_ZAxisRMove = 0x3106,
 
-		Ctrl_AxisAbsMove = 0x3107,		//ÒÆ¶¯µ½¾ø¶ÔÎ»ÖÃ
-		Ctrl_AxisRelMove = 0x3108,		//ÒÆ¶¯µ½Ïà¶ÔÎ»ÖÃ
+		Ctrl_AxisAbsMove = 0x3107,		//ç§»åŠ¨åˆ°ç»å¯¹ä½ç½®
+		Ctrl_AxisRelMove = 0x3108,		//ç§»åŠ¨åˆ°ç›¸å¯¹ä½ç½®
 
 		Ctrl_End = 0xEFFF,
 
-		// ´òÓ¡Í¨Ñ¶
-		// YÖáÒÆ¶¯pass¾ÙÀı£¬ZÖáÒÆ¶¯µÄ²ãÊıÊı¾İ
+		// æ‰“å°é€šè®¯
+		// Yè½´ç§»åŠ¨passä¸¾ä¾‹ï¼ŒZè½´ç§»åŠ¨çš„å±‚æ•°æ•°æ®
 		Print_AxisMovePos = 0xF000,
 		Print_PeriodData = 0xF0001,
 		Print_End = 0xFFFF
@@ -117,32 +117,32 @@ public:
 		//// =============================================================================
 		//// =============================================================================
 
-		//// ²ÎÊı¿ØÖÆ
-		////ÉÏÎ»»ú·¢ËÍ¿ØÖÆÃüÁî,ÏÂÎ»»ú»á·µ»ØÊı¾İ°ü
-		//Con_Breath = 0x0000,							//ĞÄÌø
+		//// å‚æ•°æ§åˆ¶
+		////ä¸Šä½æœºå‘é€æ§åˆ¶å‘½ä»¤,ä¸‹ä½æœºä¼šè¿”å›æ•°æ®åŒ…
+		//Con_Breath = 0x0000,							//å¿ƒè·³
 
-		//Set_StartPrint = 0x12A3,						//¿ªÊ¼´òÓ¡
-		//Set_PausePrint = 0x1201,						//ÔİÍ£´òÓ¡
-		//Set_StopPrint = 0x1202,							//Í£Ö¹´òÓ¡
-		//Set_continuePrint = 0x1203,						//¼ÌĞø´òÓ¡
-		//Set_ResetPrint = 0x1204,						//ÖØÖÃ´òÓ¡
-		//Set_TransData = 0x1205,							//´«Êä´òÓ¡Êı¾İ
+		//Set_StartPrint = 0x12A3,						//å¼€å§‹æ‰“å°
+		//Set_PausePrint = 0x1201,						//æš‚åœæ‰“å°
+		//Set_StopPrint = 0x1202,							//åœæ­¢æ‰“å°
+		//Set_continuePrint = 0x1203,						//ç»§ç»­æ‰“å°
+		//Set_ResetPrint = 0x1204,						//é‡ç½®æ‰“å°
+		//Set_TransData = 0x1205,							//ä¼ è¾“æ‰“å°æ•°æ®
 
 
-		////--------------------ÉÏÎ»»ú¶ÁÏÂÎ»»úÃüÁî£¬ÏÂÎ»»ú»á·µ»ØÊı¾İ°ü----------------------------//
-		//Read_PrintStatus = 0x0300,						//¶ÁÈ¡´òÓ¡×´Ì¬
-		//Read_PrintFinsh = 0x0301,						//¶ÁÈ¡´òÓ¡Êı¾İ
+		////--------------------ä¸Šä½æœºè¯»ä¸‹ä½æœºå‘½ä»¤ï¼Œä¸‹ä½æœºä¼šè¿”å›æ•°æ®åŒ…----------------------------//
+		//Read_PrintStatus = 0x0300,						//è¯»å–æ‰“å°çŠ¶æ€
+		//Read_PrintFinsh = 0x0301,						//è¯»å–æ‰“å°æ•°æ®
 
-		////-----------------¿Í»§¶ËÍÆËÍ²Ù×÷ÃüÁî£¬ĞèÊ÷İ®ÅÉÈ·ÈÏ»Ø¸´£¨»Ø¸´Ö¸Áî×î¸ßÎ»+1--------------------------//
-		////-----------------¿Í»§¶ËÍÆËÍ²Ù×÷ÃüÁî£¬ĞèÊ÷İ®ÅÉÈ·ÈÏ»Ø¸´£¨»Ø¸´Ö¸Áî×î¸ßÎ»+1--------------------------//
+		////-----------------å®¢æˆ·ç«¯æ¨é€æ“ä½œå‘½ä»¤ï¼Œéœ€æ ‘è“æ´¾ç¡®è®¤å›å¤ï¼ˆå›å¤æŒ‡ä»¤æœ€é«˜ä½+1--------------------------//
+		////-----------------å®¢æˆ·ç«¯æ¨é€æ“ä½œå‘½ä»¤ï¼Œéœ€æ ‘è“æ´¾ç¡®è®¤å›å¤ï¼ˆå›å¤æŒ‡ä»¤æœ€é«˜ä½+1--------------------------//
 		//
-		////´òÓ¡Î»ÖÃ
+		////æ‰“å°ä½ç½®
 		//Set_XAxisMovePrintPos = 0x12A2,
 		//Set_YAxisMovePrintPos = 0x12A5,
 		//Set_ZAxisMovePrintPos = 0x12A2,
 
-		////TODO: ÒÆ¶¯Î»ÖÃĞ­Òé¸üĞÂÖ¸Áî²Ù×÷
-		////ÒÆ¶¯²Ù×÷
+		////TODO: ç§»åŠ¨ä½ç½®åè®®æ›´æ–°æŒ‡ä»¤æ“ä½œ
+		////ç§»åŠ¨æ“ä½œ
 		////Set_XAxisUpAuto = 0x12A7,
 		////Set_XAxisDownAuto = 0x1207,
 		////Set_XAxisUp1CM = 0x12A9,
@@ -158,32 +158,32 @@ public:
 		//Set_ZAxisUp1CM = 0x12A9,
 		//Set_ZAxisDown1CM = 0x1209,
 
-		////¸´Î»²Ù×÷
+		////å¤ä½æ“ä½œ
 		//Set_XAxisReset = 0x12A1,
 		//Set_YAxisReset = 0x12A4,
 		//Set_ZAxisReset = 0x12A8,
 
 
-		////-----------------ÏÂÎ»»ú¶¨Ê±ÖÜÆÚÍÆËÍµÄÊı¾İÃüÁî£¬ÉÏÎ»»ú²»ĞèÒª»Ø¸´--------------------------//
-		//Period_AllPara = 0x0430							//ÖÜÆÚ·¢ËÍ¹ıÀ´µÄÊı¾İÃüÁî
+		////-----------------ä¸‹ä½æœºå®šæ—¶å‘¨æœŸæ¨é€çš„æ•°æ®å‘½ä»¤ï¼Œä¸Šä½æœºä¸éœ€è¦å›å¤--------------------------//
+		//Period_AllPara = 0x0430							//å‘¨æœŸå‘é€è¿‡æ¥çš„æ•°æ®å‘½ä»¤
 
 	};
 
 	enum ErrorCode
 	{
-		Command_Err = 0x01,      //ÃüÁîÂë´íÎó
-		DataField_Err = 0x02,    //Êı¾İÓò´íÎó
-		Crc_Err = 0x03,          //Ğ£Ñé´íÎó
-		Status_Err = 0x04        //×´Ì¬´íÎó
+		Command_Err = 0x01,      //å‘½ä»¤ç é”™è¯¯
+		DataField_Err = 0x02,    //æ•°æ®åŸŸé”™è¯¯
+		Crc_Err = 0x03,          //æ ¡éªŒé”™è¯¯
+		Status_Err = 0x04        //çŠ¶æ€é”™è¯¯
 	};
 
 
 public:
-		//Êı¾İ°ü¸ñÊ½£º
-		//¸ñÊ½ÈçÏÂ£º°üÍ·£¨2byte) + ³¤¶È£¨2byte£© + ÃüÁî£¨2byte) + µØÖ·£¨1byte) + Êı¾İÇø£¨¶¯Ì¬£¬´Ó0µ½n£© + crc16Ğ£Ñé(2byte) + °üÎ²(2byte)
+		//æ•°æ®åŒ…æ ¼å¼ï¼š
+		//æ ¼å¼å¦‚ä¸‹ï¼šåŒ…å¤´ï¼ˆ2byte) + é•¿åº¦ï¼ˆ2byteï¼‰ + å‘½ä»¤ï¼ˆ2byte) + åœ°å€ï¼ˆ1byte) + æ•°æ®åŒºï¼ˆåŠ¨æ€ï¼Œä»0åˆ°nï¼‰ + crc16æ ¡éªŒ(2byte) + åŒ…å°¾(2byte)
 
 		/**
-		*  @brief       ´¦Àí½ÓÊÕ±¨ÎÄ
+		*  @brief       å¤„ç†æ¥æ”¶æŠ¥æ–‡
 		*  @param[in]
 		*  @param[out]
 		*  @return
@@ -192,8 +192,8 @@ public:
 		void HandleRecvDatagramData1(QByteArray datagram);
 
 		/**
-		*  @brief       ½âÎö±¨ÎÄÊı¾İ
-		*  @param[in]   datagram:±¨ÎÄÊı¾İ
+		*  @brief       è§£ææŠ¥æ–‡æ•°æ®
+		*  @param[in]   datagram:æŠ¥æ–‡æ•°æ®
 		*  @param[out]
 		*  @return
 		*/
@@ -206,7 +206,7 @@ public:
 		//void HandleFailedRespPackageData(QByteArray& datagram, PackageHeadType type);
 
 		/**
-		*  @brief       ¸ù¾İ²ÎÊı×é³ÉÖ÷¶¯ÇëÇóµÄ°ü
+		*  @brief       æ ¹æ®å‚æ•°ç»„æˆä¸»åŠ¨è¯·æ±‚çš„åŒ…
 		*  @param[in]
 		*  @param[out]
 		*  @return
@@ -214,7 +214,7 @@ public:
 		static QByteArray GetSendDatagram(ECmdType cmdType, FunCode code,  QByteArray data = QByteArray());
 
 		/**
-		*  @brief       ¸ù¾İ²ÎÊı×é³É»Ø¸´°ü£¨ÕûºÏ2¸öPackData
+		*  @brief       æ ¹æ®å‚æ•°ç»„æˆå›å¤åŒ…ï¼ˆæ•´åˆ2ä¸ªPackData
 		*  @param[in]
 		*  @param[out]
 		*  @return
@@ -227,7 +227,7 @@ public slots:
 
 
 	/**
-	*  @brief       ¸ù¾İÍ¼ĞÎÊı¾İ×é³ÉÍ¼ĞÎÊı¾İ°ü
+	*  @brief       æ ¹æ®å›¾å½¢æ•°æ®ç»„æˆå›¾å½¢æ•°æ®åŒ…
 	*  @param[in]
 	*  @param[out]
 	*  @return
@@ -237,38 +237,38 @@ public slots:
 
 
 
-	// ²ğ·ÖÃüÁî×Ö¶ÎÎª¸ß8Î»ºÍµÍ8Î»
+	// æ‹†åˆ†å‘½ä»¤å­—æ®µä¸ºé«˜8ä½å’Œä½8ä½
 	static void SplitComm(uint16_t command, uint8_t& highByte, uint8_t& lowByte);
 
-	// Éú³É·şÎñÆ÷»Ø¸´ÃüÁî£¨¿Í»§¶ËÃüÁî¸ß8Î»+0x10£©
+	// ç”ŸæˆæœåŠ¡å™¨å›å¤å‘½ä»¤ï¼ˆå®¢æˆ·ç«¯å‘½ä»¤é«˜8ä½+0x10ï¼‰
 	static uint16_t GetSerResponseComm(FunCode clientCmd);
 
-	// ´Ó·şÎñÆ÷ÃüÁî»ñÈ¡¶ÔÓ¦µÄ¿Í»§¶ËÔ­Ê¼ÃüÁî
+	// ä»æœåŠ¡å™¨å‘½ä»¤è·å–å¯¹åº”çš„å®¢æˆ·ç«¯åŸå§‹å‘½ä»¤
 	static FunCode GetClientCommFromSer(uint16_t serverCommand);
 
-	// ·şÎñÆ÷»Ø¸´µÄÃüÁî£¨2×Ö½Ú£©Óë¿Í»§¶ËÃüÁîµÄÓ³Éä¹ØÏµ
+	// æœåŠ¡å™¨å›å¤çš„å‘½ä»¤ï¼ˆ2å­—èŠ‚ï¼‰ä¸å®¢æˆ·ç«¯å‘½ä»¤çš„æ˜ å°„å…³ç³»
 	//const std::map<uint16_t, FunCode> Ser2ClientCommMap =
 	//{
-	//	{0x1000, ClientCommand::Heartbeat},    // ·şÎñÆ÷»Ø¸´0x1000 ¡ú ¶ÔÓ¦¿Í»§¶Ë0x0000
-	//	{0x3000, ClientCommand::StartPrint},   // ·şÎñÆ÷»Ø¸´0x3000 ¡ú ¶ÔÓ¦¿Í»§¶Ë0x2000
-	//	{0x5000, ClientCommand::PausePrint}    // ·şÎñÆ÷»Ø¸´0x5000 ¡ú ¶ÔÓ¦¿Í»§¶Ë0x4000
+	//	{0x1000, ClientCommand::Heartbeat},    // æœåŠ¡å™¨å›å¤0x1000 â†’ å¯¹åº”å®¢æˆ·ç«¯0x0000
+	//	{0x3000, ClientCommand::StartPrint},   // æœåŠ¡å™¨å›å¤0x3000 â†’ å¯¹åº”å®¢æˆ·ç«¯0x2000
+	//	{0x5000, ClientCommand::PausePrint}    // æœåŠ¡å™¨å›å¤0x5000 â†’ å¯¹åº”å®¢æˆ·ç«¯0x4000
 	//};
 
 
 signals:
-	//--------------------------½âÎöÍêÊı¾İ·¢ËÍÏà¹ØĞÅºÅ-----------------------------//
-	//ĞÄÌøĞÅºÅ
+	//--------------------------è§£æå®Œæ•°æ®å‘é€ç›¸å…³ä¿¡å·-----------------------------//
+	//å¿ƒè·³ä¿¡å·
 	void SigHeartBeat();
 
 	void SigCmdReply(int cmd, uchar errCode, QByteArray arr = QByteArray());
 
-	//Êı¾İ¼¯ĞÅºÅ
+	//æ•°æ®é›†ä¿¡å·
 	void sigDataInfo(DataFieldInfo1);
 
-	//Éè±¸ÔË¶¯²ÎÊı SpeedRotatePara
+	//è®¾å¤‡è¿åŠ¨å‚æ•° SpeedRotatePara
 	void sigSpeedRotatePara();
 
-	// ½ÓÊÕ±¨ÎÄÊı¾İÏÔÊ¾´íÎó£¬½øÈëÖØ·¢Ä£Ê½
+	// æ¥æ”¶æŠ¥æ–‡æ•°æ®æ˜¾ç¤ºé”™è¯¯ï¼Œè¿›å…¥é‡å‘æ¨¡å¼
 	void SigPackFailRetransport(QByteArray& arr);
 
 	//
@@ -284,15 +284,15 @@ private:
 
 
 	/** 
-	*  @brief       ´¦ÀíÏÂÎ»»úÖÜÆÚ·¢ËÍ¹ıÀ´µÄÊı¾İ 
-	*  @param[in]    data:Êı¾İÓòµØÖ·  lSigCmdReply
+	*  @brief       å¤„ç†ä¸‹ä½æœºå‘¨æœŸå‘é€è¿‡æ¥çš„æ•°æ® 
+	*  @param[in]    data:æ•°æ®åŸŸåœ°å€  lSigCmdReply
 	*  @param[out]   
 	*  @return                    
 	*/
 	void HandlePeriodData(uchar* data, ushort length);
 
 	/** 
-	*  @brief       ´¦ÀíÏÂÎ»»ú»Ø¸´°ü
+	*  @brief       å¤„ç†ä¸‹ä½æœºå›å¤åŒ…
 	*  @param[in]    
 	*  @param[out]   
 	*  @return                    
@@ -302,35 +302,35 @@ private:
 
 private:
 
-	//½ÓÊÜÊı¾İ´ı´¦Àí»º´æ
+	//æ¥å—æ•°æ®å¾…å¤„ç†ç¼“å­˜
 	QByteArray m_recvBuf;
-	//crcĞ£Ñé´íÎó´ÎÊı
+	//crcæ ¡éªŒé”™è¯¯æ¬¡æ•°
 	int m_crcErrorNum = 0;
-	//ÏÂÎ»»ú·µ»Ø´íÎóÂë´ÎÊı
+	//ä¸‹ä½æœºè¿”å›é”™è¯¯ç æ¬¡æ•°
 	int m_codeErrorNum = 0;
 };
 
 /** 
 *  @author      
 *  @class       DataFieldInfo 
-*  @brief       Ğ­ÒéÊı¾İĞÅÏ¢
+*  @brief       åè®®æ•°æ®ä¿¡æ¯
 */
 class DataFieldInfo1
 {
 public:
 	DataFieldInfo1();
 
-	//¿ØÖÆÈ¨×´Ì¬  0x01: ¿ØÖÆÈ¨ÔÚÖ´ĞĞ»ú¹¹  0x02: ¿ØÖÆÈ¨ÔÚÔ¶³Ì²Ù×÷Ì¨£¨Ò¡¸ËºÍ´¥ÃşÆÁ¿É¿ØÖÆÖ´ĞĞ»ú¹¹)
+	//æ§åˆ¶æƒçŠ¶æ€  0x01: æ§åˆ¶æƒåœ¨æ‰§è¡Œæœºæ„  0x02: æ§åˆ¶æƒåœ¨è¿œç¨‹æ“ä½œå°ï¼ˆæ‘‡æ†å’Œè§¦æ‘¸å±å¯æ§åˆ¶æ‰§è¡Œæœºæ„)
 	uchar _controlStatus = 1;  
-	//°´¼üÇĞ»»×´Ì¬  0x01±íÊ¾×ó£¬ 0x02±íÊ¾ÓÒ
+	//æŒ‰é”®åˆ‡æ¢çŠ¶æ€  0x01è¡¨ç¤ºå·¦ï¼Œ 0x02è¡¨ç¤ºå³
 	uchar _switchStatus;
-	//ËÙ¶ÈÌáÊ¾Òô×´Ì¬  0x00: ÎŞÉùÒô  0x01: µÍËÙÉùÒô  0x02: ÖĞËÙÉùÒô 0x03£º¸ßËÙÉùÒô
+	//é€Ÿåº¦æç¤ºéŸ³çŠ¶æ€  0x00: æ— å£°éŸ³  0x01: ä½é€Ÿå£°éŸ³  0x02: ä¸­é€Ÿå£°éŸ³ 0x03ï¼šé«˜é€Ÿå£°éŸ³
 	uchar _speedSoudStatus = 0;
-	//Éè±¸¹ÊÕÏÂë
+	//è®¾å¤‡æ•…éšœç 
 	short _deviceFaultCode = 0;
-	//ÏÂÎ»»úÈí¼ş°æ±¾ºÅ
+	//ä¸‹ä½æœºè½¯ä»¶ç‰ˆæœ¬å·
 	QString _softVersion;
-	//ÏÂÎ»»úÓ²¼ş°æ±¾ºÅ
+	//ä¸‹ä½æœºç¡¬ä»¶ç‰ˆæœ¬å·
 	QString _hardwareVersion;
 	
 };

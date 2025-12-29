@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKCallback.cpp
  * @brief 事件回调处理实现
  * @details 处理所有信号槽回调，包括TCP事件、协议事件、心跳等

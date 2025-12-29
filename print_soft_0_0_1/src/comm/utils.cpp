@@ -1,7 +1,7 @@
-#include "utils.h"
-//»ñÈ¡shortÀàĞÍµÄ¸ß×Ö½Ú
+ï»¿#include "utils.h"
+//è·å–shortç±»å‹çš„é«˜å­—èŠ‚
 #define HI_OF_SHORT(X) (X >> 8)
-//»ñÈ¡shortÀàĞÍµÄµÍ×Ö½Ú
+//è·å–shortç±»å‹çš„ä½å­—èŠ‚
 #define LO_OF_SHORT(X) (X & 0xFF)
 
 Utils::Utils()
@@ -41,7 +41,7 @@ bool Utils::CheckCRC(uchar* data, int datalen)
 	ushort crc = MakeCRCCheck(data, datalen - 2);
 	uchar lo = LO_OF_SHORT(crc);
 	uchar hi = HI_OF_SHORT(crc);
-	//°üÖĞÊı¾İcrcÒ²ÊÇÏÈ¸ß×Ö½Ú£¬ÔÙµÍ×Ö½Ú
+	//åŒ…ä¸­æ•°æ®crcä¹Ÿæ˜¯å…ˆé«˜å­—èŠ‚ï¼Œå†ä½å­—èŠ‚
 	if (hi == data[datalen - 2] && lo == data[datalen - 1])
 	{
 		return true;
@@ -71,40 +71,40 @@ ushort Utils::MakeCRCCheck(uchar* data, int datalen)
 }
 
 /**
- * @brief ½«10000Î¢Ã×µ¥Î»µÄ×Ö·û´®Êı¾İ×ª»»Îª4×Ö½Ú16½øÖÆÊı¾İ
- * @param strData ÊäÈë×Ö·û´®£¨ÀıÈç"5"´ú±í5¡Á10000Î¢Ã×=50000Î¢Ã×£©
- * @param isBigEndian ÊÇ·ñ°´´ó¶ËĞòÊä³ö£¨Éè±¸Í¨ĞÅÄ¬ÈÏ´ó¶Ë£¬Ğ¡¶Ë´«false£©
- * @param isMicronDirect ÊäÈë×Ö·û´®ÊÇ·ñÖ±½ÓÊÇÎ¢Ã×Êı£¨true£ºĞè¡Â10000£»false£ºÒÑÊÇ10000Î¢Ã×µ¥Î»£¬Ö±½ÓÓÃ£©
- * @return 4×Ö½ÚµÄ16½øÖÆÊı¾İ£¨QByteArray£©£¬×ª»»Ê§°Ü·µ»Ø¿Õ
+ * @brief å°†10000å¾®ç±³å•ä½çš„å­—ç¬¦ä¸²æ•°æ®è½¬æ¢ä¸º4å­—èŠ‚16è¿›åˆ¶æ•°æ®
+ * @param strData è¾“å…¥å­—ç¬¦ä¸²ï¼ˆä¾‹å¦‚"5"ä»£è¡¨5Ã—10000å¾®ç±³=50000å¾®ç±³ï¼‰
+ * @param isBigEndian æ˜¯å¦æŒ‰å¤§ç«¯åºè¾“å‡ºï¼ˆè®¾å¤‡é€šä¿¡é»˜è®¤å¤§ç«¯ï¼Œå°ç«¯ä¼ falseï¼‰
+ * @param isMicronDirect è¾“å…¥å­—ç¬¦ä¸²æ˜¯å¦ç›´æ¥æ˜¯å¾®ç±³æ•°ï¼ˆtrueï¼šéœ€Ã·10000ï¼›falseï¼šå·²æ˜¯10000å¾®ç±³å•ä½ï¼Œç›´æ¥ç”¨ï¼‰
+ * @return 4å­—èŠ‚çš„16è¿›åˆ¶æ•°æ®ï¼ˆQByteArrayï¼‰ï¼Œè½¬æ¢å¤±è´¥è¿”å›ç©º
  */
 QByteArray Utils::MicroDisStrTo4BytesHex(const QString& strData, bool isBigEndian /*= true*/, bool isMicronDirect /*= true*/)
 {
-		// ²½Öè1£ºĞ£Ñé×Ö·û´®ÊÇ·ñÎªºÏ·¨Êı×Ö
+		// æ­¥éª¤1ï¼šæ ¡éªŒå­—ç¬¦ä¸²æ˜¯å¦ä¸ºåˆæ³•æ•°å­—
 		bool isOk = false;
-		// ×ªdouble¼æÈİĞ¡Êı£¨±ÈÈç"5.5"´ú±í55000Î¢Ã×£©
+		// è½¬doubleå…¼å®¹å°æ•°ï¼ˆæ¯”å¦‚"5.5"ä»£è¡¨55000å¾®ç±³ï¼‰
 		double micronValue = strData.toDouble(&isOk);
 		if (!isOk) 
 		{
-			//qWarning() << "ÊäÈë×Ö·û´®²»ÊÇºÏ·¨Êı×Ö£º" << strData;
+			//qWarning() << "è¾“å…¥å­—ç¬¦ä¸²ä¸æ˜¯åˆæ³•æ•°å­—ï¼š" << strData;
 			return QByteArray();
 		}
 
-		// ²½Öè2£ºµ¥Î»»»Ëã£¨×ªÎª10000Î¢Ã×Îªµ¥Î»µÄÊıÖµ£©
+		// æ­¥éª¤2ï¼šå•ä½æ¢ç®—ï¼ˆè½¬ä¸º10000å¾®ç±³ä¸ºå•ä½çš„æ•°å€¼ï¼‰
 		double unitValue = isMicronDirect ? (micronValue / 10000.0) : micronValue;
 
-		// ²½Öè3£º×ª»»Îª32Î»ÕûÊı£¨4×Ö½Ú·¶Î§£©£¬ÕâÀïÈ¡Õû£¨°´Ğèµ÷Õû£ºËÄÉáÎåÈë/ÏòÉÏÈ¡Õû£©
-		// ÎŞ·ûºÅ32Î»£º0 ~ 4294967295£»
-		// ÓĞ·ûºÅ32Î»£º-2147483648 ~ 2147483647
-		// ÈôĞèÓĞ·ûºÅ£¬ÓÃint32_t£ºint32_t int32Value = static_cast<int32_t>(qRound(unitValue));
-		uint32_t uint32Value = static_cast<uint32_t>(qRound(unitValue)); // ËÄÉáÎåÈëÈ¡Õû
+		// æ­¥éª¤3ï¼šè½¬æ¢ä¸º32ä½æ•´æ•°ï¼ˆ4å­—èŠ‚èŒƒå›´ï¼‰ï¼Œè¿™é‡Œå–æ•´ï¼ˆæŒ‰éœ€è°ƒæ•´ï¼šå››èˆäº”å…¥/å‘ä¸Šå–æ•´ï¼‰
+		// æ— ç¬¦å·32ä½ï¼š0 ~ 4294967295ï¼›
+		// æœ‰ç¬¦å·32ä½ï¼š-2147483648 ~ 2147483647
+		// è‹¥éœ€æœ‰ç¬¦å·ï¼Œç”¨int32_tï¼šint32_t int32Value = static_cast<int32_t>(qRound(unitValue));
+		uint32_t uint32Value = static_cast<uint32_t>(qRound(unitValue)); // å››èˆäº”å…¥å–æ•´
 
-		// ²½Öè4£ºÊıÖµ×ª4×Ö½ÚÊı×é£¨´¦Àí´óĞ¡¶Ë£©
+		// æ­¥éª¤4ï¼šæ•°å€¼è½¬4å­—èŠ‚æ•°ç»„ï¼ˆå¤„ç†å¤§å°ç«¯ï¼‰
 		QByteArray byteData;
-		byteData.resize(4); // ¹Ì¶¨4×Ö½Ú
+		byteData.resize(4); // å›ºå®š4å­—èŠ‚
 
 		if (isBigEndian) 
 		{
-			// ´ó¶ËĞò£¨¸ßÎ»ÔÚÇ°£©£º0x12345678 ¡ú [0x12, 0x34, 0x56, 0x78]
+			// å¤§ç«¯åºï¼ˆé«˜ä½åœ¨å‰ï¼‰ï¼š0x12345678 â†’ [0x12, 0x34, 0x56, 0x78]
 			byteData[0] = (uint32Value >> 24) & 0xFF;
 			byteData[1] = (uint32Value >> 16) & 0xFF;
 			byteData[2] = (uint32Value >> 8) & 0xFF;
@@ -112,7 +112,7 @@ QByteArray Utils::MicroDisStrTo4BytesHex(const QString& strData, bool isBigEndia
 		}
 		else 
 		{
-			// Ğ¡¶ËĞò£¨µÍÎ»ÔÚÇ°£©£º0x12345678 ¡ú [0x78, 0x56, 0x34, 0x12]
+			// å°ç«¯åºï¼ˆä½ä½åœ¨å‰ï¼‰ï¼š0x12345678 â†’ [0x78, 0x56, 0x34, 0x12]
 			byteData[0] = uint32Value & 0xFF;
 			byteData[1] = (uint32Value >> 8) & 0xFF;
 			byteData[2] = (uint32Value >> 16) & 0xFF;
@@ -123,48 +123,48 @@ QByteArray Utils::MicroDisStrTo4BytesHex(const QString& strData, bool isBigEndia
 }
 
 /**
- * @brief ´¦Àí¶ººÅ·Ö¸ôµÄ1~3¸öÎ¢Ã××Ö·û´®£¬×ª»»ÎªÆ´½ÓºóµÄ4/8/12×Ö½ÚQByteArray
- * @param commaStr ¶ººÅ·Ö¸ôÊäÈë×Ö·û´®£¨Àı£º"50000"¡¢"50000,60000"¡¢"50000,60000,70000"£©
- * @param isBigEndian ÊÇ·ñ´ó¶ËĞòÊä³ö£¨ËùÓĞÊı¾İ×Ö½ÚĞòÒ»ÖÂ£©
- * @param isMicronDirect ÊäÈë×Ó×Ö·û´®ÊÇ·ñÖ±½ÓÊÇÎ¢Ã×Êı£¨true£º¡Â10000£»false£ºÒÑÊÇ10000Î¢Ã×µ¥Î»£©
- * @return Æ´½ÓºóµÄ×Ö½ÚÊı×é£¨4/8/12×Ö½Ú£©£¬×ª»»Ê§°Ü·µ»Ø¿Õ
+ * @brief å¤„ç†é€—å·åˆ†éš”çš„1~3ä¸ªå¾®ç±³å­—ç¬¦ä¸²ï¼Œè½¬æ¢ä¸ºæ‹¼æ¥åçš„4/8/12å­—èŠ‚QByteArray
+ * @param commaStr é€—å·åˆ†éš”è¾“å…¥å­—ç¬¦ä¸²ï¼ˆä¾‹ï¼š"50000"ã€"50000,60000"ã€"50000,60000,70000"ï¼‰
+ * @param isBigEndian æ˜¯å¦å¤§ç«¯åºè¾“å‡ºï¼ˆæ‰€æœ‰æ•°æ®å­—èŠ‚åºä¸€è‡´ï¼‰
+ * @param isMicronDirect è¾“å…¥å­å­—ç¬¦ä¸²æ˜¯å¦ç›´æ¥æ˜¯å¾®ç±³æ•°ï¼ˆtrueï¼šÃ·10000ï¼›falseï¼šå·²æ˜¯10000å¾®ç±³å•ä½ï¼‰
+ * @return æ‹¼æ¥åçš„å­—èŠ‚æ•°ç»„ï¼ˆ4/8/12å­—èŠ‚ï¼‰ï¼Œè½¬æ¢å¤±è´¥è¿”å›ç©º
  */
 QByteArray Utils::MultiMicroDisStrTo12BytesHex(const QString& commaStr, bool isBigEndian /*= true*/, bool isMicronDirect /*= true*/)
 {
-	QByteArray resultBytes; // ×îÖÕÆ´½Ó½á¹û
+	QByteArray resultBytes; // æœ€ç»ˆæ‹¼æ¥ç»“æœ
 
-	// ²½Öè1£º°´¶ººÅ·Ö¸î×Ö·û´®£¬²¢¹ıÂË¿ÕÔªËØ£¨´¦Àí"5,,6"¡¢",5,6"ÕâÀàÎŞĞ§ÊäÈë£©
+	// æ­¥éª¤1ï¼šæŒ‰é€—å·åˆ†å‰²å­—ç¬¦ä¸²ï¼Œå¹¶è¿‡æ»¤ç©ºå…ƒç´ ï¼ˆå¤„ç†"5,,6"ã€",5,6"è¿™ç±»æ— æ•ˆè¾“å…¥ï¼‰
 	QStringList micronStrList = commaStr.split(',');
 
-	// ²½Öè2£ºĞ£Ñé×Ó×Ö·û´®ÊıÁ¿£¨1~3¸ö£©
+	// æ­¥éª¤2ï¼šæ ¡éªŒå­å­—ç¬¦ä¸²æ•°é‡ï¼ˆ1~3ä¸ªï¼‰
 	int strCount = micronStrList.count();
 	if (strCount < 1 || strCount > 3) 
 	{
-		//qWarning() << "ÎŞĞ§µÄ×Ó×Ö·û´®ÊıÁ¿£¬±ØĞë1~3¸ö£¬µ±Ç°£º" << strCount;
+		//qWarning() << "æ— æ•ˆçš„å­å­—ç¬¦ä¸²æ•°é‡ï¼Œå¿…é¡»1~3ä¸ªï¼Œå½“å‰ï¼š" << strCount;
 		return QByteArray();
 	}
 
-	// ²½Öè3£º±éÀúÃ¿¸ö×Ó×Ö·û´®£¬Öğ¸ö×ª»»Îª4×Ö½ÚÊı×é²¢Æ´½Ó
+	// æ­¥éª¤3ï¼šéå†æ¯ä¸ªå­å­—ç¬¦ä¸²ï¼Œé€ä¸ªè½¬æ¢ä¸º4å­—èŠ‚æ•°ç»„å¹¶æ‹¼æ¥
 	for (int i = 0; i < strCount; ++i) 
 	{
-		QString subStr = micronStrList.at(i).trimmed(); // È¥³ıÇ°ºó¿Õ¸ñ£¨´¦Àí" 50000 , 60000 "£©
+		QString subStr = micronStrList.at(i).trimmed(); // å»é™¤å‰åç©ºæ ¼ï¼ˆå¤„ç†" 50000 , 60000 "ï¼‰
 		QByteArray single4Bytes = MicroDisStrTo4BytesHex(subStr, isBigEndian, isMicronDirect);
 
-		// ÈÎÒâÒ»¸ö×Ó×Ö·û´®×ª»»Ê§°Ü£¬ÕûÌå·µ»Ø¿Õ
+		// ä»»æ„ä¸€ä¸ªå­å­—ç¬¦ä¸²è½¬æ¢å¤±è´¥ï¼Œæ•´ä½“è¿”å›ç©º
 		if (single4Bytes.isEmpty()) 
 		{
-			//qWarning() << "µÚ" << (i + 1) << "¸ö×Ó×Ö·û´®×ª»»Ê§°Ü£º" << subStr;
+			//qWarning() << "ç¬¬" << (i + 1) << "ä¸ªå­å­—ç¬¦ä¸²è½¬æ¢å¤±è´¥ï¼š" << subStr;
 			return QByteArray();
 		}
 
-		// Æ´½Óµ±Ç°4×Ö½ÚÊı×éµ½½á¹ûÖĞ
+		// æ‹¼æ¥å½“å‰4å­—èŠ‚æ•°ç»„åˆ°ç»“æœä¸­
 		resultBytes.append(single4Bytes);
 	}
 
-	//²½Öè4£º£¨¿ÉÑ¡£©ÈôĞèÒªÇ¿ÖÆ²¹È«12×Ö½Ú£¨²»×ãÊ±²¹0£©£¬¿ÉÆôÓÃÒÔÏÂ´úÂë
+	//æ­¥éª¤4ï¼šï¼ˆå¯é€‰ï¼‰è‹¥éœ€è¦å¼ºåˆ¶è¡¥å…¨12å­—èŠ‚ï¼ˆä¸è¶³æ—¶è¡¥0ï¼‰ï¼Œå¯å¯ç”¨ä»¥ä¸‹ä»£ç 
 	while (resultBytes.size() < 12) 
 	{
-	    resultBytes.append(static_cast<char>(0x00)); // ²¹0Ìî³äÖÁ12×Ö½Ú
+	    resultBytes.append(static_cast<char>(0x00)); // è¡¥0å¡«å……è‡³12å­—èŠ‚
 	}
 	return resultBytes;
 }

@@ -1,4 +1,4 @@
-#include "global.h"
+ï»¿#include "global.h"
 
 
 
@@ -157,7 +157,7 @@
 //
 //	QJsonObject json = doc.object();
 //
-//	// ¸ù¾İJSONÄÚÈİÅĞ¶Ï´´½¨ÄÄÖÖÀàĞÍµÄÏìÓ¦¶ÔÏó
+//	// æ ¹æ®JSONå†…å®¹åˆ¤æ–­åˆ›å»ºå“ªç§ç±»å‹çš„å“åº”å¯¹è±¡
 //	if (json.contains("user_info") && json["user_info"].isObject()) 
 //	{
 //		auto response = std::make_unique<UserRes>();
@@ -188,7 +188,7 @@
 //		response->FromJosn(json);
 //		return response;
 //	}
-//	// Ä¬ÈÏ·µ»Ø»ùÀà
+//	// é»˜è®¤è¿”å›åŸºç±»
 //	return std::make_unique<BaseSerRes>();
 //}
 //
@@ -241,7 +241,7 @@
 //
 //std::string SerProcessParam::CreateJsonReq()
 //{
-//	// ÉÏ´«ÎÄ¼ş
+//	// ä¸Šä¼ æ–‡ä»¶
 //	QJsonObject json;
 //	json["service_id"] = QString::fromStdString(sppSerId);
 //	if (sppType == 1)
@@ -256,7 +256,7 @@
 //		}
 //		json["model_list"] = modelArray;
 //	}
-//	// ×´Ì¬¸Ä±ä
+//	// çŠ¶æ€æ”¹å˜
 //	else if(sppType == 2)
 //	{
 //		json["progress"] = sppProgressNum;
@@ -275,7 +275,7 @@
 //
 //void ErrInfo::ParseFormatMsg(const std::string& msg)
 //{
-//	//"err_code=Êı×Ö, err_msg=ÎÄ±¾" ¸ñÊ½
+//	//"err_code=æ•°å­—, err_msg=æ–‡æœ¬" æ ¼å¼
 //	std::regex pattern(R"(err_code=(\d+),\s*err_msg=([^,]+))");
 //	std::smatch match;
 //
@@ -287,7 +287,7 @@
 //	}
 //	else 
 //	{
-//		// Î´Æ¥Åäµ½ÌØ¶¨¸ñÊ½£¬Ê¹ÓÃÔ­Ê¼ÏûÏ¢
+//		// æœªåŒ¹é…åˆ°ç‰¹å®šæ ¼å¼ï¼Œä½¿ç”¨åŸå§‹æ¶ˆæ¯
 //		err_msg = msg;
 //		bValid = false;
 //	}

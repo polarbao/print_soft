@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file PrintDeviceUI_SDK.cpp
  * @brief 使用PrintDeviceSDK的打印设备UI类实现
  */

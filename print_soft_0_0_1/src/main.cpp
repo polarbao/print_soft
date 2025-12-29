@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	mylogger->error("Welcome to info spdlog!");
 	mylogger->critical("Welcome to info spdlog!");
 
+
 	LOG_INFO("print_device_moudle_start");
 	CLogManager::getInstance()->startLog("./");
 	LOG_DEBUG(u8"软件启动");

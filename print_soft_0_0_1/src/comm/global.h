@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <atomic>
 #include <iostream>
@@ -27,7 +27,7 @@
 //----------------------------LOGIC_ENUM----------------------------
 //----------------------------LOGIC_ENUM----------------------------
 
-//·şÎñÆ÷·µ»Ø´íÎóÀàĞÍ
+//æœåŠ¡å™¨è¿”å›é”™è¯¯ç±»å‹
 namespace ELogic
 {
 	typedef enum DeviceMoveDirectionType
@@ -76,11 +76,11 @@ namespace EUI
 	typedef enum MoveUIBtnType
 	{
 		EMUIBT_Begin = EPUIBT_End + 1,
-		//°´Å¥·ÖÀà
+		//æŒ‰é’®åˆ†ç±»
 		EMUIBT_XAxis,
 		EMUIBT_YAxis,
 		EMUIBT_ZAxis,
-		//¾ßÌåbtnÀàĞÍ
+		//å…·ä½“btnç±»å‹
 		EMUIBT_XAxisForward,
 		EMUIBT_XAxisBackward,
 

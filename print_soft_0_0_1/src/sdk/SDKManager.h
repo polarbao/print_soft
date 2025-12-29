@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKManager.h
  * @brief SDK内部管理类头文件
  * @details 负责管理所有核心对象、通信和信号槽连接，采用单例模式

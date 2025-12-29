@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file SDKManager.cpp
  * @brief SDK管理器基础实现
  * @details 包含单例实现、初始化、资源管理和辅助函数
