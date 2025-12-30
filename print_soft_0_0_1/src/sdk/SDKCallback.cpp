@@ -26,6 +26,8 @@ void SDKManager::onRecvData(QByteArray data)
 {
         // 将接收到的数据交给协议处理器解码
         m_protocol->HandleRecvDatagramData1(data);
+		// 发送接收报文数据
+		sendEvent(EVENT_TYPE_RECV_MSG, 0, data.toHex().toUpper());
     }
 }
 
@@ -48,17 +50,17 @@ void SDKManager::onStateChanged(QAbstractSocket::SocketState state)
         
         // 启动心跳机制
         m_heartbeatTimeout = 0;
-        if (m_heartbeatSendTimer) 
+		if (m_heartbeatSendTimer)
 		{
-            m_heartbeatSendTimer->start();
-        }
-        if (m_heartbeatCheckTimer) 
+			m_heartbeatSendTimer->start();
+		}
+		if (m_heartbeatCheckTimer)
 		{
-            m_heartbeatCheckTimer->start();
-        }
+			m_heartbeatCheckTimer->start();
+		}
         
         // 发送第一个心跳包
-        sendCommand(ProtocolPrint::Get_Breath);
+        //sendCommand(ProtocolPrint::Get_Breath);
         
     }
 	else if (state == QAbstractSocket::UnconnectedState) 
@@ -126,11 +128,11 @@ void SDKManager::onFaileHandleReTransport(QByteArray& arr)
 
 void SDKManager::onSendHeartbeat() 
 {
-    // 定时发送心跳
-    if (isConnected()) 
-	{
-        sendCommand(ProtocolPrint::Get_Breath);
-    }
+ //   // 定时发送心跳
+ //   if (isConnected()) 
+	//{
+ //       sendCommand(ProtocolPrint::Get_Breath);
+ //   }
 }
 
 void SDKManager::onCheckHeartbeat() 

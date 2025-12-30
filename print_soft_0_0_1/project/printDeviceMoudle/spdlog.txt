@@ -1,0 +1,3 @@
+[spdlog][2025-12-29 18:43:32.409] [debug] [11068] Welcome to debug spdlog!
+[spdlog][2025-12-29 18:43:32.411] [info] [11068] Welcome to info spdlog!
+[spdlog][2025-12-29 18:43:32.411] [error] [11068] Welcome to error spdlog!

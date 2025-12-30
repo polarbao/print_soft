@@ -115,8 +115,7 @@ public slots:
 	void OnHandlePrintParamFun(int idx);
 	void OnHandlePrintMoveFun(int idx);
 
-	//heart 
-	void OnSendHeartComm();
+
 
 signals:
 	void SigAddShowLog(const QString& logStr);

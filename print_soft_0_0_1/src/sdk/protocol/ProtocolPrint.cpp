@@ -5,6 +5,8 @@
 #include <QDataStream>
 #include <QtEndian>
 #include "utils.h"
+#include <spdlog/spdlog.h>
+
 
 //启动CRC检测
 //#define TurnOnCRC 
@@ -83,7 +85,9 @@ void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 	//判断当前recv是req还是resp
 	//分逻辑处理3个不同类型的报文数据
 	QString str = recvdata.toHex(' ');
-	LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
+	LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
+	//std::shared_ptr<spdlog::logger> mylogger = spdlog::get("spdlog");
+	//mylogger->info(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
 
 	//新数据加入缓冲区
 	m_recvBuf.append(recvdata);
@@ -144,18 +148,21 @@ void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 		int packageLen = nextHeadPos - currHead.pos;
 
 		// 检查包长度是否满足最小要求，不足则保留在缓冲区
-		if (packageLen >= 11) {
+		if (packageLen >= 10) 
+		{
 			QByteArray packageData = m_recvBuf.mid(currHead.pos, packageLen);
 			packageList.append({ packageData, currHead.type });
 		}
-		else {
+		else 
+		{
 			break; // 最后一个包不完整，停止遍历
 		}
 	}
 
 	// --------第四步：更新缓冲区，保留未处理的剩余数据
 	int lastProcessedPos = 0;
-	if (!packageList.isEmpty()) {
+	if (!packageList.isEmpty()) 
+	{
 		// 最后一个完整包的结束位置
 		const HeadInfo& lastHead = headList.at(packageList.size() - 1);
 		int lastPackageLen = packageList.last().first.size();
@@ -186,10 +193,10 @@ int ProtocolPrint::HandleCheckPackageHead(const QByteArray& data, int pos)
 	{
 		return 0x0000;
 	}
-
-	uchar hi = (uchar)data.at(pos);
-	uchar lo = (uchar)data.at(pos + 1);
+	uchar lo = (uchar)data.at(pos);
+	uchar hi = (uchar)data.at(pos + 1);
 	quint16 headValue = (hi << 8) | lo; // 拼接成16位包头值
+
 
 	if (headValue == Req_Package_Head) return Req_Package_Head;
 	if (headValue == Resp_Package_Head_Succ) return Resp_Package_Head_Succ;
@@ -231,7 +238,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	//数据包固定字节长度为10字节，变化长度为数据区，从0到n
 	if (recvLength < DATAGRAM_MIN_SIZE)
 	{
-		LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_数据长度错误");
+		LOG_INFO(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据长度错误");
 		return;
 	}
 
@@ -245,14 +252,14 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	//比较包头
 	if (!(recvBuf[0] == LO_OF_SHORT(Req_Package_Head) && (recvBuf[1] == HI_OF_SHORT(Req_Package_Head))))
 	{
-		//LOG_INFO(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
+		//LOG_INFO(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
 		return;
 	}
 
 	//判断crc校验
 	if (!Utils::GetInstance().CheckCRC(recvBuf, recvLength - 10))
 	{
-		LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_crc校验错误"));
+		LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_crc校验错误"));
 		LOG_INFO(QString(u8"crc校验错误次数统计：%1").arg(++m_crcErrorNum));
 #ifdef TurnOnCRC
 		return;
@@ -273,7 +280,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	lenByte = (recvBuf[7] << 8) | recvBuf[6];
 	if (lenByte != recvLength - 10)
 	{
-		//LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_数据区长度字段错误"));
+		//LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据区长度字段错误"));
 		return;
 	}
 
@@ -347,7 +354,12 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 		packData.dataLen = dataLen;
 		if (dataLen != datagram.length() - 10)
 		{
-			//LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_recv_req_package_数据区长度"));
+			LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_数据区长度有误，数据长度与真实长度不同"));
+			return;
+		}
+		if(dataLen == 0)
+		{
+			LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_数据区长度为0，数据命令:%1").arg(QString::number(code, 16)));
 			return;
 		}
 
@@ -361,6 +373,10 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 		posData.xPos = (packData.data[3] << 24) | (packData.data[2] << 16) | (packData.data[1] << 8) | packData.data[0];
 		posData.yPos = (packData.data[7] << 24) | (packData.data[6] << 16) | (packData.data[5] << 8) | packData.data[4];
 		posData.zPos = (packData.data[11] << 24) | (packData.data[10] << 16) | (packData.data[9] << 8) | packData.data[8];
+		LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_各轴数据 _X轴数据：%1, _Y轴数据：%2, _Z轴数据：%3")
+			.arg(posData.xPos)
+			.arg(posData.yPos)
+			.arg(posData.zPos));
 
 		// req处理逻辑
 		emit SigHandleFunOper(operType, code);

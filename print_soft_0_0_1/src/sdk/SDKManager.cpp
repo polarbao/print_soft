@@ -9,6 +9,7 @@
 #include "ProtocolPrint.h"
 #include "CLogManager.h"
 #include <QTimer>
+#include "spdlog/spdlog.h"
 
 // ==================== 单例实现 ====================
 
@@ -76,8 +77,8 @@ bool SDKManager::init(const QString& log_dir)
     m_heartbeatSendTimer = std::make_unique<QTimer>();
     m_heartbeatCheckTimer = std::make_unique<QTimer>();
     
-    m_heartbeatSendTimer->setInterval(2000);  // 2秒发送一次心跳
-    m_heartbeatCheckTimer->setInterval(5000);   // 5秒检查心跳超时
+    //m_heartbeatSendTimer->setInterval(2000);  // 2秒发送一次心跳
+    //m_heartbeatCheckTimer->setInterval(5000);   // 5秒检查心跳超时
     
     connect(m_heartbeatSendTimer.get(), &QTimer::timeout, this, &SDKManager::onSendHeartbeat);
     connect(m_heartbeatCheckTimer.get(), &QTimer::timeout, this, &SDKManager::onCheckHeartbeat);
@@ -150,7 +151,12 @@ void SDKManager::sendCommand(int code, const QByteArray& data)
     
     // 发送数据
     m_tcpClient->sendData(packet);
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().constData());
+	LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_send_data: %1").arg(QString(packet.toHex().toUpper())));
+
+	//std::shared_ptr<spdlog::logger> mylogger = spdlog::get("spdlog");
+	//mylogger->info( packet.toHex().toUpper());
+
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
 
 }
 
@@ -159,7 +165,7 @@ void SDKManager::sendCommand(const QByteArray& data /*= QByteArray()*/)
 {
 	// 重发失败数据
 	m_tcpClient->sendData(data);
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, data.toHex().constData());
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, data.toHex().toUpper().constData());
 
 }
 
@@ -230,7 +236,7 @@ void SDKManager::sendCommand(int code, const MoveAxisPos& posData)
 	// 使用协议打包数据
 	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, senddata);
 	m_tcpClient->sendData(packet);
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().constData());
+	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
 
 }
 

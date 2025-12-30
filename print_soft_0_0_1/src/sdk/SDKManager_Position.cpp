@@ -84,12 +84,9 @@ void SDKManager::onHandleRecvDataOper(int code, const MoveAxisPos& pos)
 	pos.toMillimeters(x_mm, y_mm, z_mm);
 	
 	LOG_INFO(QString(u8"位置数据 当前位置:"));
-	LOG_INFO(QString(u8"  X = %1 mm (%2 μm)")
-		.arg(x_mm, 0, 'f', 3).arg(pos.xPos));
-	LOG_INFO(QString(u8"  Y = %1 mm (%2 μm)")
-		.arg(y_mm, 0, 'f', 3).arg(pos.yPos));
-	LOG_INFO(QString(u8"  Z = %1 mm (%2 μm)")
-		.arg(z_mm, 0, 'f', 3).arg(pos.zPos));
+	LOG_INFO(QString(u8"  X = %1 mm (%2 μm)").arg(x_mm, 0, 'f', 3).arg(pos.xPos));
+	LOG_INFO(QString(u8"  Y = %1 mm (%2 μm)").arg(y_mm, 0, 'f', 3).arg(pos.yPos));
+	LOG_INFO(QString(u8"  Z = %1 mm (%2 μm)").arg(z_mm, 0, 'f', 3).arg(pos.zPos));
 	
 	// 计算与目标位置的偏差
 	double dx_mm = (static_cast<int>(m_dstAxisData.xPos) - static_cast<int>(pos.xPos)) / 1000.0;

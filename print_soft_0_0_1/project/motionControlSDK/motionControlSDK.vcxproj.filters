@@ -30,12 +30,6 @@
     <Filter Include="Header Files\protocol">
       <UniqueIdentifier>{274a4f75-be48-4f95-b7c9-85401d29df4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\service">
-      <UniqueIdentifier>{b6af96e2-309d-470f-88e2-fcca72f2b24d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\service">
-      <UniqueIdentifier>{12767e48-c509-4fa5-a28b-593db23f880c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\comm">
       <UniqueIdentifier>{24430989-aa03-4865-8309-02c45a9ec269}</UniqueIdentifier>
     </Filter>

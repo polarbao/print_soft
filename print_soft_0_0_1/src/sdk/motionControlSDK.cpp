@@ -10,6 +10,9 @@
 #include <QMetaObject>
 #include "CLogManager.h"
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+
 /**
  * @class motionControlSDK::Private
  * @brief 私有实现类（Pimpl模式）
@@ -60,6 +63,18 @@ motionControlSDK::motionControlSDK(QObject *parent)
 {
 	QMutexLocker locker(&Private::s_mutex);
 	Private::s_instance = this;
+
+	std::shared_ptr<spdlog::logger> my_logger = spdlog::basic_logger_mt("spdlog", "spdlog_motion_moudle.txt");
+	// 设置日志格式. 参数含义: [日志标识符] [日期] [日志级别] [线程号] [数据]
+	my_logger->set_pattern("[%n][%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
+	my_logger->set_level(spdlog::level::debug);
+	spdlog::flush_every(std::chrono::seconds(5)); // 定期刷新日志缓冲区
+
+	my_logger->trace("Welcome to trace spdlog!");
+	my_logger->debug("Welcome to debug spdlog!");
+	my_logger->info("Welcome to info spdlog!");
+	my_logger->error("Welcome to error spdlog!");
+
 }
 
 motionControlSDK::~motionControlSDK()
@@ -202,6 +217,7 @@ void motionControlSDK::MC_DisconnectDev()
 
 bool motionControlSDK::MC_IsConnected() const
 {
+	//return true;
 	return d->connectedState;
 }
 
@@ -598,22 +614,21 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		case EVENT_TYPE_GENERAL: 
 		{
 			// 检测连接状态变化
-			if (message.contains("Connected", Qt::CaseInsensitive) &&
-				message.contains("device", Qt::CaseInsensitive)) 
+			if (message.contains("connected", Qt::CaseInsensitive) &&
+				message.contains("dev", Qt::CaseInsensitive)) 
 			{
 				s_instance->d->connectedState = true;
 				emit s_instance->connected();
 				emit s_instance->MC_SigConnectedChanged(true);
-				qDebug() << "Device connected";
+				LOG_INFO(QString("motion_moudle sdk_connected_dev"));
 			}
-			else if (message.contains("Disconnected", Qt::CaseInsensitive)) 
+			else if (message.contains("disconnected", Qt::CaseInsensitive)) 
 			{
 				s_instance->d->connectedState = false;
 				emit s_instance->MC_SigDisconnected();
 				emit s_instance->MC_SigConnectedChanged(false);
-				qDebug() << "Device MC_SigDisconnected";
+				LOG_INFO(QString("motion_moudle sdk_disconnected_dev"));
 			}
-
 			emit s_instance->MC_SigInfoMsg(message);
 			break;
 		}
@@ -662,11 +677,13 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		case EVENT_TYPE_SEND_MSG:
 		{
 			emit s_instance->MC_SigSend2DevCmdMsg(message);
+			LOG_INFO(QString("motion_moudle sdk_send_hex_msg: %1").arg(message));
 			break;
 		}
 		case EVENT_TYPE_RECV_MSG:
 		{
 			emit s_instance->MC_SigRecv2DevCmdMsg(message);
+			LOG_INFO(QString("motion_moudle sdk_recv_hex_msg: %1").arg(message));
 			break;
 		}
 		default: 
