@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\admin\AppData\Local\Temp\vc2vciy2.g5c;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtWidgets;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtGui;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtANGLE;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtSerialPort;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtNetwork;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtCore;C:\Users\admin\AppData\Local\Temp\vc2vciy2.g5c;C:\VulkanSDK\1.0.51.0\include;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\admin\AppData\Local\Temp\rrbmvdyj.ypm;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtWidgets;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtGui;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtANGLE;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtSerialPort;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtNetwork;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\include\QtCore;C:\Users\admin\AppData\Local\Temp\rrbmvdyj.ypm;C:\VulkanSDK\1.0.51.0\include;C:\Qt\Qt5.12.1\5.12.1\msvc2017_64\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>.\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>

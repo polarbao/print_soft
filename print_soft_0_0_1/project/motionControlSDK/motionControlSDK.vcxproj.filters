@@ -68,6 +68,9 @@
     <QtMoc Include="..\..\src\sdk\protocol\ProtocolPrint.h">
       <Filter>Header Files\protocol</Filter>
     </QtMoc>
+    <QtMoc Include="..\..\src\sdk\comm\CINIConfig.h">
+      <Filter>Header Files\comm</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\sdk\motionControlSDK.cpp">
@@ -111,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\sdk\SDKPrintParam.cpp">
       <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\comm\CINIConfig.cpp">
+      <Filter>Source Files\comm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

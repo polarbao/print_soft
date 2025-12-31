@@ -98,6 +98,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\sdk\communicate\TcpClient.cpp" />
+    <ClCompile Include="..\..\src\sdk\comm\CINIConfig.cpp" />
     <ClCompile Include="..\..\src\sdk\comm\CLogManager.cpp" />
     <ClCompile Include="..\..\src\sdk\comm\CLogThread.cpp" />
     <ClCompile Include="..\..\src\sdk\comm\utils.cpp" />
@@ -121,6 +122,7 @@
     <QtMoc Include="..\..\src\sdk\communicate\TcpClient.h" />
     <QtMoc Include="..\..\src\sdk\comm\utils.h" />
     <QtMoc Include="..\..\src\sdk\comm\CLogManager.h" />
+    <QtMoc Include="..\..\src\sdk\comm\CINIConfig.h" />
     <ClInclude Include="..\..\src\sdk\comm\CSingleton.h" />
     <QtMoc Include="..\..\src\sdk\comm\CLogThread.h" />
     <ClInclude Include="..\..\src\sdk\motioncontrolsdk_global.h" />
