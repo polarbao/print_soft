@@ -169,6 +169,25 @@ QByteArray Utils::MultiMicroDisStrTo12BytesHex(const QString& commaStr, bool isB
 	return resultBytes;
 }
 
+MoveAxisPos Utils::StrLis2MoveAxisData(const QString& strData)
+{
+	MoveAxisPos tmp;
+	QStringList micronStrList = strData.split(',');
+	// 校验子字符串数量（1~3个）
+	int strCount = micronStrList.count();
+	if (strCount < 1 || strCount > 3)
+	{
+		SPDLOG_INFO("无效的子字符串数量，必须1~3个，当前：{}", strCount);
+		return MoveAxisPos();
+	}
+
+	// 步骤3：遍历每个子字符串，逐个转换为4字节数组并拼接
+	tmp.xPos = micronStrList.at(0).trimmed().toUInt();
+	tmp.yPos = micronStrList.at(1).trimmed().toUInt();
+	tmp.zPos = micronStrList.at(2).trimmed().toUInt();
+	return tmp;
+}
+
 const uchar Utils::gabyCRCHi[256] = 
 {
 	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,

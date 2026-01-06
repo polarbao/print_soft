@@ -8,10 +8,11 @@
 #include "TcpClient.h"
 #include "ProtocolPrint.h"
 #include <QTimer>
+#include "SpdlogMgr.h"
 
 // ==================== TCP连接管理 ====================
 
-int SDKManager::connectByTCP(const QString& ip, unsigned short port) 
+int SDKManager::ConnectByTCP(const QString& ip, unsigned short port) 
 {
     if (!m_initialized || !m_tcpClient) 
 	{
@@ -23,11 +24,11 @@ int SDKManager::connectByTCP(const QString& ip, unsigned short port)
     
     // 发起连接
     m_tcpClient->connectToHost();
-    
+   
     return 0;
 }
 
-void SDKManager::disconnect() 
+void SDKManager::Disconnect() 
 {
     if (!m_tcpClient) 
 	{
@@ -48,9 +49,10 @@ void SDKManager::disconnect()
     m_tcpClient->disconnectFromHost();
 }
 
-bool SDKManager::isConnected() const 
+bool SDKManager::IsConnected() const 
 {
-    if (m_tcpClient) {
+    if (m_tcpClient) 
+	{
         return m_tcpClient->isConnected();
     }
     return false;

@@ -8,6 +8,7 @@
 #include "SDKManager.h"
 #include "protocol/ProtocolPrint.h"
 #include "CLogManager.h"
+#include "SpdlogMgr.h"
 #include <QString>
 
 // ==================== PackParam主处理函数 ====================
@@ -18,23 +19,25 @@
  * 
  * 功能：接收协议层解析的PackParam结构体，根据操作类型分发到具体处理函数
  */
-void SDKManager::onHandleRecvFunOper(const PackParam& packData)
+void SDKManager::OnHandleRecvFunOper(const PackParam& packData)
 {
-    LOG_INFO(QString(u8"  收到PackParam数据包  "));
-    LOG_INFO(QString(u8"  包头(head):      0x%1").arg(QString::number(packData.head, 16).toUpper().rightJustified(4, '0')));
-    LOG_INFO(QString(u8"  操作类型(operType): 0x%1").arg(QString::number(packData.operType, 16).toUpper().rightJustified(4, '0')));
-    LOG_INFO(QString(u8"  命令功能码(cmdFun):  0x%1").arg(QString::number(packData.cmdFun, 16).toUpper().rightJustified(4, '0')));
-    LOG_INFO(QString(u8"  数据长度(dataLen):  %1 字节").arg(packData.dataLen));
+   NAMED_LOG_T("netMoudle","收到PackParam数据包  ");
+   NAMED_LOG_T("netMoudle","包头(head):0x{:04X}", QString::number(packData.head, 16).toUpper().rightJustified(4, '0'));
+   NAMED_LOG_T("netMoudle", "操作类型(operType):0x{:02X}", QString::number(packData.operType, 16).toUpper().rightJustified(4, '0'));
+   NAMED_LOG_T("netMoudle", "命令功能码(cmdFun):0x{:02X}", QString::number(packData.cmdFun, 16).toUpper().rightJustified(4, '0'));
+   NAMED_LOG_T("netMoudle","数据长度(dataLen):{}字节", packData.dataLen);
     
     // 打印数据域（前12字节，十六进制）
     QString dataHex;
-    for (int i = 0; i < packData.dataLen && i < DATA_LEN_12; ++i) {
+    for (int i = 0; i < packData.dataLen && i < DATA_LEN_12; ++i) 
+	{
         dataHex += QString("%1 ").arg(packData.data[i], 2, 16, QChar('0')).toUpper();
     }
-    if (!dataHex.isEmpty()) {
-        LOG_INFO(QString(u8"数据域(data): %1").arg(dataHex.trimmed()));
+    if (!dataHex.isEmpty()) 
+	{
+       NAMED_LOG_T("netMoudle","数据域(data): {}", dataHex.trimmed());
     }
-    LOG_INFO(QString(u8"------------------------------------------"));
+   NAMED_LOG_T("netMoudle","------------------------------------------");
     
     // 保存到成员变量（如果需要保留最后一次的数据）
     m_curParam = packData;
@@ -43,24 +46,23 @@ void SDKManager::onHandleRecvFunOper(const PackParam& packData)
     switch (packData.operType)
     {
     case ProtocolPrint::SetParamCmd:  // 0x0001 - 设置参数命令应答
-        handleSetParamResponse(packData);
+        HandleSetParamResponse(packData);
         break;
         
     case ProtocolPrint::GetCmd:  // 0x0010 - 获取命令应答
-        handleGetCmdResponse(packData);
+        HandleGetCmdResponse(packData);
         break;
         
     case ProtocolPrint::CtrlCmd:  // 0x0011 - 控制命令应答
-        handleCtrlCmdResponse(packData);
+        HandleCtrlCmdResponse(packData);
         break;
         
     case ProtocolPrint::PrintCommCmd:  // 0x00F0 - 打印通信命令应答
-        handlePrintCommCmdResponse(packData);
+        HandlePrintCommCmdResponse(packData);
         break;
         
     default:
-        LOG_INFO(QString(u8" 未知操作类型: 0x%1")
-            .arg(QString::number(packData.operType, 16).toUpper()));
+		NAMED_LOG_T("netMoudle"," 未知操作类型: 0x{:04X}", QString::number(packData.operType, 16).toUpper());
         sendEvent(EVENT_TYPE_ERROR, -1, "Unknown operation type in PackParam");
         break;
     }
@@ -80,10 +82,9 @@ void SDKManager::onHandleRecvFunOper(const PackParam& packData)
  * - 0x1020: SetParam_MaxLimitPos (设置最大限位位置)
  * - 0x1030: SetParam_AxistSpd (设置轴速度)
  */
-void SDKManager::handleSetParamResponse(const PackParam& packData)
+void SDKManager::HandleSetParamResponse(const PackParam& packData)
 {
-    LOG_INFO(QString(u8"设置参数 命令应答: 0x%1")
-        .arg(QString::number(packData.cmdFun, 16).toUpper()));
+   NAMED_LOG_T("netMoudle","设置参数 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
     
     QString message;
     switch (packData.cmdFun)
@@ -130,8 +131,8 @@ void SDKManager::handleSetParamResponse(const PackParam& packData)
         break;
     }
     
-    LOG_INFO(QString(u8" %1").arg(message));
-    sendEvent(EVENT_TYPE_GENERAL, 0, message.toUtf8().constData());
+   NAMED_LOG_T("netMoudle","当前设置参数数据：{}", message);
+   sendEvent(EVENT_TYPE_GENERAL, 0, message.toUtf8().constData());
 }
 
 /**
@@ -142,10 +143,9 @@ void SDKManager::handleSetParamResponse(const PackParam& packData)
  * - 0x2000: Get_AxisPos (获取轴位置)
  * - 0x2010: Get_Breath (心跳)
  */
-void SDKManager::handleGetCmdResponse(const PackParam& packData)
+void SDKManager::HandleGetCmdResponse(const PackParam& packData)
 {
-    LOG_INFO(QString(u8"获取命令 命令应答: 0x%1")
-        .arg(QString::number(packData.cmdFun, 16).toUpper()));
+   NAMED_LOG_T("netMoudle","获取命令 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
     
     switch (packData.cmdFun)
     {
@@ -153,8 +153,7 @@ void SDKManager::handleGetCmdResponse(const PackParam& packData)
     {
         // 验证数据长度（假设位置数据为12字节：X(4) Y(4) Z(4)）
         if (packData.dataLen < 12) {
-            LOG_INFO(QString(u8"位置数据长度不足: 期望12字节，实际%1字节")
-                .arg(packData.dataLen));
+           NAMED_LOG_T("netMoudle","位置数据长度不足: 期望12字节，实际{}字节", packData.dataLen);
             sendEvent(EVENT_TYPE_ERROR, -1, "Invalid axis position data length");
             break;
         }
@@ -179,10 +178,7 @@ void SDKManager::handleGetCmdResponse(const PackParam& packData)
         double yMM = static_cast<double>(yPos) / 100.0;
         double zMM = static_cast<double>(zPos) / 100.0;
         
-        LOG_INFO(QString(u8" 当前轴位置: X=%1mm, Y=%2mm, Z=%3mm")
-            .arg(xMM, 0, 'f', 2)
-            .arg(yMM, 0, 'f', 2)
-            .arg(zMM, 0, 'f', 2));
+		NAMED_LOG_T("netMoudle", " 当前轴位置: X={:.3f} mm, Y={:.3f} mm, Z={:.3f} mm", xMM, yMM, zMM);
         
         // 发送位置更新事件到上层
         sendEvent(EVENT_TYPE_MOVE_STATUS, 0, "Position updated", xMM, yMM, zMM);
@@ -191,12 +187,11 @@ void SDKManager::handleGetCmdResponse(const PackParam& packData)
     
     case ProtocolPrint::Get_Breath:  // 心跳
         // 心跳应答已在SDKCallback.cpp的onHeartbeat()中处理
-        LOG_INFO(QString(u8" 心跳应答（已在onHeartbeat中处理）"));
+       NAMED_LOG_T("netMoudle"," 心跳应答（已在onHeartbeat中处理）");
         break;
         
     default:
-        LOG_INFO(QString(u8"其他获取命令应答: 0x%1")
-            .arg(QString::number(packData.cmdFun, 16).toUpper()));
+       NAMED_LOG_T("netMoudle","其他获取命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
         break;
     }
 }
@@ -214,10 +209,9 @@ void SDKManager::handleGetCmdResponse(const PackParam& packData)
  * - 0x3101~0x3106: 轴移动命令
  * - 0x3107: Ctrl_AxisAbsMove (绝对移动)
  */
-void SDKManager::handleCtrlCmdResponse(const PackParam& packData)
+void SDKManager::HandleCtrlCmdResponse(const PackParam& packData)
 {
-    LOG_INFO(QString(u8"控制命令 命令应答: 0x%1")
-        .arg(QString::number(packData.cmdFun, 16).toUpper()));
+   NAMED_LOG_T("netMoudle","控制命令 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
     
     QString message;
     SdkEventType eventType = EVENT_TYPE_GENERAL;
@@ -311,13 +305,12 @@ void SDKManager::handleCtrlCmdResponse(const PackParam& packData)
 	}
         
     default:
-        message = QString("控制命令执行完成 (命令码: 0x%1)")
-            .arg(QString::number(packData.cmdFun, 16).toUpper());
+        message = QString("控制命令执行完成 (命令码: 0x%1)").arg(QString::number(packData.cmdFun, 16).toUpper());
         break;
     }
     
-    LOG_INFO(QString(u8" %1").arg(message));
-    sendEvent(eventType, 0, message.toUtf8().constData());
+	NAMED_LOG_T("netMoudle","当前设置命令 %1", message);
+	sendEvent(eventType, 0, message.toUtf8().constData());
 }
 
 /**
@@ -328,10 +321,9 @@ void SDKManager::handleCtrlCmdResponse(const PackParam& packData)
  * - 0xF000: Print_AxisMovePos (打印轴移动位置)
  * - 0xF0001: Print_PeriodData (周期数据)
  */
-void SDKManager::handlePrintCommCmdResponse(const PackParam& packData)
+void SDKManager::HandlePrintCommCmdResponse(const PackParam& packData)
 {
-    LOG_INFO(QString(u8"打印通信 命令应答: 0x%1")
-        .arg(QString::number(packData.cmdFun, 16).toUpper()));
+   NAMED_LOG_T("netMoudle","打印通信 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
     
     switch (packData.cmdFun)
     {
@@ -351,14 +343,13 @@ void SDKManager::handlePrintCommCmdResponse(const PackParam& packData)
     
     case ProtocolPrint::Print_PeriodData:
     {
-        LOG_INFO(QString(u8"周期数据 已在HandlePeriodData中处理）"));
+		NAMED_LOG_T("netMoudle","周期数据 已在HandlePeriodData中处理）");
         // 周期数据已在ProtocolPrint::HandlePeriodData()中处理
         break;
     }
     
     default:
-        LOG_INFO(QString(u8"其他打印通信命令: 0x%1")
-            .arg(QString::number(packData.cmdFun, 16).toUpper()));
+		NAMED_LOG_T("netMoudle","其他打印通信命令: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
         break;
     }
 }

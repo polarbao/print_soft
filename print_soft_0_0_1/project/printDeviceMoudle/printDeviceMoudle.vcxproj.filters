@@ -36,12 +36,6 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\comm\CLogManager.cpp">
-      <Filter>Source Files\comm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\comm\CLogThread.cpp">
-      <Filter>Source Files\comm</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\comm\global.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
@@ -57,14 +51,11 @@
     <ClCompile Include="..\..\src\comm\utils.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\comm\SpdlogMgr.cpp">
+      <Filter>Source Files\comm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="..\..\src\comm\CLogThread.h">
-      <Filter>Header Files\comm</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\comm\CLogManager.h">
-      <Filter>Header Files\comm</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\printDeviceMoudle.h">
       <Filter>Header Files\ui</Filter>
     </QtMoc>
@@ -79,7 +70,10 @@
     <ClInclude Include="..\..\src\comm\global.h">
       <Filter>Header Files\comm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\comm\CSingleton.h">
+    <ClInclude Include="..\..\src\comm\CNewSingleton.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\comm\SpdlogMgr.h">
       <Filter>Header Files\comm</Filter>
     </ClInclude>
   </ItemGroup>

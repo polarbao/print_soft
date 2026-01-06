@@ -4,18 +4,19 @@
  * @details 包含单例实现、初始化、资源管理和辅助函数
  */
 
+#include <QTimer>
 #include "SDKManager.h"
 #include "TcpClient.h"
 #include "ProtocolPrint.h"
 #include "CLogManager.h"
-#include <QTimer>
-#include "spdlog/spdlog.h"
+#include "SpdlogMgr.h"
 
 // ==================== 单例实现 ====================
 
-SDKManager* SDKManager::instance() {
-    static SDKManager manager;
-    return &manager;
+SDKManager* SDKManager::GetInstance()
+{
+	static SDKManager manager;
+	return &manager;
 }
 
 
@@ -28,13 +29,14 @@ SDKManager::SDKManager()
     // 私有构造函数
 }
 
-SDKManager::~SDKManager() {
-    release();
+SDKManager::~SDKManager() 
+{
+    Release();
 }
 
 // ==================== 生命周期管理 ====================
 
-bool SDKManager::init(const QString& log_dir) 
+bool SDKManager::Init(const QString& log_dir) 
 {
     if (m_initialized) 
 	{
@@ -42,15 +44,7 @@ bool SDKManager::init(const QString& log_dir)
     }
     
     // 初始化日志系统
-    if (log_dir.isEmpty())
-	{
-		CLogManager::getInstance()->startLog("./");
-    }
-	else
-	{
-		CLogManager::getInstance()->startLog(log_dir);
-	}
-	LOG_INFO(QString(u8"motion_moudle_sdk_init"));
+	SPDLOG_TRACE("motion_moudle_sdk_init");
 
 
     // 创建TCP客户端和协议处理器
@@ -58,16 +52,16 @@ bool SDKManager::init(const QString& log_dir)
     m_protocol = std::make_unique<ProtocolPrint>();
     
     // 连接TCP客户端信号
-    connect(m_tcpClient.get(), &TcpClient::sigNewData, this, &SDKManager::onRecvData);
-    connect(m_tcpClient.get(), &TcpClient::sigError, this, &SDKManager::onTcpError);
-    connect(m_tcpClient.get(), &TcpClient::sigSocketStateChanged, this, &SDKManager::onStateChanged);
+    connect(m_tcpClient.get(), &TcpClient::sigNewData, this, &SDKManager::OnRecvData);
+    connect(m_tcpClient.get(), &TcpClient::sigError, this, &SDKManager::OnTcpError);
+    connect(m_tcpClient.get(), &TcpClient::sigSocketStateChanged, this, &SDKManager::OnStateChanged);
     
     // 连接协议处理器信号
-    connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &SDKManager::onHeartbeat);
-    connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &SDKManager::onCmdReply);
-	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::onHeartbeat);
-	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper1, this, &SDKManager::onHandleRecvFunOper);
-	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper2, this, &SDKManager::onHandleRecvDataOper);
+	connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &SDKManager::OnHeartbeat);
+	connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &SDKManager::OnCmdReply);
+	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::OnHeartbeat);
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper1, this, &SDKManager::OnHandleRecvFunOper);
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper2, this, &SDKManager::OnHandleRecvDataOper);
 
     
     // 设置协议的串口（实际上是TCP客户端）
@@ -80,14 +74,14 @@ bool SDKManager::init(const QString& log_dir)
     //m_heartbeatSendTimer->setInterval(2000);  // 2秒发送一次心跳
     //m_heartbeatCheckTimer->setInterval(5000);   // 5秒检查心跳超时
     
-    connect(m_heartbeatSendTimer.get(), &QTimer::timeout, this, &SDKManager::onSendHeartbeat);
-    connect(m_heartbeatCheckTimer.get(), &QTimer::timeout, this, &SDKManager::onCheckHeartbeat);
+    connect(m_heartbeatSendTimer.get(), &QTimer::timeout, this, &SDKManager::OnSendHeartbeat);
+    connect(m_heartbeatCheckTimer.get(), &QTimer::timeout, this, &SDKManager::OnCheckHeartbeat);
     
     m_initialized = true;
     return true;
 }
 
-void SDKManager::release() {
+void SDKManager::Release() {
     if (!m_initialized) {
         return;  // 未初始化，无需释放
     }
@@ -117,7 +111,7 @@ void SDKManager::release() {
 // ==================== 辅助函数 ====================
 
 //fc + dataArr
-void SDKManager::sendCommand(int code, const QByteArray& data) 
+void SDKManager::SendCommand(int code, const QByteArray& data) 
 {
     if (!m_tcpClient) 
 	{
@@ -151,17 +145,13 @@ void SDKManager::sendCommand(int code, const QByteArray& data)
     
     // 发送数据
     m_tcpClient->sendData(packet);
-	LOG_INFO(QString(u8"lrz_motion_sdk print_protocol_moudle cur_send_data: %1").arg(QString(packet.toHex().toUpper())));
-
-	//std::shared_ptr<spdlog::logger> mylogger = spdlog::get("spdlog");
-	//mylogger->info( packet.toHex().toUpper());
-
+	NAMED_LOG_D("netMoudle", "motion_sdk print_protocol_moudle cur_send_data: {}", packet.toHex().toUpper());
 	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
 
 }
 
 //重发数据
-void SDKManager::sendCommand(const QByteArray& data /*= QByteArray()*/)
+void SDKManager::SendCommand(const QByteArray& data /*= QByteArray()*/)
 {
 	// 重发失败数据
 	m_tcpClient->sendData(data);
@@ -170,7 +160,7 @@ void SDKManager::sendCommand(const QByteArray& data /*= QByteArray()*/)
 }
 
 //fc类型+坐标数据
-void SDKManager::sendCommand(int code, const MoveAxisPos& posData)
+void SDKManager::SendCommand(int code, const MoveAxisPos& posData)
 {
 	//数据处理
 	//const int dataSize = 12;

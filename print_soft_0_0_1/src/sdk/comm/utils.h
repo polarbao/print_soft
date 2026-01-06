@@ -14,23 +14,25 @@
 #include <QDateTime>
 
 
-//#include "CLogManager.h"
-#include "comm/CSingleton.h"
+#include "SpdlogMgr.h"
+#include "CNewSingleton.h"
 
 
 
 //----------------------------enum-------------------------------------
 //----------------------------enum-------------------------------------
 
-class Utils : public QObject, public CSingleton<Utils>
+class Utils : public QObject, public CNewSingleton<Utils>
 {
-	friend class CSingleton<Utils>;
 	Q_OBJECT
 
-public:
+private:
+
+	friend class CNewSingleton<Utils>;
 
 	explicit Utils();
 
+public:
 	~Utils();
 	
 	// 将输入文本转换为QByteArray(原始字节)
@@ -44,12 +46,6 @@ public:
 
 	// 直接将文本转换为16进制表示的QByteArray
 	QByteArray Text2HexByteArr(const QString& text);
-
-
-	bool readAndConvertImage(const QString &filePath, QByteArray &hexData, quint16 &w, quint16 &h);
-
-	// 组装协议报文
-	QList<QByteArray> assemblePackets(quint16 width, quint16 height, quint8 imageType, const QByteArray &hexData);
 
 	bool CheckCRC(uchar* data, int datalen);
 

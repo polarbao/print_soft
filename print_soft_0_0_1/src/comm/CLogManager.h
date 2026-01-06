@@ -6,7 +6,7 @@
 //日志宏定义
 #define LOG_ERROR(msg)     writeLog(ELogError, msg, __FILE__, __LINE__)
 #define LOG_WARN(msg)      writeLog(ELogWarning, msg, __FILE__, __LINE__)
-#define LOG_INFO(msg)      writeLog(ELogInfo, msg, __FILE__, __LINE__)
+#define SPDLOG_INFO(msg)      writeLog(ELogInfo, msg, __FILE__, __LINE__)
 #define LOG_DEBUG(msg)     writeLog(ELogDebug, msg, __FILE__, __LINE__)
 #define LOG_FATAL(msg)     writeLog(ELogFatal, msg, __FILE__, __LINE__)
 

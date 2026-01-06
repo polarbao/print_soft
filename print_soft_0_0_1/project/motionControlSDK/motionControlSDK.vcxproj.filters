@@ -53,12 +53,6 @@
     <QtMoc Include="..\..\src\sdk\SDKManager.h">
       <Filter>Header Files\sdkLogic</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\src\sdk\comm\CLogThread.h">
-      <Filter>Header Files\comm</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\sdk\comm\CLogManager.h">
-      <Filter>Header Files\comm</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\sdk\comm\utils.h">
       <Filter>Header Files\comm</Filter>
     </QtMoc>
@@ -67,9 +61,6 @@
     </QtMoc>
     <QtMoc Include="..\..\src\sdk\protocol\ProtocolPrint.h">
       <Filter>Header Files\protocol</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\sdk\comm\CINIConfig.h">
-      <Filter>Header Files\comm</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -94,12 +85,6 @@
     <ClCompile Include="..\..\src\sdk\comm\utils.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\sdk\comm\CLogManager.cpp">
-      <Filter>Source Files\comm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\sdk\comm\CLogThread.cpp">
-      <Filter>Source Files\comm</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\sdk\communicate\TcpClient.cpp">
       <Filter>Source Files\communicate</Filter>
     </ClCompile>
@@ -109,21 +94,33 @@
     <ClCompile Include="..\..\src\sdk\SDKPackParam.cpp">
       <Filter>Source Files\sdkLogic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\sdk\SDKManager_Position.cpp">
-      <Filter>Source Files\sdkLogic</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\sdk\SDKPrintParam.cpp">
       <Filter>Source Files\sdkLogic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\sdk\comm\CINIConfig.cpp">
+    <ClCompile Include="..\..\src\sdk\comm\CMotionConfig.cpp">
+      <Filter>Source Files\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\SDKPositionMgr.cpp">
+      <Filter>Source Files\sdkLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sdk\comm\SpdlogMgr.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\sdk\motioncontrolsdk_global.h">
+    <ClInclude Include="..\..\src\sdk\comm\CSingleton.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sdk\comm\CNewSingleton.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sdk\comm\CMotionConfig.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sdk\motioncontrolsdk_define.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\sdk\comm\CSingleton.h">
+    <ClInclude Include="..\..\src\sdk\comm\SpdlogMgr.h">
       <Filter>Header Files\comm</Filter>
     </ClInclude>
   </ItemGroup>

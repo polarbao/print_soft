@@ -9,9 +9,11 @@
 #include <QMutexLocker>
 #include <QMetaObject>
 #include "CLogManager.h"
+#include <QVector>
+#include <QList>
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include "comm/CMotionConfig.h"
+#include "SpdlogMgr.h"
 
 /**
  * @class motionControlSDK::Private
@@ -50,12 +52,14 @@ public:
 	// 全局实例管理（用于C回调中访问Qt对象）
 	static motionControlSDK* s_instance;
 	static QMutex s_mutex;
+
+	// 运动控制配置参数
+	MotionConfig motionConfig;
 };
 
 // 静态成员初始化
 motionControlSDK* motionControlSDK::Private::s_instance = nullptr;
 QMutex motionControlSDK::Private::s_mutex;
-
 
 motionControlSDK::motionControlSDK(QObject *parent)
 	: QObject(parent)
@@ -64,21 +68,19 @@ motionControlSDK::motionControlSDK(QObject *parent)
 	QMutexLocker locker(&Private::s_mutex);
 	Private::s_instance = this;
 
-	std::shared_ptr<spdlog::logger> my_logger = spdlog::basic_logger_mt("spdlog", "spdlog_motion_moudle.txt");
-	// 设置日志格式. 参数含义: [日志标识符] [日期] [日志级别] [线程号] [数据]
-	my_logger->set_pattern("[%n][%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
-	my_logger->set_level(spdlog::level::debug);
-	spdlog::flush_every(std::chrono::seconds(5)); // 定期刷新日志缓冲区
-
-	my_logger->trace("Welcome to trace spdlog!");
-	my_logger->debug("Welcome to debug spdlog!");
-	my_logger->info("Welcome to info spdlog!");
-	my_logger->error("Welcome to error spdlog!");
-
+	// spdlog初始化
+	SpdlogWrapper::GetInstance()->Init("./logs", "sdk_log", 10 * 1024 * 1024, 5, true, true);
+	auto netLogger = SpdlogWrapper::GetInstance()->GetLogger("netMoudle", "./logs/modules", 5 * 1024 * 1024, 3);
+	auto logicLogger = SpdlogWrapper::GetInstance()->GetLogger("logicMoudle", "./logs/modules", 5 * 1024 * 1024, 3);
+	NAMED_LOG_D("netMoudle", "motion_moudle_sdk net_moudle log_start");
+	NAMED_LOG_D("logicMoudle", "motion_moudle_sdk logic_moudle log_start");
 }
 
 motionControlSDK::~motionControlSDK()
 {
+	// 将配置信息重新写入到配置文件
+	CMotionConfig::GetInstance()->save(d->motionConfig);
+
 	MC_Release();
 
 	QMutexLocker locker(&Private::s_mutex);
@@ -97,33 +99,38 @@ bool motionControlSDK::MC_Init(const QString& logDir)
 
 	if (d->initialized) 
 	{
-		//qDebug() << "SDK已经初始化";
+		SPDLOG_INFO("SDK已经初始化");
 		return true;
 	}
+
 
 	// 初始化SDK
 	// 注意：如果SDK独立运行（不在Qt应用程序中），需要创建QCoreApplication
 	// 这里假设调用者会管理Qt事件循环
-	bool ret = SDKManager::instance()->init("./");
-
+	bool ret = SDKManager::GetInstance()->Init("./");
+	
 	if (!ret) 
 	{
 		QString errMsg = tr("SDK初始化失败，错误码：%1").arg(ret);
-		//LOG_INFO(QString(u8"SDK初始化失败"));
+		SPDLOG_INFO("SDK初始化失败");
 		emit MC_SigErrOccurred(-1, errMsg);
 		return false;
 	}
-	//LOG_INFO(QString(u8"SDK初始化成功"));
 
 	// 注册事件回调函数（桥接C回调到Qt信号）
-	//RegisterEventCallback(&Private::sdkEventCallback);
 	QMutexLocker lock(&g_callbackMutex);
 	g_sdkCallback = &Private::sdkEventCallback;
 
+	// 从配置文件加载运动控制配置
+	if (!MC_LoadMotionConfig(d->motionConfig))
+	{
+		NAMED_LOG_E("logicMoudle", "motionControlSDK MC_LoadMotionConfig failed!");
+		return false;
+	}
+
 	d->initialized = true;
 	//emit MC_SigInfoMsg(tr("SDK初始化成功"));
-
-	qDebug() << "motionControlSDK initialized successfully";
+	SPDLOG_INFO("motionControlSDK initialized successfully");
 	return true;
 }
 
@@ -141,7 +148,7 @@ void motionControlSDK::MC_Release()
 	}
 
 	// 释放底层SDK
-	SDKManager::instance()->release();
+	SDKManager::GetInstance()->Release();
 
 
 	d->initialized = false;
@@ -149,7 +156,7 @@ void motionControlSDK::MC_Release()
 	d->ip.clear();
 	d->port = 0;
 
-	qDebug() << "motionControlSDK released";
+	SPDLOG_INFO("1motion_moudle motionControlSDK released");
 }
 
 
@@ -160,27 +167,28 @@ bool motionControlSDK::MC_IsInit() const
 
 bool motionControlSDK::MC_Connect2Dev(const QString& ip, quint16 port)
 {
-	LOG_INFO("1111111111111connectToDevice");
+	SPDLOG_TRACE("1111111111111connectToDevice");
+
 	if (!d->initialized) 
 	{
 		//emit MC_SigErrOccurred(-1, tr("SDK未初始化，请先调用MC_Init()"));
-		//LOG_INFO(u8"SDK未初始化，请先调用MC_Init()");
+		SPDLOG_ERROR("SDK未初始化，请先调用MC_Init()");
 		return false;
 	}
 
 	if (d->connectedState) 
 	{
 		//emit MC_SigInfoMsg(tr("设备已连接"));
-		//LOG_INFO(u8"设备已连接");
+		//SPDLOG_INFO(u8"设备已连接");
 		return true;
 	}
 
 	// 调用C接口连接设备
-	int ret = SDKManager::instance()->connectByTCP(ip, port);
+	int ret = SDKManager::GetInstance()->ConnectByTCP(ip, port);
 	if (ret != 0) 
 	{
 		QString errMsg = tr("连接失败，错误码：%1").arg(ret);
-		//LOG_INFO(QString(u8"连接失败，错误码：%1").arg(ret));
+		SPDLOG_INFO("连接失败，错误码: {}", ret);
 		emit MC_SigErrOccurred(ret, errMsg);
 		return false;
 	}
@@ -191,7 +199,8 @@ bool motionControlSDK::MC_Connect2Dev(const QString& ip, quint16 port)
 	emit MC_SigDevIpChanged(ip);
 	emit MC_SigDevPortChanged(port);
 	emit MC_SigInfoMsg(tr("正在连接 %1:%2...").arg(ip).arg(port));
-	LOG_INFO(QString(u8"正在连接 %1:%2...").arg(ip).arg(port));
+	SPDLOG_INFO("正在连接 {} {}...", ip.toUtf8().toStdString(), port);
+	//LOG_INFO(QString(u8"正在连接 %1:%2...").arg(ip).arg(port));
 
 	return true;
 }
@@ -210,7 +219,7 @@ void motionControlSDK::MC_DisconnectDev()
 	}
 
 	// 调用C接口断开连接
-	SDKManager::instance()->disconnect();
+	SDKManager::GetInstance()->disconnect();
 
 	emit MC_SigInfoMsg(tr("正在断开连接..."));
 }
@@ -231,9 +240,54 @@ quint16 motionControlSDK::MC_GetDevPort() const
 	return d->port;
 }
 
+bool motionControlSDK::MC_LoadMotionConfig(MotionConfig & config, const QString & path)
+{
+	return CMotionConfig::GetInstance()->load(config, path);
+}
+
+bool motionControlSDK::MC_LoadCurrentMotionConfig(MotionConfig & config)
+{
+	if (!d->initialized)
+	{
+		NAMED_LOG_E("logicMoudle", "MC_LoadCurrentMotionConfig failed. d->initialized is false");
+		return false;
+	}
+	
+	config = d->motionConfig;
+	return true;
+}
+
+bool motionControlSDK::MC_SetMotionConfig(const MotionConfig & config)
+{
+	if (!d->initialized)
+	{
+		NAMED_LOG_E("logicMoudle", "MC_SetMotionConfig failed. d->initialized is false");
+		return false;
+	}
+
+	if (!d->connectedState)
+	{
+		NAMED_LOG_E("logicMoudle", "MC_SetMotionConfig failed. d->connectedState is false");
+		return false;
+	}
+
+	// 调用下位机参数设置接口
+	// TODO
+
+	NAMED_LOG_D("logicMoudle", "MC_SetMotionConfig call SetPrintStartPos, SetPrintEndPos, SetPrintCleanPos, SetAxisSpd, SetAxisUnitStep");
+	SDKManager::GetInstance()->SetPrintStartPos(d->motionConfig.startPos);
+	SDKManager::GetInstance()->SetPrintEndPos(d->motionConfig.endPos);
+	SDKManager::GetInstance()->SetPrintCleanPos(d->motionConfig.cleanPos);
+	SDKManager::GetInstance()->SetAxisSpd(d->motionConfig.speed);
+	SDKManager::GetInstance()->SetAxisUnitStep(d->motionConfig.step);
+	// 结构体信息同步
+	d->motionConfig = config;
+	return true;
+}
+
 void motionControlSDK::refreshConnectionStatus()
 {
-	bool connected = SDKManager::instance()->isConnected();
+	bool connected = SDKManager::GetInstance()->IsConnected();
 	if (d->connectedState != connected) 
 	{
 		d->connectedState = connected;
@@ -263,7 +317,7 @@ bool motionControlSDK::MC_GoHome()
 
 	// 所有轴回原点
 	// axisFlag = 7 表示 X(1) + Y(2) + Z(4) = 全部轴 
-	int ret = SDKManager::instance()->resetAxis(7);
+	int ret = SDKManager::GetInstance()->ResetAxis(7);
 	if (ret != 0) 
 	{
 		emit MC_SigErrOccurred(-1, QString(u8"go_home_cmd_failed"));
@@ -284,7 +338,7 @@ bool motionControlSDK::MC_moveXAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的X轴移动
-	int result = SDKManager::instance()->move2AbsXAxis(targetPos);
+	int result = SDKManager::GetInstance()->Move2AbsXAxis(targetPos);
 	return (result == 0);
 }
 
@@ -297,7 +351,7 @@ bool motionControlSDK::MC_moveYAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的Y轴移动
-	int result = SDKManager::instance()->move2AbsYAxis(targetPos);
+	int result = SDKManager::GetInstance()->Move2AbsYAxis(targetPos);
 	return (result == 0);
 }
 
@@ -310,7 +364,7 @@ bool motionControlSDK::MC_moveZAxis(const MoveAxisPos& targetPos)
 	}
 
 	// 调用SDKManager的Z轴移动
-	int result = SDKManager::instance()->move2AbsZAxis(targetPos);
+	int result = SDKManager::GetInstance()->Move2AbsZAxis(targetPos);
 	return (result == 0);
 }
 
@@ -327,15 +381,15 @@ bool motionControlSDK::MC_move2RelSingleAxisPos(double dx, double dy, double dz)
 	// 调用SDKManager的相对移动
 	if (dx != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dx);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dx);
 	}
 	if (dy != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dy);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dy);
 	}
 	if (dz != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dz);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dz);
 	}
 	if (ret != 0)
 	{
@@ -359,15 +413,15 @@ bool motionControlSDK::MC_move2AbsSingleAxisPos(const MoveAxisPos& targetPos)
 	// 调用SDKManager的绝对移动
 	if (targetPos.xPos != 0)
 	{
-		ret |= SDKManager::instance()->move2AbsXAxis(targetPos);
+		ret |= SDKManager::GetInstance()->Move2AbsXAxis(targetPos);
 	}
 	if (targetPos.yPos != 0)
 	{
-		ret |= SDKManager::instance()->move2AbsYAxis(targetPos);
+		ret |= SDKManager::GetInstance()->Move2AbsYAxis(targetPos);
 	}
 	if (targetPos.zPos != 0)
 	{
-		ret |= SDKManager::instance()->move2AbsZAxis(targetPos);
+		ret |= SDKManager::GetInstance()->Move2AbsZAxis(targetPos);
 	}
 	if (ret != 0)
 	{
@@ -397,15 +451,15 @@ bool motionControlSDK::MC_move2RelAxisPos(double dx, double dy, double dz)
 	// 调用SDKManager的相对移动
 	if (dx != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dx);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dx);
 	}
 	if (dy != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dy);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dy);
 	}
 	if (dz != 0)
 	{
-		ret |= SDKManager::instance()->move2RelXAxis(dz);
+		ret |= SDKManager::GetInstance()->Move2RelXAxis(dz);
 	}
 	if (ret != 0)
 	{
@@ -435,7 +489,7 @@ bool motionControlSDK::MC_move2AbsAxisPos(const MoveAxisPos& targetPos)
 	stream << targetPos.yPos;
 	stream << targetPos.zPos;
 
-	int result = SDKManager::instance()->move2AbsPosition(data);
+	int result = SDKManager::GetInstance()->Move2AbsPosition(data);
 	return (result == 0);
 }
 
@@ -455,7 +509,7 @@ bool motionControlSDK::MC_move2AbsAxisPos(const QByteArray& positionData)
 	}
 
 	// 调用SDKManager的3轴同时移动
-	int result = SDKManager::instance()->move2AbsPosition(positionData);
+	int result = SDKManager::GetInstance()->Move2AbsPosition(positionData);
 	return (result == 0);
 }
 
@@ -464,36 +518,11 @@ bool motionControlSDK::MC_move2AbsAxisPos(const QByteArray& positionData)
 
 bool motionControlSDK::MC_SendData(int cmdType, const QByteArray& data)
 {
-	SDKManager::instance()->sendCommand(cmdType, data);
+	SDKManager::GetInstance()->SendCommand(cmdType, data);
 	return true;
 }
 
 // ======================= 打印控制 ====================
-
-bool motionControlSDK::MC_loadPrintData(const QString& filePath)
-{
-	if (!MC_IsConnected())
-	{
-		emit MC_SigErrOccurred(-1, tr(u8"dev_unconnect"));
-		return false;
-	}
-
-	if (filePath.isEmpty()) 
-	{
-		emit MC_SigErrOccurred(-1, tr(u8"文件路径为空"));
-		return false;
-	}
-
-	int ret = SDKManager::instance()->loadImageData(filePath.toUtf8().constData());
-	if (ret != 0) 
-	{
-		emit MC_SigErrOccurred(ret, tr(u8"加载打印数据失败"));
-		return false;
-	}
-
-	emit MC_SigInfoMsg(tr(u8"图像数据已加载：%1").arg(filePath));
-	return true;
-}
 
 bool motionControlSDK::MC_StartPrint()
 {
@@ -503,7 +532,7 @@ bool motionControlSDK::MC_StartPrint()
 		return false;
 	}
 
-	int ret = SDKManager::instance()->startPrint();
+	int ret = SDKManager::GetInstance()->StartPrint();
 	if (ret != 0) 
 	{
 		emit MC_SigErrOccurred(ret, tr("start_print_cmd_failed"));
@@ -522,7 +551,7 @@ bool motionControlSDK::MC_PausePrint()
 		return false;
 	}
 
-	int ret = SDKManager::instance()->pausePrint();
+	int ret = SDKManager::GetInstance()->PausePrint();
 	if (ret != 0) 
 	{
 		emit MC_SigErrOccurred(ret, tr(u8"暂停打印命令失败"));
@@ -541,7 +570,7 @@ bool motionControlSDK::MC_ResumePrint()
 		return false;
 	}
 
-	int ret = SDKManager::instance()->resumePrint();
+	int ret = SDKManager::GetInstance()->ResumePrint();
 	if (ret != 0) 
 	{
 		emit MC_SigErrOccurred(ret, tr(u8"恢复打印命令失败"));
@@ -560,7 +589,7 @@ bool motionControlSDK::MC_StopPrint()
 		return false;
 	}
 
-	int ret = SDKManager::instance()->stopPrint();
+	int ret = SDKManager::GetInstance()->StopPrint();
 	if (ret != 0) 
 	{
 		emit MC_SigErrOccurred(ret, tr(u8"停止打印命令失败"));
@@ -578,11 +607,10 @@ bool motionControlSDK::MC_CleanPrint()
 
 void motionControlSDK::MC_SendCmd(int operCmd, const QByteArray& arrData)
 {
-	SDKManager::instance()->sendCommand(operCmd, arrData);
+	SDKManager::GetInstance()->SendCommand(operCmd, arrData);
 }
 
 // ==================== 回调函数（桥接C回调到Qt信号）====================
-
 void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 {
 	if (!event) 
@@ -617,17 +645,24 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 			if (message.contains("connected", Qt::CaseInsensitive) &&
 				message.contains("dev", Qt::CaseInsensitive)) 
 			{
+				// 连接成功, 将配置参数设置到下位机
 				s_instance->d->connectedState = true;
+
+				// 连接标志位修改之后, 再调用参数下发接口
+				s_instance->MC_SetMotionConfig(s_instance->d->motionConfig);
+
 				emit s_instance->connected();
 				emit s_instance->MC_SigConnectedChanged(true);
-				LOG_INFO(QString("motion_moudle sdk_connected_dev"));
+				SPDLOG_INFO("motion_moudle sdk_connected_dev");
+
 			}
 			else if (message.contains("disconnected", Qt::CaseInsensitive)) 
 			{
 				s_instance->d->connectedState = false;
 				emit s_instance->MC_SigDisconnected();
 				emit s_instance->MC_SigConnectedChanged(false);
-				LOG_INFO(QString("motion_moudle sdk_disconnected_dev"));
+				SPDLOG_INFO("motion_moudle sdk_disconnected_dev");
+
 			}
 			emit s_instance->MC_SigInfoMsg(message);
 			break;
@@ -636,7 +671,8 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		case EVENT_TYPE_ERROR: 
 		{
 			emit s_instance->MC_SigErrOccurred(code, message);
-			qWarning() << "SDK Error:" << code << message;
+			SPDLOG_INFO("SDK Error:{} {} ", code, message.toUtf8().toStdString());
+			//qWarning() << "SDK Error:" << code << message;
 			break;
 		}
 
@@ -653,6 +689,7 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 
 			qDebug() << "Print progress:" << progress << "%"
 				<< currentLayer << "/" << totalLayers;
+			//SPDLOG_INFO("Print progress:{} %{} /{}", progress, currentLayer, totalLayers);
 			break;
 		}
 
@@ -664,6 +701,9 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 			if (v1 != 0 || v2 != 0 || v3 != 0) {
 				emit s_instance->MC_SigPosChanged(v1, v2, v3);
 				qDebug() << "Position:" << v1 << v2 << v3;
+				//auto str = FormatString(v1, v2, v3);
+				//SPDLOG_INFO("motion_moudle Position:", str);
+
 			}
 			break;
 		}
@@ -671,23 +711,28 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 		case EVENT_TYPE_LOG: 
 		{
 			emit s_instance->MC_SigLogMsg(message);
+			SPDLOG_INFO("motion_moudle SDK_Log: {}", message.toUtf8().toStdString());
 			// qDebug() << "SDK Log:" << message;  // 可选：打印到调试输出
 			break;
 		}
 		case EVENT_TYPE_SEND_MSG:
 		{
 			emit s_instance->MC_SigSend2DevCmdMsg(message);
-			LOG_INFO(QString("motion_moudle sdk_send_hex_msg: %1").arg(message));
+			//auto str = FormatString(QString("motion_moudle sdk_send_hex_msg: %1").arg(message));
+			SPDLOG_INFO("motion_moudle sdk_send_hex_msg: {}", message.toUtf8().toStdString());
 			break;
 		}
 		case EVENT_TYPE_RECV_MSG:
 		{
 			emit s_instance->MC_SigRecv2DevCmdMsg(message);
-			LOG_INFO(QString("motion_moudle sdk_recv_hex_msg: %1").arg(message));
+			SPDLOG_INFO("motion_moudle sdk_recv_hex_msg: {}", message.toUtf8().toStdString());
+			//SPDLOG_INFO(FormatString(QString("motion_moudle sdk_recv_hex_msg: %1").arg(message)));
+
 			break;
 		}
 		default: 
 		{
+			//SPDLOG_INFO("motion_moudle Unknown event type:{}", type);
 			qWarning() << "Unknown event type:" << type;
 			break;
 		}

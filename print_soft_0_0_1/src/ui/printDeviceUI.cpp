@@ -5,6 +5,7 @@
 
 
 #include "sdk/protocol/ProtocolPrint.h"
+#include "SpdlogMgr.h"
 
 #define TurnOffHeartBeat
 
@@ -38,7 +39,12 @@ void PrintDeviceUI::Init()
 
 		emit SigAddShowOperCmd(QString("连接成功"), "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString("motion_SDK_moudle, 链接成功"));
+		NAMED_LOG_I("print_soft", "motion_SDK_moudle, 链接成功");
+
+		// 新增读取全部sdk配置文件数据至对话框
+		MotionConfig tmp;
+		m_motionSDK->MC_LoadMotionConfig(tmp);
+		SetMCCfgFile2UI(tmp);
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigDisconnected, this, [this]()
@@ -47,7 +53,7 @@ void PrintDeviceUI::Init()
 
 		emit SigAddShowOperCmd(QString("断开连接"), "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString("motion_SDK_moudle, 断开成功"));
+		NAMED_LOG_I("print_soft", "motion_SDK_moudle, 断开成功");
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigConnectedChanged, this, [this](bool bConn)
@@ -56,7 +62,7 @@ void PrintDeviceUI::Init()
 
 		emit SigAddShowOperCmd(logInfo, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString("motion_SDK_moudle, 链接状态%1").arg(bConn));
+		NAMED_LOG_I("print_soft", "motion_SDK_moudle, 链接状态 {} ",bConn);
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigPrintProgUpdated, [this]()
@@ -69,7 +75,7 @@ void PrintDeviceUI::Init()
 		QString logStr = QString("motion_SDK_moudle, 当前错误code: %1, 当前错误msg: %2").arg(ec).arg(emsg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(QString("motion_SDK_当前错误code:%1, 当前错误msg: %2").arg(ec).arg(emsg));
+		NAMED_LOG_I("print_soft", "motion_SDK_当前错误code:{}, 当前错误msg: {}", ec, emsg);
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigInfoMsg, this, [this](const QString& emsg)
@@ -77,7 +83,7 @@ void PrintDeviceUI::Init()
 		QString logStr = QString("motion_SDK_moudle, 当前msg: %1").arg(emsg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(logStr);
+		NAMED_LOG_I("print_soft", logStr);
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigLogMsg, this, [this](const QString& msg)
@@ -85,7 +91,7 @@ void PrintDeviceUI::Init()
 		QString logStr = QString("motion_SDK_moudle, 当前打印日志msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(logStr);
+		NAMED_LOG_I("print_soft", logStr);
 	});
 
 
@@ -94,7 +100,7 @@ void PrintDeviceUI::Init()
 		QString logStr = QString("motion_SDK_moudle, 下发设备msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_Sendomm);
 
-		LOG_INFO(logStr);
+		NAMED_LOG_I("print_soft", logStr);
 	});
 
 	connect(m_motionSDK, &motionControlSDK::MC_SigRecv2DevCmdMsg, this, [this](const QString& msg)
@@ -102,7 +108,7 @@ void PrintDeviceUI::Init()
 		QString logStr = QString("motion_SDK_moudle, 接收设备msg: %1").arg(msg);
 		emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_RecvComm);
 
-		LOG_INFO(logStr);
+		NAMED_LOG_I("print_soft", logStr);
 	});
 
 	InitUI();
@@ -138,8 +144,8 @@ void PrintDeviceUI::InitUI()
 		m_connStateLab = new QLabel(u8"未链接");
 
 		m_ipLine = new QLineEdit();
-		m_ipLine->setText("192.168.1.100");
-		//m_ipLine->setText("127.0.0.1");
+		//m_ipLine->setText("192.168.1.100");
+		m_ipLine->setText("127.0.0.1");
 
 		m_portLine = new QLineEdit();
 		m_portLine->setText("12355");
@@ -203,7 +209,7 @@ void PrintDeviceUI::InitUI()
 		QGridLayout* layout = new QGridLayout;
 		box21->setLayout(layout);
 
-		auto addUI = [&](const QString& text, const QString& objText, EPrintParamType type, int row, int col)
+		auto addUI = [&](const QString& text, const QString& objText, EPrintParamType type, int row, int col, bool enable = false)
 		{
 			QLabel* titleLab = new QLabel(text);
 			QLineEdit* dataLine = new QLineEdit();
@@ -228,24 +234,27 @@ void PrintDeviceUI::InitUI()
 
 			layout->addWidget(titleLab, row, col, 1, 1);
 			layout->addWidget(dataLine, row, col + 1, 1, 1);
-			layout->addWidget(btn, row, col + 2, 1, 1);
+			if (enable)
+			{
+				layout->addWidget(btn, row, col + 2, 1, 1);
+			}
 		};
 
-		addUI(u8"打印起点", "EPPT_SetStartPos", EPPT_SetStartPos, 0, 0);
-		addUI(u8"打印终点", "EPPT_SetStopPos", EPPT_SetStopPos, 0, 3);
-		addUI(u8"清洗位置", "EPPT_SetClenaPos", EPPT_SetClenaPos, 0, 6);
+		addUI(u8"打印起点", "EPPT_SetStartPos", EPPT_SetStartPos, 0, 0, true);
+		addUI(u8"打印终点", "EPPT_SetStopPos", EPPT_SetStopPos, 0, 3, true);
+		addUI(u8"清洗位置", "EPPT_SetClenaPos", EPPT_SetClenaPos, 0, 6, true);
 
 		addUI(u8"X轴步进", "EPPT_SetStepX", EPPT_SetStepX, 1, 0);
 		addUI(u8"Y轴步进", "EPPT_SetStepY", EPPT_SetStepY, 1, 3);
-		addUI(u8"Z轴步进", "EPPT_SetStepZ",EPPT_SetStepZ, 1, 6);
+		addUI(u8"Z轴步进", "EPPT_SetStepZ",EPPT_SetStepZ, 1, 6, true);
 
-		addUI(u8"Z轴限位", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 6);
 		addUI(u8"X轴限位", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 0);
-		addUI(u8"Y轴限位", "EPPT_SetLimitXPos", EPPT_SetLimitXPos, 2, 3);
-		
+		addUI(u8"Y轴限位", "EPPT_SetLimitYPos", EPPT_SetLimitYPos, 2, 3);
+		addUI(u8"Z轴限位", "EPPT_SetLimitZPos", EPPT_SetLimitZPos, 2, 6, true);
+
 		addUI(u8"X轴速度", "EPPT_SetSpdX", EPPT_SetSpdX, 3, 0);
 		addUI(u8"Y轴速度", "EPPT_SetSpdY", EPPT_SetSpdY, 3, 3);
-		addUI(u8"Z轴速度", "EPPT_SetSpdZ", EPPT_SetSpdZ, 3, 6);
+		addUI(u8"Z轴速度", "EPPT_SetSpdZ", EPPT_SetSpdZ, 3, 6, true);
 
 	}
 
@@ -338,6 +347,28 @@ void PrintDeviceUI::InitUI()
 }
 
 
+void PrintDeviceUI::SetMCCfgFile2UI(const MotionConfig& data)
+{
+	m_ipLine->setText(data.ip);
+	m_portLine->setText(QString::number(data.port));
+	auto str = data.startPos.toStrList(data.startPos);
+	this->findChild<QLineEdit*>("EPPT_SetStartPos")->setText((data.startPos.toStrList(data.startPos)).join(","));
+	this->findChild<QLineEdit*>("EPPT_SetStopPos")->setText ((data.startPos.toStrList(data.endPos)).join(","));
+	this->findChild<QLineEdit*>("EPPT_SetClenaPos")->setText((data.startPos.toStrList(data.cleanPos)).join(","));
+	auto stepStr = data.step.toStrList(data.startPos);
+	this->findChild<QLineEdit*>("EPPT_SetStepX")->setText(stepStr.at(0));
+	this->findChild<QLineEdit*>("EPPT_SetStepY")->setText(stepStr.at(1));
+	this->findChild<QLineEdit*>("EPPT_SetStepZ")->setText(stepStr.at(2));
+	auto limitStr = data.limit.toStrList(data.startPos);
+	this->findChild<QLineEdit*>("EPPT_SetLimitXPos")->setText(limitStr.at(0));
+	this->findChild<QLineEdit*>("EPPT_SetLimitYPos")->setText(limitStr.at(1));
+	this->findChild<QLineEdit*>("EPPT_SetLimitZPos")->setText(limitStr.at(2));
+	auto spdStr = data.speed.toStrList(data.startPos);
+	this->findChild<QLineEdit*>("EPPT_SetSpdX")->setText(spdStr.at(0));
+	this->findChild<QLineEdit*>("EPPT_SetSpdY")->setText(spdStr.at(1));
+	this->findChild<QLineEdit*>("EPPT_SetSpdZ")->setText(spdStr.at(2));
+}
+
 void PrintDeviceUI::OnListenBtnClicked(int idx)
 {
 	QString logStr;
@@ -387,7 +418,7 @@ void PrintDeviceUI::OnListenBtnClicked(int idx)
 		break;
 	}
 	emit SigAddShowOperCmd(logStr, "", ESET_OperComm);
-	LOG_INFO(logStr);
+	NAMED_LOG_I("print_soft", logStr);
 }
 
 void PrintDeviceUI::OnShowOperCmd(const QString& msg, QByteArray arr, const ShowEditType& type)
@@ -445,7 +476,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 	//{
 	//	auto logStr = QString("未连接运动模块，无法进行相关操作");
 	//	emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_OperComm);
-	//	LOG_INFO(logStr);
+	//	NAMED_LOG_I("print_soft", logStr);
 	//	return;
 	//}
 
@@ -458,7 +489,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("开始打印操作"));
 
 		m_motionSDK->MC_StartPrint();
-		LOG_INFO(QString("开始打印操作"));
+		NAMED_LOG_I("print_soft", "开始打印操作");
 		break;
 	}
 	case EPOF_StopPrint:
@@ -467,7 +498,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("停止打印操作"));
 
 		m_motionSDK->MC_StopPrint();
-		LOG_INFO(QString("停止打印操作"));
+		NAMED_LOG_I("print_soft", "停止打印操作");
 
 		break;
 	}
@@ -477,7 +508,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("暂停打印操作"));
 
 		m_motionSDK->MC_PausePrint();
-		LOG_INFO(QString("暂停打印操作"));
+		NAMED_LOG_I("print_soft", "暂停打印操作");
 
 		break;
 	}
@@ -487,7 +518,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("继续打印操作"));
 
 		m_motionSDK->MC_ResumePrint();
-		LOG_INFO(QString("继续打印操作"));
+		NAMED_LOG_I("print_soft", "继续打印操作");
 		break;
 	}
 	case EPOF_CleanPos:
@@ -496,7 +527,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("移动至清洗位置操作"));
 
 		m_motionSDK->MC_CleanPrint();
-		LOG_INFO(QString("移动至清洗位置操作"));
+		NAMED_LOG_I("print_soft", "移动至清洗位置操作");
 		break;
 	}
 	case EPOF_GoHomnePos:
@@ -505,7 +536,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 		logStr.append(QString("各轴复位操作"));
 
 		m_motionSDK->MC_GoHome();
-		LOG_INFO(QString("各轴复位操作"));
+		NAMED_LOG_I("print_soft", "各轴复位操作");
 		break;
 	}
 
@@ -515,8 +546,7 @@ void PrintDeviceUI::OnHandlePrintOperFun(int idx)
 	
 	emit SigAddShowOperCmd(logStr, "" ,ShowEditType::ESET_Sendomm);
 	emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_OperComm);
-	LOG_INFO(QString("print_UI_module print_btn_oper cur_oper_comm = %1")
-		.arg(logStr.toStdString().c_str()));
+	NAMED_LOG_I("print_soft", "print_UI_module print_btn_oper cur_oper_comm = {}", logStr);
 }
 
 void PrintDeviceUI::OnHandlePrintParamFun(int idx)
@@ -532,7 +562,7 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 	//{
 	//	auto logStr = QString("未连接运动模块，无法进行相关操作");
 	//	emit SigAddShowOperCmd(logStr, "", ShowEditType::ESET_OperComm);
-	//	LOG_INFO(logStr);
+	//	NAMED_LOG_I("print_soft", logStr);
 	//	return;
 	//}
 
@@ -545,13 +575,18 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			// 获取移动的数据，单位um
 			// 根据,拆分数据，往下分发
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStartPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置打印起点信息\n"));
 			logStr.append(QString("设置打印起点信息\n"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(QString(hexArr.toHex(' ').toUpper()))));
-
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
 
+			//更新SDK打印参数配置
+			MoveAxisPos data = Utils::GetInstance()->StrLis2MoveAxisData(valData);
+			MotionConfig tmp;
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.startPos = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
 			break;
 		}
 		case EPPT_SetStopPos:
@@ -559,18 +594,25 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_PrintEndPos);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStopPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			m_motionSDK->MC_SendCmd(cmdType, hexArr);	
 
-			m_motionSDK->MC_SendCmd(cmdType, hexArr);			break;
+			//更新SDK打印参数配置
+			MoveAxisPos data = Utils::GetInstance()->StrLis2MoveAxisData(valData);
+			MotionConfig tmp;
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.endPos = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
+			break;
 		}
 		case EPPT_SetStepX:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepX")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置X轴步进值"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
@@ -582,7 +624,7 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepY")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置Y轴步进值"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
@@ -593,32 +635,58 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		case EPPT_SetStepZ:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxisUnitMove);
-			auto valData = this->findChild<QLineEdit*>("EPPT_SetStepZ")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString("设置Z轴步进值"));
-			logStr.append(QString("设置打印终点信息"));
-			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
+			QString valStr;
+			auto xVal = this->findChild<QLineEdit*>("EPPT_SetStepX")->text();
+			auto yVal = this->findChild<QLineEdit*>("EPPT_SetStepY")->text();
+			auto zVal = this->findChild<QLineEdit*>("EPPT_SetStepZ")->text();
+
+			valStr.append(xVal.isEmpty() ? "0" : xVal);
+			valStr.append(",");
+			valStr.append(yVal.isEmpty() ? "0" : yVal);
+			valStr.append(",");
+			valStr.append(zVal.isEmpty() ? "0" : zVal);
 			
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valStr, false, false);
+			operStr.append(QString("设置各轴步进值"));
+			logStr.append(QString("设置打印终点信息"));
+			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));	
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
+
+			//更新SDK打印参数配置
+			MoveAxisPos data;
+			MotionConfig tmp;
+			data.xPos = xVal.isEmpty() ? 0 : xVal.toUInt();
+			data.yPos = yVal.isEmpty() ? 0 : yVal.toUInt();
+			data.zPos = zVal.isEmpty() ? 0 : zVal.toUInt();
+
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.step = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
 			break;
 		}
 		case EPPT_SetClenaPos:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_CleanPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetClenaPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置清洗位置"));
 			logStr.append(QString("设置打印终点信息"));
-			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
-			
+			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));	
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
+
+			//更新SDK打印参数配置
+			MoveAxisPos data = Utils::GetInstance()->StrLis2MoveAxisData(valData);
+			MotionConfig tmp;
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.cleanPos = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
 			break;
 		}
 		case EPPT_SetLimitXPos:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitXPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置X轴限位"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
@@ -630,7 +698,7 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitYPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置Y轴限位"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
@@ -641,20 +709,40 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		case EPPT_SetLimitZPos:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_MaxLimitPos);
-			auto valData = this->findChild<QLineEdit*>("EPPT_SetLimitZPos")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString("设置Z轴限位"));
+			QString valStr;
+			auto xVal = this->findChild<QLineEdit*>("EPPT_SetLimitXPos")->text();
+			auto yVal = this->findChild<QLineEdit*>("EPPT_SetLimitYPos")->text();
+			auto zVal = this->findChild<QLineEdit*>("EPPT_SetLimitZPos")->text();
+
+			valStr.append(xVal.isEmpty() ? "0" : xVal);
+			valStr.append(",");
+			valStr.append(yVal.isEmpty() ? "0" : yVal);
+			valStr.append(",");
+			valStr.append(zVal.isEmpty() ? "0" : zVal);
+
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valStr, false, false);
+			operStr.append(QString("设置各轴限位"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
-
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
+
+			//更新SDK打印参数配置
+			MoveAxisPos data;
+			MotionConfig tmp;
+			data.xPos = xVal.isEmpty() ? 0 : xVal.toUInt();
+			data.yPos = yVal.isEmpty() ? 0 : yVal.toUInt();
+			data.zPos = zVal.isEmpty() ? 0 : zVal.toUInt();
+
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.speed = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
 			break;
 		}
 		case EPPT_SetSpdX:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdX")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置X轴速度"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
@@ -666,24 +754,44 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
 			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdY")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valData, false, false);
 			operStr.append(QString("设置Y轴速度"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
-			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
+
 			break;
 		}
 		case EPPT_SetSpdZ:
 		{
 			cmdType = static_cast<int>(ProtocolPrint::SetParam_AxistSpd);
-			auto valData = this->findChild<QLineEdit*>("EPPT_SetSpdZ")->text();
-			hexArr = Utils::GetInstance().MultiMicroDisStrTo12BytesHex(valData, false, false);
-			operStr.append(QString("设置Z轴速度"));
+			QString valStr;
+			auto xVal = this->findChild<QLineEdit*>("EPPT_SetSpdX")->text();
+			auto yVal = this->findChild<QLineEdit*>("EPPT_SetSpdY")->text();
+			auto zVal = this->findChild<QLineEdit*>("EPPT_SetSpdZ")->text();
+			
+			valStr.append(xVal.isEmpty() ? "0" : xVal);
+			valStr.append(",");
+			valStr.append(yVal.isEmpty() ? "0" : yVal);
+			valStr.append(",");
+			valStr.append(zVal.isEmpty() ? "0" : zVal);
+			hexArr = Utils::GetInstance()->MultiMicroDisStrTo12BytesHex(valStr, false, false);
+
+			operStr.append(QString("设置各轴速度"));
 			logStr.append(QString("设置打印终点信息"));
 			logStr.append(QString("数据区发送数据：%1").arg(QString(hexArr.toHex(' ').toUpper())));
-			
 			m_motionSDK->MC_SendCmd(cmdType, hexArr);
+			
+			//更新SDK打印参数配置
+			MoveAxisPos data;
+			MotionConfig tmp;
+			data.xPos = xVal.isEmpty() ? 0 : xVal.toUInt();
+			data.yPos = yVal.isEmpty() ? 0 : yVal.toUInt();
+			data.zPos = zVal.isEmpty() ? 0 : zVal.toUInt();
+						
+			m_motionSDK->MC_LoadCurrentMotionConfig(tmp);
+			tmp.speed = data;
+			m_motionSDK->MC_SetMotionConfig(tmp);
 			break;
 		}
 		default:
@@ -692,8 +800,7 @@ void PrintDeviceUI::OnHandlePrintParamFun(int idx)
 
 	emit SigAddShowOperCmd(operStr,"" , ShowEditType::ESET_OperComm);
 	emit SigAddShowOperCmd(logStr);
-	LOG_INFO(QString("print_UI_module print_btn_oper cur_oper_comm = %1")
-		.arg(logStr.toStdString().c_str()));
+	NAMED_LOG_I("print_soft", "print_UI_module print_btn_oper cur_oper_comm = {}", logStr);
 }
 
 void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
@@ -712,7 +819,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_XAxisLMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false,false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false,false);
 			sendData.append(data);
 			sendData.append(static_cast<char>(0x00));		// Y轴补0
 			sendData.append(static_cast<char>(0x00));		// Z轴补0
@@ -727,7 +834,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_XAxisRMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
 			sendData.append(static_cast<char>(0x00));		// Y轴补0
 			sendData.append(static_cast<char>(0x00));		// Z轴补0
@@ -742,7 +849,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_YAxisLMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_XAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
 			sendData.prepend(static_cast<char>(0x00));		// X轴补0
 			sendData.append(static_cast<char>(0x00));		// Z轴补0
@@ -758,7 +865,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_YAxisRMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_YAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
 			sendData.prepend(static_cast<char>(0x00));		// X轴补0
 			sendData.append(static_cast<char>(0x00));		// Z轴补0
@@ -773,7 +880,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisLMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_ZAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
 			sendData.prepend(static_cast<char>(0x00));		// X轴补0
 			sendData.prepend(static_cast<char>(0x00));		// Z轴补0
@@ -788,7 +895,7 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 			cmdType = static_cast<int>(ProtocolPrint::Ctrl_ZAxisRMove);
 			//获取移动的数据，单位um
 			auto valData = this->findChild<QLineEdit*>("EPMOF_ZAxisLMove")->text();
-			auto data = Utils::GetInstance().MicroDisStrTo4BytesHex(valData, false, false);
+			auto data = Utils::GetInstance()->MicroDisStrTo4BytesHex(valData, false, false);
 			sendData.append(data);
 			sendData.prepend(static_cast<char>(0x00));		// X轴补0
 			sendData.prepend(static_cast<char>(0x00));		// Z轴补0
@@ -804,6 +911,5 @@ void PrintDeviceUI::OnHandlePrintMoveFun(int idx)
 	emit SigAddShowOperCmd(logStr);
 	emit SigAddShowOperCmd(operStr, "", ShowEditType::ESET_OperComm);
 	m_motionSDK->MC_SendCmd(cmdType, sendData);
-	LOG_INFO(QString("print_UI_module print_btn_oper cur_oper_comm = %1")
-		.arg(logStr.toStdString().c_str()));
+	NAMED_LOG_I("print_soft", "print_UI_module print_btn_oper cur_oper_comm = {}", logStr);
 }

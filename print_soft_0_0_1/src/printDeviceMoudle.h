@@ -1,11 +1,6 @@
 ﻿#pragma once
 
-//#include "ui_printDeviceMoudle.h"
 #include <QtWidgets/QtWidgets>
-#include <QButtonGroup>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-
 #include "printDeviceUI.h"
 
 
@@ -33,7 +28,5 @@ private:
 
 
 private:
-	//motionControlSDK m_motion;
 	PrintDeviceUI m_printUI;
-	//SerialPortWidget m_serialUI;
 };

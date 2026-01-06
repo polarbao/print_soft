@@ -13,120 +13,57 @@
 
 // ==================== 打印控制 ====================
 
-int SDKManager::startPrint() 
+int SDKManager::StartPrint()
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-   sendCommand(ProtocolPrint::Ctrl_StartPrint);
+	SendCommand(ProtocolPrint::Ctrl_StartPrint);
     return 0;
 }
 
-int SDKManager::stopPrint() 
+int SDKManager::StopPrint() 
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Ctrl_PasusePrint);
+	SendCommand(ProtocolPrint::Ctrl_PasusePrint);
     return 0;
 }
 
-int SDKManager::pausePrint() 
+int SDKManager::PausePrint() 
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-   sendCommand(ProtocolPrint::Ctrl_StopPrint);
+   SendCommand(ProtocolPrint::Ctrl_StopPrint);
     return 0;
 }
 
-int SDKManager::resumePrint() 
+int SDKManager::ResumePrint() 
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Ctrl_ContinuePrint);
+    SendCommand(ProtocolPrint::Ctrl_ContinuePrint);
     return 0;
 }
 
-int SDKManager::resetPrint() 
+int SDKManager::ResetPrint() 
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-    sendCommand(ProtocolPrint::Ctrl_ResetPos);
+    SendCommand(ProtocolPrint::Ctrl_ResetPos);
     return 0;
 }
-
-int SDKManager::loadImageData(const QString& imagePath) 
-{
-    if (!isConnected()) 
-	{
-        return -1;
-    }
-    
-    // 加载图像文件
-    QImage img(imagePath);
-    if (img.isNull()) 
-	{
-        sendEvent(EVENT_TYPE_ERROR, -1, "Failed to load image");
-        return -1;
-    }
-    
-    // 读取原始文件数据
-    QFile file(imagePath);
-    if (!file.open(QIODevice::ReadOnly)) 
-	{
-        sendEvent(EVENT_TYPE_ERROR, -1, "Failed to open image file");
-        return -1;
-    }
-    
-    QByteArray rawData = file.readAll().toHex();
-    file.close();
-    
-    // 根据文件扩展名确定图像类型
-    quint8 imgType = 0x01; // 默认JPG
-    if (imagePath.endsWith(".png", Qt::CaseInsensitive)) 
-	{
-        imgType = 0x02;  // PNG
-    }
-	else if (imagePath.endsWith(".bmp", Qt::CaseInsensitive)) 
-	{
-        imgType = 0x03;  // BMP
-    } 
-	else if (imagePath.endsWith(".raw", Qt::CaseInsensitive)) 
-	{
-        imgType = 0x04;  // RAW
-    }
-    
-    // 使用协议打包图像数据
-    // 图像会被分包成多个数据包
-    QList<QByteArray> packets = ProtocolPrint::GetSendImgDatagram(
-        img.width(), img.height(), imgType, rawData);
-    
-    // 发送所有数据包
-    for (const auto& packet : packets) 
-	{
-        m_tcpClient->sendData(packet);
-    }
-    
-    // 发送成功事件
-    QString msg = QString("Image data sent: %1 packets, size: %2x%3")
-        .arg(packets.size())
-        .arg(img.width())
-        .arg(img.height());
-    sendEvent(EVENT_TYPE_GENERAL, 0, msg.toUtf8().constData());
-    
-    return 0;
-}
-

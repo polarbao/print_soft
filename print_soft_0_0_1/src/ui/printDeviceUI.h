@@ -13,7 +13,7 @@
 
 #include "global.h"
 
-#include "motioncontrolsdk_global.h"
+#include "motioncontrolsdk_define.h"
 #include "motionControlSDK.h"
 
 
@@ -95,55 +95,96 @@ public:
 
 
 private:
-
+	/** 
+	*  @brief       初始化函数 
+	*  @param[in]    
+	*  @param[out]   
+	*  @return                    
+	*/
 	void Init();
 
+	/** 
+	*  @brief       UI界面初始化函数 
+	*  @param[in]    
+	*  @param[out]   
+	*  @return                    
+	*/
 	void InitUI();
 
-
+	/** 
+	*  @brief       读取运动控制配置文件至UI界面
+	*  @param[in]   data - 运动控制模块结构体数据
+	*  @param[out]   
+	*  @return                    
+	*/
+	void SetMCCfgFile2UI(const MotionConfig& data);
 	 
 public slots:
-	//UI
+	/** 
+	*  @brief       网络控制按钮槽函数 
+	*  @param[in]   idx - 按钮枚举值（NetFun）
+	*  @param[out]   
+	*  @return                    
+	*/
 	void OnListenBtnClicked(int idx);
 	
 	//add_UI操作界面处理逻辑
+	/** 
+	*  @brief       操作日志显示处理逻辑 
+	*  @param[in]   msg - 操作日志
+	*  @param[in]	arr - 16进制数据
+	*  @param[in]	type - 显示框类型
+	*  @param[out]   
+	*  @return                    
+	*/
 	void OnShowOperCmd(const QString& msg, QByteArray arr, const ShowEditType& type);
 
 
 	//Btn
+	/** 
+	*  @brief       打印逻辑处理槽函数 
+	*  @param[in]   idx - 按钮类型（EPrintOperFun
+	*  @param[out]   
+	*  @return                    
+	*/
 	void OnHandlePrintOperFun(int idx);
+
+	/**
+	*  @brief       打印参数处理槽函数
+	*  @param[in]   idx - 按钮类型（EPrintOperFun
+	*  @param[out]
+	*  @return
+	*/
 	void OnHandlePrintParamFun(int idx);
+
+	/**
+	*  @brief       打印移动处理槽函数
+	*  @param[in]   idx - 按钮类型（EPrintMoveOperFun
+	*  @param[out]
+	*  @return
+	*/
 	void OnHandlePrintMoveFun(int idx);
 
 
 
 signals:
+
 	void SigAddShowLog(const QString& logStr);
+
 	void SigShowOperComm(const QString& msg, const ShowEditType& type, QByteArray arr = QByteArray());
 	
-	//add
 	void SigAddShowOperCmd(const QString& msg, QByteArray arr = QByteArray(), const ShowEditType& type = ShowEditType::ESET_Sendomm);
 
 
 private:
-	//Data
+	//sdk
 	motionControlSDK* m_motionSDK;
-	//std::unique_ptr<TcpClient>		m_tcpClient;
-	//std::unique_ptr<ProtocolPrint>	m_protocol;
-	//QTimer m_heartSendTimer;	//心跳定时器	
-	//QTimer m_heartOutTimer;		//超时
-	//int m_heartOutCnt;			//心跳超时计数
 
+	//btn
 	QButtonGroup* m_netBtnGroup;
-
-
 	QButtonGroup* m_printOperBtnGroup;
 	QButtonGroup* m_printParamBtnGroup;
 	QButtonGroup* m_printMoveBtnGroup;
-
-
-	QMutex m_heartMtx;			//心跳互斥锁
-
 
 
 	//UI

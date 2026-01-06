@@ -14,7 +14,7 @@
 #include <QDateTime>
 #include <QMap>
 
-#include "CLogManager.h"
+//#include "SpdlogMgr.h"
 
 
 #define SerialVer1_0

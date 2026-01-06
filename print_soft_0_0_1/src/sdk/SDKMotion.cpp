@@ -7,7 +7,7 @@
 
 #include "SDKManager.h"
 #include "protocol/ProtocolPrint.h"
-#include "CLogManager.h"
+#include "SpdlogMgr.h"
 #include "motionControlSDK.h"
 #include <QByteArray>
 #include <QDataStream>
@@ -38,15 +38,14 @@ static QByteArray positionToByteArray(quint32 position, char axis)
 	// 转换为毫米用于日志
 	double pos_mm = static_cast<double>(position) / 1000.0;
 
-	LOG_INFO(QString(u8"%1轴 位置数据: %2 μm (%3 mm)")
-		.arg(axis)
-		.arg(position)
-		.arg(pos_mm, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", "{}轴 位置数据: {}μm ({:.3f}mm)",
+		axis,
+		position,
+		pos_mm);
 
 	// 打印十六进制（用于调试）
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"%1轴 协议数据(Hex): %2").arg(axis).arg(hex));
-
+	//QString hex = data.toHex(' ').toUpper();
+	NAMED_LOG_T("logicMoudle", "{}轴 协议数据(Hex): {}",  axis, data.toHex(' ').toUpper());
 	return data;
 }
 
@@ -75,15 +74,14 @@ static QByteArray fullPositionToByteArray(const MoveAxisPos& pos)
 	double x_mm, y_mm, z_mm;
 	pos.toMillimeters(x_mm, y_mm, z_mm);
 
-	LOG_INFO(QString(u8"完整位置 转换为协议数据:"));
-	LOG_INFO(QString(u8"  X = %1 mm (%2 μm)").arg(x_mm, 0, 'f', 3).arg(pos.xPos));
-	LOG_INFO(QString(u8"  Y = %1 mm (%2 μm)").arg(y_mm, 0, 'f', 3).arg(pos.yPos));
-	LOG_INFO(QString(u8"  Z = %1 mm (%2 μm)").arg(z_mm, 0, 'f', 3).arg(pos.zPos));
+	NAMED_LOG_T("logicMoudle", "完整位置 转换为协议数据:");
+	NAMED_LOG_T("logicMoudle", "X = {:.3f} mm ({} μm)", x_mm, pos.xPos);
+	NAMED_LOG_T("logicMoudle", "Y = {:.3f} mm ({} μm)", y_mm, pos.yPos);
+	NAMED_LOG_T("logicMoudle", "Z = {:.3f} mm ({} μm)", z_mm, pos.zPos);
 
 	// 打印十六进制（用于调试）
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"完整位置 协议数据(12字节 Hex): %1").arg(hex));
-
+	//QString hex = data.toHex(' ').toUpper();
+	NAMED_LOG_T("logicMoudle", "完整位置 协议数据(12字节 Hex): {}", data.toHex(' ').toUpper());
 	return data;
 }
 
@@ -99,11 +97,11 @@ static QByteArray fullPositionToByteArray(const MoveAxisPos& pos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X坐标 + Y=0 + Z=0)
  */
-int SDKManager::move2AbsXAxis(const MoveAxisPos& targetPos)
+int SDKManager::Move2AbsXAxis(const MoveAxisPos& targetPos)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"X轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", "X轴移动 失败：设备未连接");
 		return -1;
 	}
 
@@ -111,19 +109,19 @@ int SDKManager::move2AbsXAxis(const MoveAxisPos& targetPos)
 	double x_mm = static_cast<double>(targetPos.xPos) / 1000.0;
 	auto posArr = fullPositionToByteArray(targetPos);
 
-	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=%1mm (%2μm), Y=0, Z=0; 协议数据(12字节 Hex): %3")
-		.arg(x_mm, 0, 'f', 3)
-		.arg(targetPos.xPos)
-		.arg(QString(posArr.toHex(' ').toUpper())));
+	NAMED_LOG_T("logicMoudle", "X轴绝对移动，目标位置: X={:.3f}mm ({}μm), Y=0, Z=0; 协议数据(12字节 Hex): {}", 
+		x_mm,
+		targetPos.xPos,
+		posArr.toHex(' ').toUpper());
 
 	// 选择命令（根据X坐标的符号）
 	ProtocolPrint::FunCode cmd = (targetPos.xPos >= 0) ? ProtocolPrint::Ctrl_XAxisRMove : ProtocolPrint::Ctrl_XAxisLMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(x_mm, 0, 'f', 3)
-		.arg(m_curAxisData.xPos));
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式: 相对移动_{:3.f}mm (当前 {}μm_偏移μm)",
+		x_mm, 
+		m_curAxisData.xPos);
 
 	// 发送命令
-	sendCommand(cmd, posArr);
+	SendCommand(cmd, posArr);
 	return 0;
 }
 
@@ -136,30 +134,30 @@ int SDKManager::move2AbsXAxis(const MoveAxisPos& targetPos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X=0 + Y坐标 + Z=0)
  */
-int SDKManager::move2AbsYAxis(const MoveAxisPos& targetPos)
+int SDKManager::Move2AbsYAxis(const MoveAxisPos& targetPos)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"Y轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", u8"Y轴移动 失败：设备未连接");
 		return -1;
 	}
 
 	// 转换为毫米用于日志
 	double y_mm = static_cast<double>(targetPos.yPos) / 1000.0;
 	auto posArr = fullPositionToByteArray(targetPos);
-	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=0, Y=%1mm (%2μm), Z=0; 协议数据(12字节 Hex): %3")
-		.arg(y_mm, 0, 'f', 3)
-		.arg(targetPos.yPos)
-		.arg(QString(posArr.toHex(' ').toUpper())));
+	NAMED_LOG_T("logicMoudle", u8"X轴绝对移动，目标位置: X=0, Y={:.3f}mm ({}μm), Z=0; 协议数据(12字节 Hex): {}", 
+		y_mm,
+		targetPos.yPos,
+		posArr.toHex(' ').toUpper());
 
 
 	// 选择命令（根据y坐标的符号）
 	ProtocolPrint::FunCode cmd = (targetPos.yPos >= 0) ? ProtocolPrint::Ctrl_YAxisRMove : ProtocolPrint::Ctrl_YAxisLMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(y_mm, 0, 'f', 3)
-		.arg(m_curAxisData.yPos));
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式: 相对移动_{:.3f}mm (当前{}μm)",
+		y_mm,
+		m_curAxisData.yPos);
 
-	sendCommand(cmd, posArr);
+	SendCommand(cmd, posArr);
 	return 0;
 }
 
@@ -172,30 +170,30 @@ int SDKManager::move2AbsYAxis(const MoveAxisPos& targetPos)
  * - 命令类型: 0x0011 (控制命令)
  * - 数据区: 12字节 (X=0 + Y=0 + Z坐标)
  */
-int SDKManager::move2AbsZAxis(const MoveAxisPos& targetPos)
+int SDKManager::Move2AbsZAxis(const MoveAxisPos& targetPos)
 {
-	if (!isConnected()) 
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"Z轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", "Z轴移动 失败：设备未连接");
 		return -1;
 	}
 
 	// 转换为毫米用于日志
 	double z_mm = static_cast<double>(targetPos.zPos) / 1000.0;
 	auto posArr = fullPositionToByteArray(targetPos);
-	LOG_INFO(QString(u8"X轴绝对移动，目标位置: X=0, Y= 0, Z=%1mm (%2μm); 协议数据(12字节 Hex): %3")
-		.arg(z_mm, 0, 'f', 3)
-		.arg(targetPos.zPos)
-		.arg(QString(posArr.toHex(' ').toUpper())));
+	NAMED_LOG_T("logicMoudle", u8"Z轴绝对移动，目标位置: X=0, Y=0, Z={:.3f}mm ({}μm); 协议数据(12字节 Hex): {}",
+		z_mm,
+		targetPos.zPos,
+		posArr.toHex(' ').toUpper());
 
 
 	// 选择命令（根据y坐标的符号）
 	ProtocolPrint::FunCode cmd = (targetPos.zPos >= 0) ? ProtocolPrint::Ctrl_ZAxisLMove : ProtocolPrint::Ctrl_ZAxisRMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(z_mm, 0, 'f', 3)
-		.arg(m_curAxisData.yPos));
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式: 相对移动_{:.3f}mm (当前{}μm)",
+		z_mm,
+		m_curAxisData.zPos);
 
-	sendCommand(cmd, posArr);
+	SendCommand(cmd, posArr);
 	return 0;
 
 }
@@ -213,14 +211,14 @@ int SDKManager::move2AbsZAxis(const MoveAxisPos& targetPos)
  * 2. 将目标位置（微米）转换为QByteArray
  * 3. 发送命令到设备
  */
-int SDKManager::move2RelXAxis(double distance)
+int SDKManager::Move2RelXAxis(double distance)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"X轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", u8"X轴移动 失败：设备未连接");
 		return -1;
 	}
-	LOG_INFO(QString(u8"X轴移动相对位置参数: distance = %1mm").arg(distance, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", u8"X轴移动相对位置参数: distance = {:.3f}mm", distance);
 
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
@@ -234,12 +232,12 @@ int SDKManager::move2RelXAxis(double distance)
 
 	// 选择命令（根据移动方向）
 	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_XAxisRMove : ProtocolPrint::Ctrl_XAxisLMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(distance, 0, 'f', 3)
-		.arg(m_curAxisData.xPos)
-		.arg(offset_um));
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式: 相对移动_{:.3f}mm (当前{}μm_偏移{}μm)", 
+		distance,
+		m_curAxisData.xPos,
+		offset_um);
 
-	sendCommand(cmd, data);
+	SendCommand(cmd, data);
 	return 0;
 }
 
@@ -249,15 +247,15 @@ int SDKManager::move2RelXAxis(double distance)
  * @param isAbsolute true=绝对移动，false=相对移动
  * @return 0=成功, -1=失败
  */
-int SDKManager::move2RelYAxis(double distance)
+int SDKManager::Move2RelYAxis(double distance)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"Y轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", "Y轴移动 失败：设备未连接");
 		return -1;
 	}
 
-	LOG_INFO(QString(u8"Y轴移动相对位置参数: distance=%1mm ").arg(distance, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", u8"Y轴移动相对位置参数: distance={:.3f}mm ", distance);
 
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
@@ -271,12 +269,12 @@ int SDKManager::move2RelYAxis(double distance)
 
 	// 选择命令（根据移动方向）
 	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_YAxisRMove : ProtocolPrint::Ctrl_YAxisLMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(distance, 0, 'f', 3)
-		.arg(m_curAxisData.yPos)
-		.arg(offset_um));
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式:  相对移动_{:.3f}mm (当前{}μm_偏移{}μm)",
+		distance,
+		m_curAxisData.yPos,
+		offset_um);
 
-	sendCommand(cmd, data);
+	SendCommand(cmd, data);
 	return 0;
 }
 
@@ -286,13 +284,14 @@ int SDKManager::move2RelYAxis(double distance)
  * @param isAbsolute true=绝对移动，false=相对移动
  * @return 0=成功, -1=失败
  */
-int SDKManager::move2RelZAxis(double distance)
+int SDKManager::Move2RelZAxis(double distance)
 {
-	if (!isConnected()) {
-		LOG_INFO(QString(u8"Z轴移动 失败：设备未连接"));
+	if (!IsConnected()) 
+	{
+		NAMED_LOG_T("logicMoudle", u8"Z轴移动 失败：设备未连接");
 		return -1;
 	}
-	LOG_INFO(QString(u8"Z轴移动相对位置参数: distance=%1mm ").arg(distance, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", "Z轴移动相对位置参数: distance={:.3f} mm ", distance);
 
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
@@ -306,12 +305,13 @@ int SDKManager::move2RelZAxis(double distance)
 
 	// 选择命令（根据移动方向）
 	ProtocolPrint::FunCode cmd = (distance >= 0) ? ProtocolPrint::Ctrl_ZAxisLMove : ProtocolPrint::Ctrl_ZAxisRMove;
-	LOG_INFO(QString(u8"手动相对运动模式: 相对移动_%1mm (当前%2μm_偏移%3μm)")
-		.arg(distance, 0, 'f', 3)
-		.arg(m_curAxisData.zPos)
-		.arg(offset_um));
 
-	sendCommand(cmd, data);
+	NAMED_LOG_T("logicMoudle", "手动相对运动模式:  相对移动_{:.3f}mm (当前{}μm_偏移{}μm)",
+		distance,
+		m_curAxisData.zPos,
+		offset_um);
+
+	SendCommand(cmd, data);
 	return 0;
 }
 
@@ -321,16 +321,16 @@ int SDKManager::move2RelZAxis(double distance)
 
 
 // ==================== 3轴同时移动 ====================
-int SDKManager::move2RelPos(double dx, double dy, double dz)
+int SDKManager::Move2RelPos(double dx, double dy, double dz)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"X轴移动 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", "X轴移动 失败：设备未连接");
 		return -1;
 	}
 
-	//LOG_INFO(QString(u8" X轴移动相对位置"));
-	LOG_INFO(QString(u8"参数: distance = %1mm").arg(dx, 0, 'f', 3));
+	//NAMED_LOG_T("logicMoudle", u8" X轴移动相对位置"));
+	NAMED_LOG_T("logicMoudle", "参数: distance = {:.3f}mm", dx);
 	MoveAxisPos movPos;
 	// 相对移动：在当前位置基础上偏移
 	auto calRealPos = [&](double distance, quint32 curPosUm)->quint32
@@ -342,11 +342,11 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
 		{
 			// 正方向移动
 			targetPosUm = curPosUm + offsetUm;
-			LOG_INFO(QString(u8"  模式: 相对移动 +%1mm (当前%2μm + 偏移%3μm = 目标%4μm)")
-				.arg(dx, 0, 'f', 3)
-				.arg(curPosUm)
-				.arg(distance)
-				.arg(targetPosUm));
+			NAMED_LOG_T("logicMoudle", "模式: 相对移动 +{:.3f}mm (当前{}μm + 偏移{}μm = 目标{}μm)", 
+				dx,
+				curPosUm,
+				distance,
+				targetPosUm);
 		}
 		else
 		{
@@ -358,13 +358,13 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
 			else
 			{
 				targetPosUm = 0;
-				LOG_INFO(QString(u8"  警告: 移动距离超过当前位置，限制到0"));
+				NAMED_LOG_T("logicMoudle", "警告: 移动距离超过当前位置，限制到0");
 			}
-			LOG_INFO(QString(u8"  模式: 相对移动 %1mm (当前%2μm - 偏移%3μm = 目标%4μm)")
-				.arg(dx, 0, 'f', 3)
-				.arg(curPosUm)
-				.arg(distance)
-				.arg(targetPosUm));
+			NAMED_LOG_T("logicMoudle", "模式: 相对移动 -{:.3f}mm(当前{}μm - 偏移{}μm = 目标{}μm)", 
+				dx,
+				curPosUm,
+				distance,
+				targetPosUm);
 		}
 		return targetPosUm;
 	};
@@ -377,10 +377,12 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
 	QByteArray arrData = fullPositionToByteArray(movPos);
 	// 选择命令（根据移动方向）
 	ProtocolPrint::FunCode cmd = ProtocolPrint::Ctrl_AxisAbsMove;
-	LOG_INFO(QString(u8"相对运动命令转换为绝对命令: Ctrl_AxisAbsMove (0x%1)，数据: 0x%2").arg(QString::number(cmd, 16).toUpper()).arg(QString(arrData.toHex().toUpper()).data()));
+	NAMED_LOG_T("logicMoudle", "相对运动命令转换为绝对命令: Ctrl_AxisAbsMove 0x{:04X}，数据: 0x{:04X}", 
+		QString::number(cmd, 16).toUpper(), 
+		arrData.toHex().toUpper());
 
 	// 发送命令
-	sendCommand(cmd, arrData);
+	SendCommand(cmd, arrData);
 	return 0;
 }
 
@@ -390,15 +392,15 @@ int SDKManager::move2RelPos(double dx, double dy, double dz)
  * @param targetPos 目标位置（微米单位）
  * @return 0=成功, -1=失败
  */
-int SDKManager::move2AbsPosition(const MoveAxisPos& targetPos)
+int SDKManager::Move2AbsPosition(const MoveAxisPos& targetPos)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
 		return -1;
 	}
 
 	// 设置目标位置（用于后续操作）
-	setTargetPosition(targetPos);
+	SetTargetPosition(targetPos);
 
 	// 转换为12字节协议数据
 	QByteArray data;
@@ -414,20 +416,20 @@ int SDKManager::move2AbsPosition(const MoveAxisPos& targetPos)
 	double x_mm, y_mm, z_mm;
 	targetPos.toMillimeters(x_mm, y_mm, z_mm);
 
-	LOG_INFO(QString(u8"  3轴同时移动  "));
-	LOG_INFO(QString(u8"目标位置: X=%1mm, Y=%2mm, Z=%3mm")
-		.arg(x_mm, 0, 'f', 3)
-		.arg(y_mm, 0, 'f', 3)
-		.arg(z_mm, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", "3轴同时移动");
+	NAMED_LOG_T("logicMoudle", "目标位置: X={:.3f}mm, Y={:.3f}mm, Z={:.3f}mm",
+		x_mm,
+		y_mm,
+		z_mm);
 
 	// 打印十六进制数据
-	QString hex = data.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"协议数据(12字节 Hex): %1").arg(hex));
+	//QString hex = data.toHex(' ').toUpper();
+	NAMED_LOG_T("logicMoudle", "协议数据(12字节 Hex): {}", data.toHex(' ').toUpper());
 
 	// 发送命令：绝对移动 (Ctrl_AxisAbsMove = 0x3107)
-	sendCommand(ProtocolPrint::Ctrl_AxisAbsMove, data);
+	SendCommand(ProtocolPrint::Ctrl_AxisAbsMove, data);
 
-	LOG_INFO(QString(u8"3轴移动 命令已发送 "));
+	NAMED_LOG_T("logicMoudle", u8"3轴移动 命令已发送 ");
 	return 0;
 }
 
@@ -436,9 +438,9 @@ int SDKManager::move2AbsPosition(const MoveAxisPos& targetPos)
  * @param positionData 位置数据（12字节：X4+Y4+Z4）
  * @return 0=成功, -1=失败
  */
-int SDKManager::move2AbsPosition(const QByteArray& positionData)
+int SDKManager::Move2AbsPosition(const QByteArray& positionData)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
 		return -1;
 	}
@@ -446,8 +448,7 @@ int SDKManager::move2AbsPosition(const QByteArray& positionData)
 	// 验证数据长度
 	if (positionData.size() != 12)
 	{
-		LOG_INFO(QString(u8"3轴移动 数据长度错误: 期望12字节，实际%1字节")
-			.arg(positionData.size()));
+		NAMED_LOG_T("logicMoudle", "3轴移动 数据长度错误: 期望12字节，实际{}字节", positionData.size());
 		return -1;
 	}
 
@@ -463,20 +464,20 @@ int SDKManager::move2AbsPosition(const QByteArray& positionData)
 	double y_mm = static_cast<double>(yPos) / 1000.0;
 	double z_mm = static_cast<double>(zPos) / 1000.0;
 
-	LOG_INFO(QString(u8"  3轴同时移动（字节数组）  "));
-	LOG_INFO(QString(u8"目标位置: X=%1mm, Y=%2mm, Z=%3mm")
-		.arg(x_mm, 0, 'f', 3)
-		.arg(y_mm, 0, 'f', 3)
-		.arg(z_mm, 0, 'f', 3));
+	NAMED_LOG_T("logicMoudle", "3轴同时移动（字节数组）");
+	NAMED_LOG_T("logicMoudle", "目标位置: X={:.3f}mm, Y={:.3f}mm, Z={:.3f}mm",
+		x_mm,
+		y_mm,
+		z_mm);
 
 	// 打印十六进制数据
 	QString hex = positionData.toHex(' ').toUpper();
-	LOG_INFO(QString(u8"协议数据(12字节 Hex): %1").arg(hex));
+	NAMED_LOG_T("logicMoudle", u8"协议数据(12字节 Hex): {}", positionData.toHex(' ').toUpper());
 
 	// 发送命令：绝对移动 (Ctrl_AxisAbsMove = 0x3107)
-	sendCommand(ProtocolPrint::Ctrl_AxisAbsMove, positionData);
+	SendCommand(ProtocolPrint::Ctrl_AxisAbsMove, positionData);
 
-	LOG_INFO(QString(u8"3轴移动 命令已发送 "));
+	NAMED_LOG_T("logicMoudle", u8"3轴移动 命令已发送 ");
 	return 0;
 }
 
@@ -492,15 +493,15 @@ int SDKManager::move2AbsPosition(const QByteArray& positionData)
  * - axisFlag=3: 复位X和Y轴
  * - axisFlag=7: 复位所有轴
  */
-int SDKManager::resetAxis(int axisFlag)
+int SDKManager::ResetAxis(int axisFlag)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
-		LOG_INFO(QString(u8"轴复位 失败：设备未连接"));
+		NAMED_LOG_T("logicMoudle", u8"轴复位 失败：设备未连接");
 		return -1;
 	}
 
-	LOG_INFO(QString(u8"轴复位 axisFlag = %1").arg(QString::number(axisFlag, 10).toUpper()));
+	NAMED_LOG_T("logicMoudle", u8"轴复位 axisFlag =  {} ", QString::number(axisFlag, 10).toUpper());
 	QByteArray data;
 	QDataStream stream(&data, QIODevice::WriteOnly);
 	stream.setByteOrder(QDataStream::LittleEndian);
@@ -510,7 +511,7 @@ int SDKManager::resetAxis(int axisFlag)
 	//if (axisFlag & 1) axes << "X";
 	//if (axisFlag & 2) axes << "Y";
 	//if (axisFlag & 4) axes << "Z";
-	//LOG_INFO(QString(u8"  要复位的轴: %1").arg(axes.join(", ")));
+	//NAMED_LOG_T("logicMoudle", u8"  要复位的轴: %1").arg(axes.join(", ")));
 
 	// 复位各轴
 	switch (axisFlag)
@@ -607,7 +608,7 @@ int SDKManager::resetAxis(int axisFlag)
 		break;
 	}
 
-	sendCommand(ProtocolPrint::Ctrl_ResetPos, data);
-	//LOG_INFO(QString(u8"轴复位所有复位命令已发送"));
+	SendCommand(ProtocolPrint::Ctrl_ResetPos, data);
+	//NAMED_LOG_T("logicMoudle", u8"轴复位所有复位命令已发送"));
 	return 0;
 }

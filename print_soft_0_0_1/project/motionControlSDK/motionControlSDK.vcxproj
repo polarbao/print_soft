@@ -62,12 +62,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(QTDIR);$(SolutionDir)..\ext\inc\;$(SolutionDir)..\src\sdk\;$(SolutionDir)..\src\sdk\protocol\;$(SolutionDir)..\src\sdk\communicate\;$(SolutionDir)..\src\sdk\service\;$(SolutionDir)..\src\sdk\comm\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR);$(SolutionDir)..\ext\inc\;$(SolutionDir)..\src\sdk\;$(SolutionDir)..\src\sdk\protocol\;$(SolutionDir)..\src\sdk\communicate\;$(SolutionDir)..\src\sdk\service\;$(SolutionDir)..\src\sdk\comm\;$(SolutionDir)..\ext\inc\spdlog;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(SolutionDir)..\ext\lib\spdlog;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>spdlog.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -98,18 +99,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\sdk\communicate\TcpClient.cpp" />
-    <ClCompile Include="..\..\src\sdk\comm\CINIConfig.cpp" />
-    <ClCompile Include="..\..\src\sdk\comm\CLogManager.cpp" />
-    <ClCompile Include="..\..\src\sdk\comm\CLogThread.cpp" />
+    <ClCompile Include="..\..\src\sdk\comm\CMotionConfig.cpp" />
+    <ClCompile Include="..\..\src\sdk\comm\SpdlogMgr.cpp" />
     <ClCompile Include="..\..\src\sdk\comm\utils.cpp" />
     <ClCompile Include="..\..\src\sdk\protocol\ProtocolPrint.cpp" />
+    <ClCompile Include="..\..\src\sdk\SDKPositionMgr.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKPrintParam.cpp" />
     <QtMoc Include="..\..\src\sdk\SDKManager.h" />
     <ClCompile Include="..\..\src\sdk\motionControlSDK.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKCallback.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKConnection.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKManager.cpp" />
-    <ClCompile Include="..\..\src\sdk\SDKManager_Position.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKMotion.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKPackParam.cpp" />
     <ClCompile Include="..\..\src\sdk\SDKPrint.cpp" />
@@ -121,11 +121,11 @@
     <QtMoc Include="..\..\src\sdk\protocol\ProtocolPrint.h" />
     <QtMoc Include="..\..\src\sdk\communicate\TcpClient.h" />
     <QtMoc Include="..\..\src\sdk\comm\utils.h" />
-    <QtMoc Include="..\..\src\sdk\comm\CLogManager.h" />
-    <QtMoc Include="..\..\src\sdk\comm\CINIConfig.h" />
+    <ClInclude Include="..\..\src\sdk\comm\CMotionConfig.h" />
+    <ClInclude Include="..\..\src\sdk\comm\CNewSingleton.h" />
     <ClInclude Include="..\..\src\sdk\comm\CSingleton.h" />
-    <QtMoc Include="..\..\src\sdk\comm\CLogThread.h" />
-    <ClInclude Include="..\..\src\sdk\motioncontrolsdk_global.h" />
+    <ClInclude Include="..\..\src\sdk\comm\SpdlogMgr.h" />
+    <ClInclude Include="..\..\src\sdk\motioncontrolsdk_define.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

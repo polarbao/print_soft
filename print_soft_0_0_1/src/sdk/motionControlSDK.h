@@ -1,84 +1,6 @@
 ﻿#pragma once
 
-#include "motioncontrolsdk_global.h"
-#define DATA_LEN_12 12
-
-// --- 事件回调定义 ---
-/**
- * @brief SDK事件类型枚举
- */
-typedef enum 
-{
-	EVENT_TYPE_GENERAL,     // 普通信息事件 (如: "Connected", "Disconnected")
-	EVENT_TYPE_ERROR,       // 错误事件
-	EVENT_TYPE_PRINT_STATUS,// 打印状态更新 (如: 进度, 层数)
-	EVENT_TYPE_MOVE_STATUS, // 运动状态更新 (如: "Moving", "Idle")
-	EVENT_TYPE_LOG,          // 内部日志事件
-	EVENT_TYPE_SEND_MSG,
-	EVENT_TYPE_RECV_MSG
-} SdkEventType;
-
-/**
- * @brief SDK事件结构体
- */
-typedef struct 
-{
-	SdkEventType type;      // 事件类型
-	int code;               // 状态/错误码
-	const char* message;    // 事件消息
-	double value1;          // 附加数据1 (例如: 打印进度, X坐标)
-	double value2;          // 附加数据2 (例如: 当前层, Y坐标)
-	double value3;          // 附加数据3 (例如: 总层数, Z坐标)
-} SdkEvent;
-
-/**
- * @brief 回调函数指针类型
- */
-typedef void(*SdkEventCallback)(const SdkEvent* event);
-
-
-struct MOTIONCONTROLSDK_EXPORT MoveAxisPos
-{
-	quint32 xPos;  
-	quint32 yPos;  
-	quint32 zPos;  
-
-	MoveAxisPos() : xPos(0), yPos(0), zPos(0) {}
-
-	MoveAxisPos(quint32 x, quint32 y, quint32 z) 
-		: xPos(x), yPos(y), zPos(z) {}
-
-	static MoveAxisPos fromMillimeters(double x_mm, double y_mm, double z_mm)
-	{
-		return MoveAxisPos(
-			static_cast<quint32>(x_mm * 1000.0),
-			static_cast<quint32>(y_mm * 1000.0),
-			static_cast<quint32>(z_mm * 1000.0)
-		);
-	}
-
-	void toMillimeters(double& x_out, double& y_out, double& z_out) const
-	{
-		x_out = static_cast<double>(xPos) / 1000.0;
-		y_out = static_cast<double>(yPos) / 1000.0;
-		z_out = static_cast<double>(zPos) / 1000.0;
-	}
-};
-Q_DECLARE_METATYPE(MoveAxisPos)
-
-struct MOTIONCONTROLSDK_EXPORT PackParam
-{
-	uint16_t head;
-	uint16_t operType;
-	uint16_t cmdFun;
-	uint16_t dataLen;
-	uint8_t data[DATA_LEN_12];
-	uint16_t crc16;
-
-	//PackParam() ;
-};
-Q_DECLARE_METATYPE(PackParam)
-
+#include "motioncontrolsdk_define.h"
 
 class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 {
@@ -160,6 +82,37 @@ public:
 	 * @return 端口号
 	 */
 	quint16 MC_GetDevPort() const;
+
+
+	// ==================== 运动控制配置信息 ====================
+	/**
+	 * @brief 从配置文件中加载轴运动控制信息
+	 *		  此接口底层不会实际设置参数, 只是将参数配置返回, 如果需要修改参数, 需要主动调用运动控制相关配置接口
+	 * @param config 配置结构对象引用, 如果加载成功, 则会被赋值
+	 * @param path	配置文件路径
+	 * @return true=配置加载成功, false=配置加载失败
+	 */
+	bool MC_LoadMotionConfig(MotionConfig& config, const QString& path="config/motionMoudleConfig.ini");
+
+
+	/**
+	 * @brief 加载当前的轴运动控制信息
+	 *		  此接口会将SDK_Init时读到的参数返回, 一般是用作UI层获取配置, 然后同步显示用的
+	 *		  需要注意, 在没有调用SDK_Init之前, 此接口无法工作
+	 * @param config 配置结构体对象引用, 如果读取成功, 则会被赋值
+	 * @return true=读取成功, false=读取失败
+	 */
+	bool MC_LoadCurrentMotionConfig(MotionConfig& config);
+
+
+	/**
+	 * @brief 设置轴运动控制配置
+	 *		  此接口接收运动配置信息结构体, 然后将参数包全部设置到下位机设备中, 需要在设备连接成功的情况下调用
+	 * @param config 要设置到下位机的配置结构对象const引用
+	 * @return true=配置加载成功, false=配置加载失败
+	 */
+	bool MC_SetMotionConfig(const MotionConfig& config);
+
 
 	// ==================== 运动控制 ====================
 
@@ -277,13 +230,6 @@ public:
 	// ==================== 打印控制 ====================
 
 	/**
-	 * @brief 加载打印数据
-	 * @param filePath 图像文件路径（支持JPG/PNG/BMP）
-	 * @return true=成功, false=失败
-	 */
-	bool MC_loadPrintData(const QString& filePath);
-
-	/**
 	 * @brief 开始打印
 	 * @return true=命令发送成功, false=失败
 	 */
@@ -312,12 +258,6 @@ public:
 	 * @return true=命令发送成功, false=失败
 	 */
 	bool MC_CleanPrint();
-
-	/**
-	 * @brief 参数设置 add
-	 * @return true=命令发送成功, false=失败
-	 */
-	bool MC_SetPrintParam();
 
 	/**
 	 * @brief 停止打印

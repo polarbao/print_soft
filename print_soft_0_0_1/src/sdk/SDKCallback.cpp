@@ -20,7 +20,7 @@ class ProtocolPrint;
 
 // ==================== TCP事件处理 ====================
 
-void SDKManager::onRecvData(QByteArray data) 
+void SDKManager::OnRecvData(QByteArray data) 
 {
     if (m_protocol) 
 {
@@ -31,7 +31,7 @@ void SDKManager::onRecvData(QByteArray data)
     }
 }
 
-void SDKManager::onTcpError(QAbstractSocket::SocketError error) 
+void SDKManager::OnTcpError(QAbstractSocket::SocketError error) 
 {
     // 构造错误消息
     QString errorMsg = QString("TCP Error: %1").arg(static_cast<int>(error));
@@ -41,7 +41,7 @@ void SDKManager::onTcpError(QAbstractSocket::SocketError error)
               errorMsg.toUtf8().constData());
 }
 
-void SDKManager::onStateChanged(QAbstractSocket::SocketState state) 
+void SDKManager::OnStateChanged(QAbstractSocket::SocketState state) 
 {
     if (state == QAbstractSocket::ConnectedState) 
 	{
@@ -87,7 +87,7 @@ void SDKManager::onStateChanged(QAbstractSocket::SocketState state)
 
 // ==================== 协议事件处理 ====================
 
-void SDKManager::onHeartbeat() 
+void SDKManager::OnHeartbeat() 
 {
     // 收到心跳应答
     QMutexLocker lock(&m_heartbeatMutex);
@@ -99,7 +99,7 @@ void SDKManager::onHeartbeat()
     sendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle Heartbeat_info_rece");
 }
 
-void SDKManager::onCmdReply(int cmd, uchar errCode, QByteArray arr) 
+void SDKManager::OnCmdReply(int cmd, uchar errCode, QByteArray arr) 
 {
     // 命令应答处理
     QString msg = QString("Command reply: 0x%1, Error: %2")
@@ -118,15 +118,15 @@ void SDKManager::onCmdReply(int cmd, uchar errCode, QByteArray arr)
     }
 }
 
-void SDKManager::onFaileHandleReTransport(QByteArray& arr)
+void SDKManager::OnFaileHandleReTransport(QByteArray& arr)
 {
-	sendCommand(arr);
+	SendCommand(arr);
 }
 
 
 // ==================== 心跳机制 ====================
 
-void SDKManager::onSendHeartbeat() 
+void SDKManager::OnSendHeartbeat() 
 {
  //   // 定时发送心跳
  //   if (isConnected()) 
@@ -135,7 +135,7 @@ void SDKManager::onSendHeartbeat()
  //   }
 }
 
-void SDKManager::onCheckHeartbeat() 
+void SDKManager::OnCheckHeartbeat() 
 {
 //暂停监控管理
  //   // 检查心跳超时

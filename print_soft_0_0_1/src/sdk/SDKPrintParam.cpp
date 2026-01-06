@@ -10,125 +10,69 @@
 
 #include <QFile>
 #include <QImage>
+#include <SpdlogMgr.h>
+#include <MoveAxisPosFormat.h>
 
 // ==================== 打印参数设置 ====================
 
 
-int SDKManager::SetPrintStartPos(int operCode, const QByteArray& data)
+int SDKManager::SetPrintStartPos(const MoveAxisPos& startPos)
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
 
-    sendCommand(static_cast<ProtocolPrint::FunCode>(operCode), data);
+
+	NAMED_LOG_D("logicMoudle", "SetPrintStartPos => {}", startPos);
+	SendCommand(ProtocolPrint::SetParam_PrintStartPos, startPos);
     return 0;
 }
 
-int SDKManager::SetPrintEndPos(int operCode, const QByteArray& data)
+int SDKManager::SetPrintEndPos(const MoveAxisPos& endPos)
 {
-    if (!isConnected()) 
+    if (!IsConnected()) 
 	{
         return -1;
     }
     
-	sendCommand(operCode, data);
+	NAMED_LOG_D("logicMoudle", "SetPrintEndPos => {}", endPos);
+	SendCommand(ProtocolPrint::SetParam_PrintEndPos, endPos);
 	return 0;
 }
 
-int SDKManager::SetPrintCleanPos(int operCode, const QByteArray& data)
+int SDKManager::SetPrintCleanPos(const MoveAxisPos& cleanPos)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
 		return -1;
 	}
 
-	sendCommand(operCode, data);
+	NAMED_LOG_D("logicMoudle", "SetPrintCleanPos => {}", cleanPos);
+	SendCommand(ProtocolPrint::SetParam_CleanPos, cleanPos);
 	return 0;
 }
 
-int SDKManager::SetAxisSpd(int operCode, const QByteArray& data)
+int SDKManager::SetAxisSpd(const MoveAxisPos& speed)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
 		return -1;
 	}
 
-	sendCommand(operCode, data);
+	NAMED_LOG_D("logicMoudle", "SetAxisSpd => {}", speed);
+	SendCommand(ProtocolPrint::SetParam_AxistSpd, speed);
 	return 0;
 }
 
-int SDKManager::SetAxisUnitStep(int operCode, const QByteArray& data)
+int SDKManager::SetAxisUnitStep(const MoveAxisPos& step)
 {
-	if (!isConnected())
+	if (!IsConnected())
 	{
 		return -1;
 	}
 
-	sendCommand(operCode, data);
+	NAMED_LOG_D("logicMoudle", "SetAxisUnitStep => {}", step);
+	SendCommand(ProtocolPrint::SetParam_AxisUnitMove, step);
 	return 0;
 }
-
-
-//int SDKManager::loadImageData(const QString& imagePath) 
-//{
-//    if (!isConnected()) 
-//	{
-//        return -1;
-//    }
-//    
-//    // 加载图像文件
-//    QImage img(imagePath);
-//    if (img.isNull()) 
-//	{
-//        sendEvent(EVENT_TYPE_ERROR, -1, "Failed to load image");
-//        return -1;
-//    }
-//    
-//    // 读取原始文件数据
-//    QFile file(imagePath);
-//    if (!file.open(QIODevice::ReadOnly)) 
-//	{
-//        sendEvent(EVENT_TYPE_ERROR, -1, "Failed to open image file");
-//        return -1;
-//    }
-//    
-//    QByteArray rawData = file.readAll().toHex();
-//    file.close();
-//    
-//    // 根据文件扩展名确定图像类型
-//    quint8 imgType = 0x01; // 默认JPG
-//    if (imagePath.endsWith(".png", Qt::CaseInsensitive)) 
-//	{
-//        imgType = 0x02;  // PNG
-//    }
-//	else if (imagePath.endsWith(".bmp", Qt::CaseInsensitive)) 
-//	{
-//        imgType = 0x03;  // BMP
-//    } 
-//	else if (imagePath.endsWith(".raw", Qt::CaseInsensitive)) 
-//	{
-//        imgType = 0x04;  // RAW
-//    }
-//    
-//    // 使用协议打包图像数据
-//    // 图像会被分包成多个数据包
-//    QList<QByteArray> packets = ProtocolPrint::GetSendImgDatagram(
-//        img.width(), img.height(), imgType, rawData);
-//    
-//    // 发送所有数据包
-//    for (const auto& packet : packets) 
-//	{
-//        m_tcpClient->sendData(packet);
-//    }
-//    
-//    // 发送成功事件
-//    QString msg = QString("Image data sent: %1 packets, size: %2x%3")
-//        .arg(packets.size())
-//        .arg(img.width())
-//        .arg(img.height());
-//    sendEvent(EVENT_TYPE_GENERAL, 0, msg.toUtf8().constData());
-//    
-//    return 0;
-//}
-//

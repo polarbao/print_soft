@@ -14,22 +14,21 @@
 #include <QDateTime>
 
 
-//#include "CLogManager.h"
-#include "comm/CSingleton.h"
+#include "SpdlogMgr.h"
+#include "CNewSingleton.h"
+#include "motionControlSDK.h"
 
 
 
-//----------------------------enum-------------------------------------
-//----------------------------enum-------------------------------------
-
-class Utils : public QObject, public CSingleton<Utils>
+class Utils : public QObject, public CNewSingleton<Utils>
 {
-	friend class CSingleton<Utils>;
 	Q_OBJECT
-
-public:
+private:
+	friend class CNewSingleton<Utils>;
 
 	explicit Utils();
+
+public:
 
 	~Utils();
 	
@@ -45,12 +44,6 @@ public:
 	// 直接将文本转换为16进制表示的QByteArray
 	QByteArray Text2HexByteArr(const QString& text);
 
-
-	bool readAndConvertImage(const QString &filePath, QByteArray &hexData, quint16 &w, quint16 &h);
-
-	// 组装协议报文
-	QList<QByteArray> assemblePackets(quint16 width, quint16 height, quint8 imageType, const QByteArray &hexData);
-
 	bool CheckCRC(uchar* data, int datalen);
 
 	ushort MakeCRCCheck(uchar* data, int datalen);
@@ -60,6 +53,10 @@ public:
 
 	// 多个微米数据转换为12字节数据
 	QByteArray MultiMicroDisStrTo12BytesHex(const QString& commaStr, bool isBigEndian = true, bool isMicronDirect = true);
+
+	// 将qstring数据类型转换为MoveAxis数据
+	MoveAxisPos StrLis2MoveAxisData(const QString& strData);
+
 
 private:
 	/**  crc高字节  **/

@@ -18,17 +18,15 @@ class TcpClient;
 class ProtocolPrint;
 class QTimer;
 
-//extern struct PackParam;
 
 // 导入事件类型定义
 #include "motionControlSDK.h"
-// 导入事件类型定义
+#include "CNewSingleton.h"
 
 // 全局回调相关（在SDKCallback.cpp中定义）
 extern SdkEventCallback g_sdkCallback;
 extern QMutex g_callbackMutex;
 extern QByteArray g_messageBuffer;
-
 
 /**
  * @class SDKManager
@@ -40,14 +38,15 @@ extern QByteArray g_messageBuffer;
  * - 处理信号槽连接和事件分发
  * - 管理心跳机制
  */
-class SDKManager : public QObject {
+class SDKManager : public QObject //, public CNewSingleton<SDKManager>
+{
     Q_OBJECT
 
 public:
     /**
      * @brief 获取单例实例
      */
-    static SDKManager* instance();
+   static SDKManager* GetInstance();
     
     // ==================== 生命周期管理 ====================
     
@@ -56,12 +55,12 @@ public:
      * @param log_dir 日志目录路径
      * @return true=成功, false=失败
      */
-    bool init(const QString& log_dir);
+    bool Init(const QString& log_dir);
     
     /**
      * @brief 释放SDK资源
      */
-    void release();
+    void Release();
     
     // ==================== 连接管理（实现在SDKConnection.cpp） ====================
     
@@ -71,18 +70,18 @@ public:
      * @param port 端口号
      * @return 0=成功, -1=失败
      */
-    int connectByTCP(const QString& ip, unsigned short port);
+    int ConnectByTCP(const QString& ip, unsigned short port);
     
     /**
      * @brief 断开设备连接
      */
-    void disconnect();
+    void Disconnect();
     
     /**
      * @brief 查询连接状态
      * @return true=已连接, false=未连接
      */
-    bool isConnected() const;
+    bool IsConnected() const;
     
     // ==================== 运动控制（实现在SDKMotion.cpp） ====================
     
@@ -93,18 +92,18 @@ public:
      * @param isAbsolute 是否为绝对坐标
      * @return 0=成功, -1=失败
      */
-	int move2AbsXAxis(const MoveAxisPos& targetPos);
-	int move2AbsYAxis(const MoveAxisPos& targetPos);
-	int move2AbsZAxis(const MoveAxisPos& targetPos);
+	int Move2AbsXAxis(const MoveAxisPos& targetPos);
+	int Move2AbsYAxis(const MoveAxisPos& targetPos);
+	int Move2AbsZAxis(const MoveAxisPos& targetPos);
 
-	int move2RelXAxis(double distance);
-	int move2RelYAxis(double distance);
-	int move2RelZAxis(double distance);
+	int Move2RelXAxis(double distance);
+	int Move2RelYAxis(double distance);
+	int Move2RelZAxis(double distance);
 
 
 
 	//三轴同时移动
-	int move2RelPos(double dx, double dy, double dz);
+	int Move2RelPos(double dx, double dy, double dz);
 
 
 	/**
@@ -117,14 +116,14 @@ public:
 	 * - 命令字: 0x3107 (绝对移动)
 	 * - 数据区: 12字节 (X/Y/Z各4字节，大端序，微米)
 	 */
-	int move2AbsPosition(const MoveAxisPos& targetPos);
+	int Move2AbsPosition(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief 3轴同时移动（字节数组版本）
 	 * @param positionData 位置数据（12字节：X4+Y4+Z4）
 	 * @return 0=成功, -1=失败
 	 */
-	int move2AbsPosition(const QByteArray& positionData);
+	int Move2AbsPosition(const QByteArray& positionData);
 
 
 	/**
@@ -132,7 +131,7 @@ public:
 	 * @param axisFlag 轴标志位：1=X, 2=Y, 4=Z, 可以组合（如7=全部）
 	 * @return 0=成功, -1=失败
 	 */
-	int resetAxis(int axisFlag);
+	int ResetAxis(int axisFlag);
 
 
 
@@ -140,71 +139,65 @@ public:
 	 * @brief 设置目标位置
 	 * @param targetPos 目标位置（微米单位）
 	 */
-	void setTargetPosition(const MoveAxisPos& targetPos);
+	void SetTargetPosition(const MoveAxisPos& targetPos);
 
 	/**
 	 * @brief 获取目标位置
 	 * @return 目标位置（微米单位）
 	 */
-	MoveAxisPos getTargetPosition() const;
+	MoveAxisPos GetTargetPosition() const;
     
 
 	/**
 	 * @brief 获取目标位置
 	 * @return 目标位置（微米单位）
 	 */
-	MoveAxisPos getCurrentPosition() const;
+	MoveAxisPos GetCurrentPosition() const;
     // ==================== 打印控制（实现在SDKPrint.cpp） ====================
     
     /**
      * @brief 开始打印
      * @return 0=成功, -1=失败
      */
-    int startPrint();
+    int StartPrint();
     
     /**
      * @brief 停止打印
      * @return 0=成功, -1=失败
      */
-    int stopPrint();
+    int StopPrint();
     
     /**
      * @brief 暂停打印
      * @return 0=成功, -1=失败
      */
-    int pausePrint();
+    int PausePrint();
     
     /**
      * @brief 恢复打印
      * @return 0=成功, -1=失败
      */
-    int resumePrint();
+    int ResumePrint();
     
     /**
      * @brief 打印复位
      * @return 0=成功, -1=失败
      */
-    int resetPrint();
+    int ResetPrint();
     
-    /**
-     * @brief 加载图像数据
-     * @param imagePath 图像文件路径
-     * @return 0=成功, -1=失败
-     */
-    int loadImageData(const QString& imagePath);
 
 	// ==================== 打印参数控制（实现在SDKPrintParam.cpp） ====================
 
 
-	int SetPrintStartPos(int operCode, const QByteArray& data = QByteArray());
+	int SetPrintStartPos(const MoveAxisPos& startPos);
 
-	int SetPrintEndPos(int operCode, const QByteArray& data = QByteArray());
+	int SetPrintEndPos(const MoveAxisPos& endPos);
 
-	int SetPrintCleanPos(int operCode, const QByteArray& data = QByteArray());
+	int SetPrintCleanPos(const MoveAxisPos& cleanPos);
 
-	int SetAxisSpd(int operCode, const QByteArray& data = QByteArray());
+	int SetAxisSpd(const MoveAxisPos& speed);
 
-	int SetAxisUnitStep(int operCode, const QByteArray& data = QByteArray());
+	int SetAxisUnitStep(const MoveAxisPos& step);
 
 
     
@@ -215,7 +208,7 @@ public:
      * @param code 功能码
      * @param data 附加数据
      */
-    void sendCommand(int code, const QByteArray& data = QByteArray());
+    void SendCommand(int code, const QByteArray& data = QByteArray());
 
 
 	/**
@@ -223,14 +216,14 @@ public:
 	 * @param code 功能码
 	 * @param data 附加数据
 	 */
-	void sendCommand(int code, const MoveAxisPos& posData);
+	void SendCommand(int code, const MoveAxisPos& posData);
 
 	/**
 	 * @brief 发送协议命令（重发
 	 * @param code 功能码
 	 * @param data 附加数据
 	 */
-	void sendCommand(const QByteArray& data = QByteArray());
+	void SendCommand(const QByteArray& data = QByteArray());
     
     /**
      * @brief 发送事件到回调函数
@@ -250,59 +243,60 @@ private slots:
     /**
      * @brief 接收到数据
      */
-    void onRecvData(QByteArray data);
+    void OnRecvData(QByteArray data);
     
     /**
      * @brief TCP错误
      */
-    void onTcpError(QAbstractSocket::SocketError error);
+    void OnTcpError(QAbstractSocket::SocketError error);
     
     /**
      * @brief 连接状态改变
      */
-    void onStateChanged(QAbstractSocket::SocketState state);
+    void OnStateChanged(QAbstractSocket::SocketState state);
     
     /**
      * @brief 收到心跳
      */
-    void onHeartbeat();
+    void OnHeartbeat();
     
     /**
      * @brief 命令应答
      */
-    void onCmdReply(int cmd, uchar errCode, QByteArray arr);
+    void OnCmdReply(int cmd, uchar errCode, QByteArray arr);
     
     /**
      * @brief 发送心跳定时器
      */
-    void onSendHeartbeat();
+    void OnSendHeartbeat();
     
     /**
      * @brief 检查心跳超时
      */
-    void onCheckHeartbeat();
+    void OnCheckHeartbeat();
 
 	/**
 	 * @brief 失败操作命令重发
 	 */
-	void onFaileHandleReTransport(QByteArray& arr);
+	void OnFaileHandleReTransport(QByteArray& arr);
 
 	/**
 	 * @brief 处理功能操作指令
 	 */
-	void onHandleRecvFunOper(const PackParam& arr);
+	void OnHandleRecvFunOper(const PackParam& arr);
 
 	/**
 	 * @brief 处理功能操作指令
 	 */
-	void onHandleRecvDataOper(int code, const MoveAxisPos& pos);
+	void OnHandleRecvDataOper(int code, const MoveAxisPos& pos);
 
 
 private:
     /**
      * @brief 私有构造函数（单例模式）
      */
-    SDKManager();
+	//friend class CNewSingleton<SDKManager>;
+	SDKManager();
     
     // ==================== PackParam处理辅助方法 ====================
     
@@ -310,25 +304,25 @@ private:
      * @brief 处理设置参数命令的应答
      * @param packData 数据包参数
      */
-    void handleSetParamResponse(const PackParam& packData);
+    void HandleSetParamResponse(const PackParam& packData);
     
     /**
      * @brief 处理获取命令的应答
      * @param packData 数据包参数
      */
-    void handleGetCmdResponse(const PackParam& packData);
+    void HandleGetCmdResponse(const PackParam& packData);
     
     /**
      * @brief 处理控制命令的应答
      * @param packData 数据包参数
      */
-    void handleCtrlCmdResponse(const PackParam& packData);
+    void HandleCtrlCmdResponse(const PackParam& packData);
     
     /**
      * @brief 处理打印通信命令的应答
      * @param packData 数据包参数
      */
-    void handlePrintCommCmdResponse(const PackParam& packData);
+    void HandlePrintCommCmdResponse(const PackParam& packData);
     
     /**
      * @brief 析构函数

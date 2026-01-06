@@ -14,9 +14,8 @@
     <QtRcc Include="..\..\res\printDeviceMoudle.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\comm\CLogManager.cpp" />
-    <ClCompile Include="..\..\src\comm\CLogThread.cpp" />
     <ClCompile Include="..\..\src\comm\global.cpp" />
+    <ClCompile Include="..\..\src\comm\SpdlogMgr.cpp" />
     <ClCompile Include="..\..\src\comm\utils.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\printDeviceMoudle.cpp" />
@@ -26,14 +25,9 @@
     <QtMoc Include="..\..\src\printDeviceMoudle.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="..\..\src\comm\CLogManager.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="..\..\src\comm\CLogThread.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="..\..\src\comm\SpdlogMgr.h" />
     <QtMoc Include="..\..\src\comm\utils.h" />
-    <ClInclude Include="..\..\src\comm\CSingleton.h" />
+    <ClInclude Include="..\..\src\comm\CNewSingleton.h" />
     <ClInclude Include="..\..\src\comm\global.h" />
     <QtMoc Include="..\..\src\ui\printDeviceUI.h" />
   </ItemGroup>

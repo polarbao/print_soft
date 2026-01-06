@@ -5,7 +5,7 @@
 #include <QDataStream>
 #include <QtEndian>
 #include "utils.h"
-#include <spdlog/spdlog.h>
+#include "SpdlogMgr.h"
 
 
 //启动CRC检测
@@ -43,8 +43,8 @@ void ProtocolPrint::HandleRecvDatagramData(QByteArray recvdata)
 {
 	//判断当前recv是req还是resp
 	//分逻辑处理3个不同类型的报文数据
-	QString str = recvdata.toHex(' ');
-	LOG_INFO(QString(u8"接收数据: %1").arg(str));
+	QString str = "接收数据:" + recvdata.toHex(' ');
+	NAMED_LOG_I("netMoudle", str.toUtf8().toStdString());
 
 	//新数据加入缓冲区
 	m_recvBuf.append(recvdata);
@@ -84,8 +84,8 @@ void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 {
 	//判断当前recv是req还是resp
 	//分逻辑处理3个不同类型的报文数据
-	QString str = recvdata.toHex(' ');
-	LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
+	QString str = QString("motion_moudle_sdk print_protocol_moudle cur_recv_data:") + recvdata.toHex(' ').toUpper();
+	NAMED_LOG_I("netMoudle", str.toUtf8().toStdString());
 	//std::shared_ptr<spdlog::logger> mylogger = spdlog::get("spdlog");
 	//mylogger->info(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_data: %1").arg(str));
 
@@ -179,9 +179,9 @@ void ProtocolPrint::HandleRecvDatagramData1(QByteArray recvdata)
 		PackageHeadType headType = packageItem.second;
 
 		// 可根据包头类型做不同处理，示例：
-		LOG_INFO(QString(u8"解析包头类型: 0x%1 数据包长度: %2")
+		NAMED_LOG_I("netMoudle", QString("解析包头类型: 0x%1 数据包长度: %2")
 			.arg(QString::number(headType, 16).toUpper())
-			.arg(datagram.size()));
+			.arg(datagram.size()).toUtf8().toStdString());
 		ParsePackageData(datagram, headType); // 如果需要，可修改Parse函数接收headType参数：Parse(datagram, headType)
 	}
 }
@@ -238,7 +238,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	//数据包固定字节长度为10字节，变化长度为数据区，从0到n
 	if (recvLength < DATAGRAM_MIN_SIZE)
 	{
-		LOG_INFO(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据长度错误");
+		NAMED_LOG_I("netMoudle", "motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据长度错误");
 		return;
 	}
 
@@ -252,15 +252,18 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	//比较包头
 	if (!(recvBuf[0] == LO_OF_SHORT(Req_Package_Head) && (recvBuf[1] == HI_OF_SHORT(Req_Package_Head))))
 	{
-		//LOG_INFO(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
+		//NAMED_LOG_I("netMoudle", (u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
 		return;
 	}
 
 	//判断crc校验
-	if (!Utils::GetInstance().CheckCRC(recvBuf, recvLength - 10))
+	if (!Utils::GetInstance()->CheckCRC(recvBuf, recvLength - 10))
 	{
-		LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_crc校验错误"));
-		LOG_INFO(QString(u8"crc校验错误次数统计：%1").arg(++m_crcErrorNum));
+		NAMED_LOG_I("netMoudle", "motion_moudle_sdk print_protocol_moudle cur_recv_req_package_crc校验错误");
+		//auto strNum = "crc校验错误次数统计1：{}" + QString::number(++m_crcErrorNum);
+		//NAMED_LOG_I("netMoudle", strNum.toUtf8().toStdString());
+		NAMED_LOG_I("netMoudle", QString("crc校验错误次数统计2：{}").arg(++m_crcErrorNum).toUtf8().toStdString());
+
 #ifdef TurnOnCRC
 		return;
 #endif 
@@ -280,7 +283,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	lenByte = (recvBuf[7] << 8) | recvBuf[6];
 	if (lenByte != recvLength - 10)
 	{
-		//LOG_INFO(QString(u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据区长度字段错误"));
+		NAMED_LOG_I("netMoudle", "motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据区长度字段错误");
 		return;
 	}
 
@@ -354,12 +357,12 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 		packData.dataLen = dataLen;
 		if (dataLen != datagram.length() - 10)
 		{
-			LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_数据区长度有误，数据长度与真实长度不同"));
+			NAMED_LOG_I("netMoudle", "motion_moudle_sdk cur_recv_resp_package_数据区长度有误，数据长度与真实长度不同");
 			return;
 		}
 		if(dataLen == 0)
 		{
-			LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_数据区长度为0，数据命令:%1").arg(QString::number(code, 16)));
+			NAMED_LOG_I("netMoudle", QString("motion_moudle_sdk cur_recv_resp_package_数据区长度为0，数据命令:%1").arg(QString::number(code, 16)).toUtf8().toStdString());
 			return;
 		}
 
@@ -373,10 +376,10 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 		posData.xPos = (packData.data[3] << 24) | (packData.data[2] << 16) | (packData.data[1] << 8) | packData.data[0];
 		posData.yPos = (packData.data[7] << 24) | (packData.data[6] << 16) | (packData.data[5] << 8) | packData.data[4];
 		posData.zPos = (packData.data[11] << 24) | (packData.data[10] << 16) | (packData.data[9] << 8) | packData.data[8];
-		LOG_INFO(QString(u8"motion_moudle_sdk cur_recv_resp_package_各轴数据 _X轴数据：%1, _Y轴数据：%2, _Z轴数据：%3")
+		NAMED_LOG_I("netMoudle", QString("motion_moudle_sdk cur_recv_resp_package_各轴数据 _X轴数据：%1, _Y轴数据：%2, _Z轴数据：%3")
 			.arg(posData.xPos)
 			.arg(posData.yPos)
-			.arg(posData.zPos));
+			.arg(posData.zPos).toUtf8().toStdString());
 
 		// req处理逻辑
 		emit SigHandleFunOper(operType, code);
@@ -410,12 +413,12 @@ QByteArray ProtocolPrint::GetSendDatagram(ECmdType cmdType, FunCode cmd, QByteAr
 	sendBuf[1] = HI_OF_SHORT(Req_Package_Head);
 
 	// 命令类型
-	sendBuf[2] = HI_OF_SHORT(cmdType);
-	sendBuf[3] = LO_OF_SHORT(cmdType);
+	sendBuf[2] = LO_OF_SHORT(cmdType);
+	sendBuf[3] = HI_OF_SHORT(cmdType);
 
 	//命令字
-	sendBuf[4] = HI_OF_SHORT(cmd);
-	sendBuf[5] = LO_OF_SHORT(cmd);
+	sendBuf[4] = LO_OF_SHORT(cmd);
+	sendBuf[5] = HI_OF_SHORT(cmd);
 
 	//长度字
 	// 数据区长度
@@ -430,9 +433,9 @@ QByteArray ProtocolPrint::GetSendDatagram(ECmdType cmdType, FunCode cmd, QByteAr
 	}
 
 	//校验
-	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length + 8);
-	sendBuf[length + 8] = HI_OF_SHORT(crc);
-	sendBuf[length + 9] = LO_OF_SHORT(crc);
+	ushort crc = Utils::GetInstance()->MakeCRCCheck(sendBuf, length + 8);
+	sendBuf[length + 8] = LO_OF_SHORT(crc);
+	sendBuf[length + 9] = HI_OF_SHORT(crc);
 
 	QByteArray senddata;
 	senddata.resize(length + 8 + 2);
@@ -477,7 +480,7 @@ QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByt
 	}
 
 	//CRC
-	ushort crc = Utils::GetInstance().MakeCRCCheck(sendBuf, length+8);
+	ushort crc = Utils::GetInstance()->MakeCRCCheck(sendBuf, length+8);
 	sendBuf[length] = LO_OF_SHORT(crc);
 	sendBuf[length + 1] = HI_OF_SHORT(crc);
 
@@ -514,8 +517,8 @@ void ProtocolPrint::HandleResponseData(ushort code, uchar* data, ushort length, 
 	//else if (code >= 0x8000)
 	//{
 	//	uchar errcode = data[0];
-	//	LOG_INFO(u8"下位机返回错误码,错误为: " + getErrString(errcode));
-	//	LOG_INFO(QString(u8"下位机返回错误码次数统计：%1").arg(++m_codeErrorNum));
+	//	NAMED_LOG_I("netMoudle", (u8"下位机返回错误码,错误为: " + getErrString(errcode));
+	//	NAMED_LOG_I("netMoudle", (QString(u8"下位机返回错误码次数统计：%1").arg(++m_codeErrorNum));
 	//	emit SigCmdReply(code - 0x8000, errcode);
 	//	return;
 	//}
