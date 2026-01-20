@@ -108,7 +108,7 @@ bool CMotionConfig::load(MotionConfig& config, const QString & iniPath)
 	config.limit = MoveAxisPos(xLimit, yLimit, zLimit);
 	settings.endGroup();
 
-	// 读取轴速度参数（单位：微米）
+	// 读取轴速度参数（单位：毫米）
 	settings.beginGroup("motion_speed_param");
 	quint32 xSpeed = settings.value("x_axis_speed", 10).toUInt();
 	quint32 ySpeed = settings.value("y_axis_speed", 10).toUInt();
@@ -116,6 +116,29 @@ bool CMotionConfig::load(MotionConfig& config, const QString & iniPath)
 	config.speed = MoveAxisPos(xSpeed, ySpeed, zSpeed);
 	settings.endGroup();
 
+	// 读取轴加速度参数（单位：毫米）
+	settings.beginGroup("motion_accelerate_param");
+	quint32 xAcc = settings.value("x_axis_accelerate", 10).toUInt();
+	quint32 yAcc = settings.value("y_axis_accelerate", 10).toUInt();
+	quint32 zAcc = settings.value("z_axis_accelerate", 10).toUInt();
+	config.acc = MoveAxisPos(xAcc, yAcc, zAcc);
+	settings.endGroup();
+
+	// 读取轴偏移量参数（单位：毫米）
+	settings.beginGroup("motion_offset_param");
+	quint32 xOffset = settings.value("x_axis_offset", 10).toUInt();
+	quint32 yOffset = settings.value("y_axis_offset", 10).toUInt();
+	quint32 zOffset = settings.value("z_axis_offset", 10).toUInt();
+	config.offset = MoveAxisPos(xOffset, yOffset, zOffset);
+	settings.endGroup();
+
+	// 读取打印图层信息轴偏移量参数（单位：毫米）
+	settings.beginGroup("motion_print_layer_param");
+	quint32 xLayer = settings.value("x_axis_total", 10).toUInt();
+	quint32 yLayer = settings.value("y_axis_total", 10).toUInt();
+	quint32 zLayer = settings.value("z_axis_total", 10).toUInt();
+	config.layerData = MoveAxisPos(xLayer, yLayer, zLayer);
+	settings.endGroup();
 	return true;
 }
 
@@ -171,6 +194,27 @@ bool CMotionConfig::save(const MotionConfig& config, const QString& iniPath)
 	settings.setValue("x_axis_speed", config.speed.xPos);
 	settings.setValue("y_axis_speed", config.speed.yPos);
 	settings.setValue("z_axis_speed", config.speed.zPos);
+	settings.endGroup();
+
+	// 保存轴速度参数（单位：微米）
+	settings.beginGroup("motion_accelerate_param");
+	settings.setValue("x_axis_accelerate", config.acc.xPos);
+	settings.setValue("y_axis_accelerate", config.acc.yPos);
+	settings.setValue("z_axis_accelerate", config.acc.zPos);
+	settings.endGroup();
+
+	// 保存轴速度参数（单位：微米）
+	settings.beginGroup("motion_offset_param");
+	settings.setValue("x_axis_offset", config.offset.xPos);
+	settings.setValue("y_axis_offset", config.offset.yPos);
+	settings.setValue("z_axis_offset", config.offset.zPos);
+	settings.endGroup();
+
+	// 保存轴速度参数（单位：微米）
+	settings.beginGroup("motion_print_layer_param");
+	settings.setValue("x_axis_total", config.layerData.xPos);
+	settings.setValue("y_axis_total", config.layerData.yPos);
+	settings.setValue("z_axis_total", config.layerData.zPos);
 	settings.endGroup();
 
 	// 同步写入文件

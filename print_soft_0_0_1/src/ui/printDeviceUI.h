@@ -51,6 +51,15 @@ public:
 		EPPT_SetSpdX,
 		EPPT_SetSpdY,
 		EPPT_SetSpdZ,
+		EPPT_SetAccX,
+		EPPT_SetAccY,
+		EPPT_SetAccZ,
+		EPPT_SetOffsetX,
+		EPPT_SetOffsetY,
+		EPPT_SetOffsetZ,
+		EPPT_SetLayerStepX,
+		EPPT_SetLayerStepY,
+		EPPT_SetLayerStepZ,
 		EPPT_End
 	};
 
@@ -80,6 +89,13 @@ public:
 		EPMOF_End
 	};
 
+
+	enum EPrintSimulateOperFun
+	{
+		EPSOF_Begin = EPMOF_End + 1,
+		EPSOF_StartPrt,	//L为正方向，R为负方向
+		EPSOF_End
+	};
 
 	enum ShowEditType
 	{
@@ -118,6 +134,14 @@ private:
 	*  @return                    
 	*/
 	void SetMCCfgFile2UI(const MotionConfig& data);
+
+	/**
+	*  @brief       模拟自动化运动流程测试
+	*  @param[in]   cnt 打印层数
+	*  @param[out]
+	*  @return
+	*/
+	void SimulateLogic(int layerCnt = 2, int passCnt = 4);
 	 
 public slots:
 	/** 
@@ -165,6 +189,14 @@ public slots:
 	*/
 	void OnHandlePrintMoveFun(int idx);
 
+	/**
+	*  @brief       模拟流程槽函数
+	*  @param[in]   cnt 打印层数
+	*  @param[out]
+	*  @return
+	*/
+	void OnSimulateLogic(int idx);
+
 
 
 signals:
@@ -179,12 +211,16 @@ signals:
 private:
 	//sdk
 	motionControlSDK* m_motionSDK;
+	int m_layerIdx;
+	int m_passIdx;
+
 
 	//btn
 	QButtonGroup* m_netBtnGroup;
 	QButtonGroup* m_printOperBtnGroup;
 	QButtonGroup* m_printParamBtnGroup;
 	QButtonGroup* m_printMoveBtnGroup;
+	QButtonGroup* m_simulatePrtBtnGroup;
 
 
 	//UI

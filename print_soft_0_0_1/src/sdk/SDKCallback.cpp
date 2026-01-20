@@ -27,7 +27,7 @@ void SDKManager::OnRecvData(QByteArray data)
         // 将接收到的数据交给协议处理器解码
         m_protocol->HandleRecvDatagramData1(data);
 		// 发送接收报文数据
-		sendEvent(EVENT_TYPE_RECV_MSG, 0, data.toHex().toUpper());
+		SendEvent(EVENT_TYPE_RECV_MSG, 0, data.toHex().toUpper());
     }
 }
 
@@ -37,8 +37,7 @@ void SDKManager::OnTcpError(QAbstractSocket::SocketError error)
     QString errorMsg = QString("TCP Error: %1").arg(static_cast<int>(error));
     
     // 发送错误事件
-    sendEvent(EVENT_TYPE_ERROR, static_cast<int>(error), 
-              errorMsg.toUtf8().constData());
+    SendEvent(EVENT_TYPE_ERROR, static_cast<int>(error), errorMsg.toUtf8().constData());
 }
 
 void SDKManager::OnStateChanged(QAbstractSocket::SocketState state) 
@@ -46,7 +45,7 @@ void SDKManager::OnStateChanged(QAbstractSocket::SocketState state)
     if (state == QAbstractSocket::ConnectedState) 
 	{
         // 连接成功
-        sendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle connected_2_dev");
+        SendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle connected_2_dev");
         
         // 启动心跳机制
         m_heartbeatTimeout = 0;
@@ -66,7 +65,7 @@ void SDKManager::OnStateChanged(QAbstractSocket::SocketState state)
 	else if (state == QAbstractSocket::UnconnectedState) 
 	{
         // 连接断开
-        sendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle disconnected_from_dev");
+        SendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle disconnected_from_dev");
         
         // 停止心跳定时器
         if (m_heartbeatSendTimer) 
@@ -81,7 +80,7 @@ void SDKManager::OnStateChanged(QAbstractSocket::SocketState state)
 	else if (state == QAbstractSocket::ConnectingState) 
 	{
         // 正在连接
-        sendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle connecting_2_dev");
+        SendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle connecting_2_dev");
     }
 }
 
@@ -96,7 +95,7 @@ void SDKManager::OnHeartbeat()
     m_heartbeatTimeout = 0;
     
     // 发送心跳接收事件（可选，用于调试）
-    sendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle Heartbeat_info_rece");
+    SendEvent(EVENT_TYPE_GENERAL, 0, "motion_sdk_moudle Heartbeat_info_rece");
 }
 
 void SDKManager::OnCmdReply(int cmd, uchar errCode, QByteArray arr) 
@@ -109,12 +108,12 @@ void SDKManager::OnCmdReply(int cmd, uchar errCode, QByteArray arr)
     if (errCode != 0) 
 	{
         // 命令执行出错
-        sendEvent(EVENT_TYPE_ERROR, errCode, msg.toUtf8().constData());
+        SendEvent(EVENT_TYPE_ERROR, errCode, msg.toUtf8().constData());
     } 
 	else 
 	{
         // 命令执行成功
-        sendEvent(EVENT_TYPE_GENERAL, cmd, msg.toUtf8().constData());
+        SendEvent(EVENT_TYPE_GENERAL, cmd, msg.toUtf8().constData());
     }
 }
 
@@ -146,7 +145,7 @@ void SDKManager::OnCheckHeartbeat()
  //   if (m_heartbeatTimeout > 3) 
 	//{
  //       // 心跳超时（连续3次未收到应答）
- //       sendEvent(EVENT_TYPE_ERROR, -1, "Heartbeat timeout, disconnecting...");
+ //       SendEvent(EVENT_TYPE_ERROR, -1, "Heartbeat timeout, disconnecting...");
  //       
  //       // 异步断开连接（避免在信号处理中直接操作可能导致的问题）
  //       QMetaObject::invokeMethod(this, [this]() 

@@ -123,5 +123,8 @@
     <ClInclude Include="..\..\src\sdk\comm\SpdlogMgr.h">
       <Filter>Header Files\comm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\print_soft\print_soft_0_0_1\src\sdk\comm\SpdlogQtDataFormat.h">
+      <Filter>Header Files\comm</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -8,7 +8,6 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QMetaObject>
-#include "CLogManager.h"
 #include <QVector>
 #include <QList>
 
@@ -32,7 +31,6 @@ public:
 		: q_ptr(q)
 		, initialized(false)
 		, connectedState(false)
-		, port(0)
 	{
 	}
 
@@ -40,26 +38,38 @@ public:
 	{
 	}
 
-	motionControlSDK* q_ptr;
-	bool initialized;
-	bool connectedState;
-	QString ip;
-	quint16 port;
-
 	// 静态回调函数（桥接C回调到Qt信号）
 	static void sdkEventCallback(const SdkEvent* event);
 
-	// 全局实例管理（用于C回调中访问Qt对象）
+
+	motionControlSDK* q_ptr;
+	
+	bool initialized;
+	bool connectedState;
+	
+	bool _bInit;
+	bool _bConnected;					// 是否连接运动dev
+	bool _bPrinting;					// 是否进行打印
+	MoveAxisPos _curPos;				// 当前各轴数据
+	MotionConfig motionConfig;			// 运动控制配置参数
+
 	static motionControlSDK* s_instance;
 	static QMutex s_mutex;
 
-	// 运动控制配置参数
-	MotionConfig motionConfig;
+
+	//QString ip;
+	//quint16 port;
 };
 
 // 静态成员初始化
 motionControlSDK* motionControlSDK::Private::s_instance = nullptr;
 QMutex motionControlSDK::Private::s_mutex;
+
+
+
+
+
+
 
 motionControlSDK::motionControlSDK(QObject *parent)
 	: QObject(parent)
@@ -150,13 +160,13 @@ void motionControlSDK::MC_Release()
 	// 释放底层SDK
 	SDKManager::GetInstance()->Release();
 
-
 	d->initialized = false;
 	d->connectedState = false;
-	d->ip.clear();
-	d->port = 0;
 
-	SPDLOG_INFO("1motion_moudle motionControlSDK released");
+	//d->ip.clear();
+	//d->port = 0;
+
+	SPDLOG_INFO("motion_moudle motionControlSDK released");
 }
 
 
@@ -167,7 +177,7 @@ bool motionControlSDK::MC_IsInit() const
 
 bool motionControlSDK::MC_Connect2Dev(const QString& ip, quint16 port)
 {
-	SPDLOG_TRACE("1111111111111connectToDevice");
+	SPDLOG_TRACE("motion_moudle motionControlSDK connect_dev");
 
 	if (!d->initialized) 
 	{
@@ -184,7 +194,7 @@ bool motionControlSDK::MC_Connect2Dev(const QString& ip, quint16 port)
 	}
 
 	// 调用C接口连接设备
-	int ret = SDKManager::GetInstance()->ConnectByTCP(ip, port);
+	int ret = SDKManager::GetInstance()->Connect2MotionDev(ip, port);
 	if (ret != 0) 
 	{
 		QString errMsg = tr("连接失败，错误码：%1").arg(ret);
@@ -194,13 +204,15 @@ bool motionControlSDK::MC_Connect2Dev(const QString& ip, quint16 port)
 	}
 
 	// 保存连接信息
-	d->ip = ip;
-	d->port = port;
-	emit MC_SigDevIpChanged(ip);
-	emit MC_SigDevPortChanged(port);
+	d->motionConfig.ip = ip;
+	d->motionConfig.port = port;
+
+	//d->ip = ip;
+	//d->port = port;
+	//emit MC_SigDevIpChanged(ip);
+	//emit MC_SigDevPortChanged(port);
 	emit MC_SigInfoMsg(tr("正在连接 %1:%2...").arg(ip).arg(port));
-	SPDLOG_INFO("正在连接 {} {}...", ip.toUtf8().toStdString(), port);
-	//LOG_INFO(QString(u8"正在连接 %1:%2...").arg(ip).arg(port));
+	SPDLOG_INFO("正在连接 {} {}...", ip, port);
 
 	return true;
 }
@@ -214,12 +226,12 @@ void motionControlSDK::MC_DisconnectDev()
 
 	if (!d->connectedState) 
 	{
-		//emit MC_SigInfoMsg(tr("设备未连接"));
+		emit MC_SigInfoMsg(tr("设备未连接"));
 		return;
 	}
 
 	// 调用C接口断开连接
-	SDKManager::GetInstance()->disconnect();
+	SDKManager::GetInstance()->Disconnect();
 
 	emit MC_SigInfoMsg(tr("正在断开连接..."));
 }
@@ -232,12 +244,12 @@ bool motionControlSDK::MC_IsConnected() const
 
 QString motionControlSDK::MC_GetDevIp() const
 {
-	return d->ip;
+	return d->motionConfig.ip;
 }
 
 quint16 motionControlSDK::MC_GetDevPort() const
 {
-	return d->port;
+	return  d->motionConfig.port;
 }
 
 bool motionControlSDK::MC_LoadMotionConfig(MotionConfig & config, const QString & path)
@@ -272,16 +284,81 @@ bool motionControlSDK::MC_SetMotionConfig(const MotionConfig & config)
 	}
 
 	// 调用下位机参数设置接口
-	// TODO
-
-	NAMED_LOG_D("logicMoudle", "MC_SetMotionConfig call SetPrintStartPos, SetPrintEndPos, SetPrintCleanPos, SetAxisSpd, SetAxisUnitStep");
+	NAMED_LOG_D("logicMoudle", "MC_SetMotionConfig call SetPrintStartPos, SetPrintEndPos, SetPrintCleanPos, SetAxisSpd, SetAxisUnitStep, SetOriginOffsetData, SetPrtLayerData");
 	SDKManager::GetInstance()->SetPrintStartPos(d->motionConfig.startPos);
 	SDKManager::GetInstance()->SetPrintEndPos(d->motionConfig.endPos);
 	SDKManager::GetInstance()->SetPrintCleanPos(d->motionConfig.cleanPos);
 	SDKManager::GetInstance()->SetAxisSpd(d->motionConfig.speed);
 	SDKManager::GetInstance()->SetAxisUnitStep(d->motionConfig.step);
+	SDKManager::GetInstance()->SetAxisAccelerated(d->motionConfig.acc);
+	
+	// 设置判断非零函数
+	SDKManager::GetInstance()->SetOriginOffsetData(d->motionConfig.offset);
+	SDKManager::GetInstance()->SetPrtLayerData(d->motionConfig.layerData);
+
+
 	// 结构体信息同步
 	d->motionConfig = config;
+	return true;
+}
+
+bool motionControlSDK::MC_SetPrintStartPos(const MoveAxisPos& data)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, QString(u8"dev_unconnect"));
+		return false;
+	}
+
+	// 设置打印起点
+	int ret = SDKManager::GetInstance()->SetPrintStartPos(data);
+	if (ret != 0)
+	{
+		emit MC_SigErrOccurred(-1, QString("set_print_start_pos_failed"));
+		return false;
+	}
+	d->motionConfig.startPos = data;
+	emit MC_SigMoveStatusChanged(tr("set_start_pos_opering..."));
+	return true;
+}
+
+bool motionControlSDK::MC_SetPrintEndPos(const MoveAxisPos& data)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, QString(u8"dev_unconnect"));
+		return false;
+	}
+
+	// 设置打印终点
+	int ret = SDKManager::GetInstance()->SetPrintEndPos(data);
+	if (ret != 0)
+	{
+		emit MC_SigErrOccurred(-1, QString("set_print_start_pos_failed"));
+		return false;
+	}
+	d->motionConfig.endPos = data;
+	emit MC_SigMoveStatusChanged(tr("set_start_pos_opering..."));
+	return true;
+}
+
+bool motionControlSDK::MC_SetPrintStep(const MoveAxisPos & data)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, QString(u8"dev_unconnect"));
+		return false;
+	}
+
+	// 设置打印步长
+	int ret = SDKManager::GetInstance()->SetAxisUnitStep(data);
+	if (ret != 0)
+	{
+		emit MC_SigErrOccurred(-1, QString("set_print_step_failed"));
+		return false;
+	}
+	d->motionConfig.step = data;
+	emit MC_SigMoveStatusChanged(tr("set_print_step_opering..."));
 	return true;
 }
 
@@ -306,8 +383,8 @@ void motionControlSDK::refreshConnectionStatus()
 
 // ==================== 运动控制 ====================
 
-//全轴复位
-bool motionControlSDK::MC_GoHome()
+// 复位
+bool motionControlSDK::MC_GoHome(int x, int y, int z)
 {
 	if (!MC_IsConnected())
 	{
@@ -315,10 +392,10 @@ bool motionControlSDK::MC_GoHome()
 		return false;
 	}
 
-	// 所有轴回原点
-	// axisFlag = 7 表示 X(1) + Y(2) + Z(4) = 全部轴 
-	int ret = SDKManager::GetInstance()->ResetAxis(7);
-	if (ret != 0) 
+	// 所有轴回原点X(1) Y(2) Z(4) 7 = 全部轴
+	int axisFlag = (x ? 1 : 0) | (y ? 2 : 0) | (z ? 4 : 0);
+	int ret = SDKManager::GetInstance()->ResetAxis(axisFlag);
+	if (ret != 0)
 	{
 		emit MC_SigErrOccurred(-1, QString(u8"go_home_cmd_failed"));
 		return false;
@@ -539,7 +616,7 @@ bool motionControlSDK::MC_StartPrint()
 		return false;
 	}
 
-	emit MC_SigPrintStatusChanged(tr("start_print"));
+	//emit MC_SigPrintStatusChangedText(tr("start_print"));
 	return true;
 }
 
@@ -558,7 +635,7 @@ bool motionControlSDK::MC_PausePrint()
 		return false;
 	}
 
-	emit MC_SigPrintStatusChanged(tr(u8"打印暂停"));
+	//emit MC_SigPrintStatusChangedText(tr(u8"打印暂停"));
 	return true;
 }
 
@@ -577,7 +654,7 @@ bool motionControlSDK::MC_ResumePrint()
 		return false;
 	}
 
-	emit MC_SigPrintStatusChanged(tr(u8"打印恢复"));
+	//emit MC_SigPrintStatusChangedText(tr(u8"打印恢复"));
 	return true;
 }
 
@@ -596,12 +673,14 @@ bool motionControlSDK::MC_StopPrint()
 		return false;
 	}
 
-	emit MC_SigPrintStatusChanged(tr(u8"打印停止"));
+	//emit MC_SigPrintStatusChangedText(tr(u8"打印停止"));
 	return true;
 }
 
 bool motionControlSDK::MC_CleanPrint()
 {
+	//设置打印位置信息
+	//移动
 	return true;
 }
 
@@ -610,7 +689,87 @@ void motionControlSDK::MC_SendCmd(int operCmd, const QByteArray& arrData)
 	SDKManager::GetInstance()->SendCommand(operCmd, arrData);
 }
 
+//bool motionControlSDK::MC_PrtStep(const MoveAxisPos& targetPos)
+//{
+//	if (!MC_IsConnected())
+//	{
+//		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+//		return false;
+//	}
+//
+//	d->motionConfig.step = targetPos;
+//	SDKManager::GetInstance()->SetAxisUnitStep(targetPos);
+//	return true;
+//}
+//
+//bool motionControlSDK::MC_PrtReset(const MoveAxisPos& targetPos)
+//{
+//	if (!MC_IsConnected())
+//	{
+//		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+//		return false;
+//	}
+//
+//	SDKManager::GetInstance()->SetPrtReset(targetPos);
+//	return true;
+//}
+//
+//bool motionControlSDK::MC_PrtPassEnable()
+//{
+//	if (!MC_IsConnected())
+//	{
+//		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+//		return false;
+//	}
+//	MoveAxisPos targetPos;
+//	SDKManager::GetInstance()->SetPrtPassEnable();
+//	return true;
+//}
+
+
+bool motionControlSDK::MC_PrtMoveLayer(quint32 layerIdx, quint32 passIdx)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+		return false;
+	}
+
+	MoveAxisPos layerData(0, passIdx, layerIdx);
+	SDKManager::GetInstance()->SetPrtMoveLayer(layerData);
+	return true;
+}
+
+bool motionControlSDK::MC_SetLayerNumData(quint32 passNum, quint32 zStep)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+		return false;
+	}
+
+	MoveAxisPos layerData(0, passNum, zStep);
+	SDKManager::GetInstance()->SetPrtLayerData(layerData);
+	d->motionConfig.layerData = layerData;
+	return true;
+}
+
+bool motionControlSDK::MC_SetOffsetData(quint32 xOffset, quint32 yOffset, quint32 zOffset)
+{
+	if (!MC_IsConnected())
+	{
+		emit MC_SigErrOccurred(-1, tr("dev_unconnect"));
+		return false;
+	}
+
+	MoveAxisPos offset(xOffset, yOffset, zOffset);
+	SDKManager::GetInstance()->SetOriginOffsetData(offset);
+	d->motionConfig.offset = offset;
+	return true;
+}
+
 // ==================== 回调函数（桥接C回调到Qt信号）====================
+
 void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 {
 	if (!event) 
@@ -627,7 +786,7 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 
 	// 将C回调转换为Qt信号
 	// 使用QMetaObject::invokeMethod确保信号在正确的线程中发射（线程安全）
-	QString message = QString::fromUtf8(event->message);
+	QString msg = QString::fromUtf8(event->message);
 	SdkEventType type = event->type;
 	int code = event->code;
 	double v1 = event->value1;
@@ -639,103 +798,112 @@ void motionControlSDK::Private::sdkEventCallback(const SdkEvent* event)
 	{
 		switch (type) 
 		{
-		case EVENT_TYPE_GENERAL: 
-		{
-			// 检测连接状态变化
-			if (message.contains("connected", Qt::CaseInsensitive) &&
-				message.contains("dev", Qt::CaseInsensitive)) 
+			// tcp连接信息
+			case EVENT_TYPE_GENERAL: 
 			{
-				// 连接成功, 将配置参数设置到下位机
-				s_instance->d->connectedState = true;
+				// 检测连接状态变化
+				if (msg.contains("connected_2_dev", Qt::CaseInsensitive))
+				{
+					// 连接成功, 将配置参数设置到下位机
+					s_instance->d->connectedState = true;
+					// 连接标志位修改之后, 再调用参数下发接口
+					s_instance->MC_SetMotionConfig(s_instance->d->motionConfig);
 
-				// 连接标志位修改之后, 再调用参数下发接口
-				s_instance->MC_SetMotionConfig(s_instance->d->motionConfig);
+					emit s_instance->connected();
+					emit s_instance->MC_SigConnectedChanged(true);
+					SPDLOG_INFO("motion_moudle sdk_connected_dev");
 
-				emit s_instance->connected();
-				emit s_instance->MC_SigConnectedChanged(true);
-				SPDLOG_INFO("motion_moudle sdk_connected_dev");
+				}
+				else if (msg.contains("disconnected_from_dev", Qt::CaseInsensitive))
+				{
+					s_instance->d->connectedState = false;
+					emit s_instance->MC_SigDisconnected();
+					emit s_instance->MC_SigConnectedChanged(false);
+					SPDLOG_INFO("motion_moudle sdk_disconnected_dev");
 
+				}
+				emit s_instance->MC_SigInfoMsg(msg);
+				break;
 			}
-			else if (message.contains("disconnected", Qt::CaseInsensitive)) 
+
+			case EVENT_TYPE_ERROR: 
 			{
-				s_instance->d->connectedState = false;
-				emit s_instance->MC_SigDisconnected();
-				emit s_instance->MC_SigConnectedChanged(false);
-				SPDLOG_INFO("motion_moudle sdk_disconnected_dev");
-
+				emit s_instance->MC_SigErrOccurred(code, msg);
+				SPDLOG_INFO("SDK Error:{} {} ", code, msg);
+				break;
 			}
-			emit s_instance->MC_SigInfoMsg(message);
-			break;
-		}
 
-		case EVENT_TYPE_ERROR: 
-		{
-			emit s_instance->MC_SigErrOccurred(code, message);
-			SPDLOG_INFO("SDK Error:{} {} ", code, message.toUtf8().toStdString());
-			//qWarning() << "SDK Error:" << code << message;
-			break;
-		}
+			// 打印逻辑操作
+			case EVENT_TYPE_PRINT_STATUS: 
+			{
+				int xData = static_cast<int>(v1);
+				int passIdx = static_cast<int>(v2);
+				int curLayerIdx = static_cast<int>(v3);
 
-		case EVENT_TYPE_PRINT_STATUS: 
-		{
-			int progress = static_cast<int>(v1);
-			int currentLayer = static_cast<int>(v2);
-			int totalLayers = static_cast<int>(v3);
-
-			emit s_instance->MC_SigPrintProgUpdated(progress, currentLayer, totalLayers);
-
-			QString statusMsg = QString(u8"打印进度: %1% (%2/%3层)").arg(progress).arg(currentLayer).arg(totalLayers);
-			emit s_instance->MC_SigPrintStatusChanged(statusMsg);
-
-			qDebug() << "Print progress:" << progress << "%"
-				<< currentLayer << "/" << totalLayers;
-			//SPDLOG_INFO("Print progress:{} %{} /{}", progress, currentLayer, totalLayers);
-			break;
-		}
-
-		case EVENT_TYPE_MOVE_STATUS: 
-		{
-			emit s_instance->MC_SigMoveStatusChanged(message);
-
-			// 如果有坐标信息，发送位置更新
-			if (v1 != 0 || v2 != 0 || v3 != 0) {
-				emit s_instance->MC_SigPosChanged(v1, v2, v3);
-				qDebug() << "Position:" << v1 << v2 << v3;
-				//auto str = FormatString(v1, v2, v3);
-				//SPDLOG_INFO("motion_moudle Position:", str);
-
+				// 判断是否为pass运动结束信号
+				if (msg.contains("print_pass_unit_finished", Qt::CaseInsensitive))
+				{
+					emit s_instance->MC_SigPrintPassFinished(msg);
+					emit s_instance->MC_SigPrintProgUpdated(xData, passIdx, curLayerIdx);
+					SPDLOG_INFO("motion_moudle SDK_print_pass_unit_finished: {}", msg);
+					break;
+				}
+				
+				QString statusMsg = QString(u8"打印进度: %1% (%2/%3层)").arg(xData).arg(passIdx).arg(curLayerIdx);
+				//emit s_instance->MC_SigPrintProgUpdated(progress, curLayer, totalLayers);
+				emit s_instance->MC_SigPrintStatusChangedText(msg);
+				SPDLOG_INFO("motion_moudle Print progress:{} %{} /{}", xData, passIdx, curLayerIdx);
+				break;
 			}
-			break;
-		}
+			// 运动逻辑操作
+			case EVENT_TYPE_MOVE_STATUS: 
+			{		
+				// 判断是否为复位信号
+				if (msg.contains("move_origin_finished", Qt::CaseInsensitive))
+				{
+					emit  s_instance->MC_SigMove2OriginFinished(msg);
+					SPDLOG_INFO("motion_moudle SDK_move_2_origin_pos_finished: {}", msg);
 
-		case EVENT_TYPE_LOG: 
-		{
-			emit s_instance->MC_SigLogMsg(message);
-			SPDLOG_INFO("motion_moudle SDK_Log: {}", message.toUtf8().toStdString());
-			// qDebug() << "SDK Log:" << message;  // 可选：打印到调试输出
-			break;
-		}
-		case EVENT_TYPE_SEND_MSG:
-		{
-			emit s_instance->MC_SigSend2DevCmdMsg(message);
-			//auto str = FormatString(QString("motion_moudle sdk_send_hex_msg: %1").arg(message));
-			SPDLOG_INFO("motion_moudle sdk_send_hex_msg: {}", message.toUtf8().toStdString());
-			break;
-		}
-		case EVENT_TYPE_RECV_MSG:
-		{
-			emit s_instance->MC_SigRecv2DevCmdMsg(message);
-			SPDLOG_INFO("motion_moudle sdk_recv_hex_msg: {}", message.toUtf8().toStdString());
-			//SPDLOG_INFO(FormatString(QString("motion_moudle sdk_recv_hex_msg: %1").arg(message)));
+					break;
+				}
+				emit s_instance->MC_SigMoveStatusChanged(msg);
+				// 如果有坐标信息，发送位置更新
+				if (v1 != 0 || v2 != 0 || v3 != 0)
+				{
+					emit s_instance->MC_SigPosChanged(v1, v2, v3);
+					// 更新数据区数据信息
+					SPDLOG_INFO("motion_moudle Position:数据区1:{} 数据区2:{} 数据区3:{} ", v1, v2, v3);
+				}
+				break;
+			}
+			// 本地日志信息
+			case EVENT_TYPE_LOG: 
+			{
+				emit s_instance->MC_SigLogMsg(msg);
+				SPDLOG_INFO("motion_moudle SDK_Log: {}", msg);
+				break;
+			}
+			// 发送至下位机信息
+			case EVENT_TYPE_SEND_MSG:
+			{
+				emit s_instance->MC_SigSend2DevCmdMsg(msg);
+				SPDLOG_INFO("motion_moudle sdk_send_hex_msg: {}", msg);
+				break;
+			}
+			// 接收下位机信息
+			case EVENT_TYPE_RECV_MSG:
+			{
+				emit s_instance->MC_SigRecv2DevCmdMsg(msg);
+				SPDLOG_INFO("motion_moudle sdk_recv_hex_msg: {}", msg);
 
-			break;
-		}
-		default: 
-		{
-			//SPDLOG_INFO("motion_moudle Unknown event type:{}", type);
-			qWarning() << "Unknown event type:" << type;
-			break;
-		}
+				break;
+			}
+			default: 
+			{
+				//SPDLOG_INFO("motion_moudle Unknown event type:{}", type);
+				qWarning() << "Unknown event type:" << type;
+				break;
+			}
 		}
 	}, Qt::QueuedConnection);
 }

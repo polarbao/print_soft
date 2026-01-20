@@ -121,6 +121,7 @@
     <QtMoc Include="..\..\src\sdk\protocol\ProtocolPrint.h" />
     <QtMoc Include="..\..\src\sdk\communicate\TcpClient.h" />
     <QtMoc Include="..\..\src\sdk\comm\utils.h" />
+    <ClInclude Include="..\..\..\..\print_soft\print_soft_0_0_1\src\sdk\comm\SpdlogQtDataFormat.h" />
     <ClInclude Include="..\..\src\sdk\comm\CMotionConfig.h" />
     <ClInclude Include="..\..\src\sdk\comm\CNewSingleton.h" />
     <ClInclude Include="..\..\src\sdk\comm\CSingleton.h" />

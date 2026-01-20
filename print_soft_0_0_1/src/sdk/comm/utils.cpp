@@ -1,4 +1,4 @@
-﻿#include "utils.h"
+﻿#include "Utils.h"
 //获取short类型的高字节
 #define HI_OF_SHORT(X) (X >> 8)
 //获取short类型的低字节
@@ -69,6 +69,45 @@ ushort Utils::MakeCRCCheck(uchar* data, int datalen)
 	crc += byCRCLo;
 	return crc;
 }
+
+
+/**
+ * @brief 将完整MoveAxisPos转换为QByteArray
+ * @param pos 位置数据（微米单位）
+ * @return 协议数据包（12字节：X(4)+Y(4)+Z(4)，大端序）
+ *
+ * 协议格式：
+ * - Byte 0-3:  X坐标（4字节无符号整数，小端序，微米）
+ * - Byte 4-7:  Y坐标（4字节无符号整数，小端序，微米）
+ * - Byte 8-11: Z坐标（4字节无符号整数，小端序，微米）
+ */
+QByteArray Utils::fullPositionToByteArray(const MoveAxisPos& pos)
+{
+	QByteArray data;
+	QDataStream stream(&data, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+
+	// 写入X/Y/Z坐标（各4字节，大端序，微米单位）
+	stream << pos.xPos;
+	stream << pos.yPos;
+	stream << pos.zPos;
+
+	// 转换为毫米用于日志
+	double x_mm, y_mm, z_mm;
+	pos.toMillimeters(x_mm, y_mm, z_mm);
+
+	NAMED_LOG_T("logicMoudle", "完整位置 转换为协议数据:");
+	NAMED_LOG_T("logicMoudle", "X = {:.3f} mm ({} μm)", x_mm, pos.xPos);
+	NAMED_LOG_T("logicMoudle", "Y = {:.3f} mm ({} μm)", y_mm, pos.yPos);
+	NAMED_LOG_T("logicMoudle", "Z = {:.3f} mm ({} μm)", z_mm, pos.zPos);
+
+	// 打印十六进制（用于调试）
+	//QString hex = data.toHex(' ').toUpper();
+	NAMED_LOG_T("logicMoudle", "完整位置 协议数据(12字节 Hex): {}", data.toHex(' ').toUpper());
+	return data;
+}
+
+
 
 const uchar Utils::gabyCRCHi[256] = 
 {

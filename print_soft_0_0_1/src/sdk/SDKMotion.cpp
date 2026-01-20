@@ -9,6 +9,7 @@
 #include "protocol/ProtocolPrint.h"
 #include "SpdlogMgr.h"
 #include "motionControlSDK.h"
+#include "Utils.h"
 #include <QByteArray>
 #include <QDataStream>
 #include <QtEndian>
@@ -107,7 +108,7 @@ int SDKManager::Move2AbsXAxis(const MoveAxisPos& targetPos)
 
 	// 转换为毫米用于日志
 	double x_mm = static_cast<double>(targetPos.xPos) / 1000.0;
-	auto posArr = fullPositionToByteArray(targetPos);
+	auto posArr = Utils::GetInstance()->fullPositionToByteArray(targetPos);
 
 	NAMED_LOG_T("logicMoudle", "X轴绝对移动，目标位置: X={:.3f}mm ({}μm), Y=0, Z=0; 协议数据(12字节 Hex): {}", 
 		x_mm,
@@ -144,7 +145,7 @@ int SDKManager::Move2AbsYAxis(const MoveAxisPos& targetPos)
 
 	// 转换为毫米用于日志
 	double y_mm = static_cast<double>(targetPos.yPos) / 1000.0;
-	auto posArr = fullPositionToByteArray(targetPos);
+	auto posArr = Utils::GetInstance()->fullPositionToByteArray(targetPos);
 	NAMED_LOG_T("logicMoudle", u8"X轴绝对移动，目标位置: X=0, Y={:.3f}mm ({}μm), Z=0; 协议数据(12字节 Hex): {}", 
 		y_mm,
 		targetPos.yPos,
@@ -180,7 +181,7 @@ int SDKManager::Move2AbsZAxis(const MoveAxisPos& targetPos)
 
 	// 转换为毫米用于日志
 	double z_mm = static_cast<double>(targetPos.zPos) / 1000.0;
-	auto posArr = fullPositionToByteArray(targetPos);
+	auto posArr = Utils::GetInstance()->fullPositionToByteArray(targetPos);
 	NAMED_LOG_T("logicMoudle", u8"Z轴绝对移动，目标位置: X=0, Y=0, Z={:.3f}mm ({}μm); 协议数据(12字节 Hex): {}",
 		z_mm,
 		targetPos.zPos,
@@ -506,109 +507,70 @@ int SDKManager::ResetAxis(int axisFlag)
 	QDataStream stream(&data, QIODevice::WriteOnly);
 	stream.setByteOrder(QDataStream::LittleEndian);
 
+	bool isX = (axisFlag & 1);
+	bool isY = (axisFlag & 2);
+	bool isZ = (axisFlag & 4);
 
+	stream << quint32(isX ? 1 : 0);		 
+	stream << quint32(isY ? 1 : 0);		
+	stream << quint32(isZ ? 1 : 0);
+	
+	if (isX)
+	{
+		// 复位X轴
+		m_dstAxisData.xPos = 0;		
+		m_curAxisData.xPos = 0;
+	}
+	if (isY)
+	{
+		// 复位X轴
+		m_dstAxisData.yPos = 0;
+		m_curAxisData.yPos = 0;
+	}
+	if (isZ)
+	{
+		// 复位Z轴
+		m_dstAxisData.zPos = 0;
+		m_curAxisData.zPos = 0;
+	}
 	//QStringList axes;
 	//if (axisFlag & 1) axes << "X";
 	//if (axisFlag & 2) axes << "Y";
 	//if (axisFlag & 4) axes << "Z";
 	//NAMED_LOG_T("logicMoudle", u8"  要复位的轴: %1").arg(axes.join(", ")));
 
-	// 复位各轴
-	switch (axisFlag)
-	{
-	case 1:
-	{
-		stream << (quint32)1;		// X轴补0 
-		stream << (quint32)0;		// Y轴补0
-		stream << (quint32)0;		// Z轴补0
 
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		break;
-	}
-	case 2:
-	{
-		stream << (quint32)0;		// X轴补0 
-		stream << (quint32)1;		// Y轴补0
-		stream << (quint32)0;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.yPos = 0;
-		m_curAxisData.yPos = 0;
-		break;
-	}
-	case 3:
-	{
-		stream << (quint32)1;		// X轴补0 
-		stream << (quint32)1;		// Y轴补0
-		stream << (quint32)0;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		m_dstAxisData.yPos = 0;
-		m_curAxisData.yPos = 0;
-		break;
-	}
-	case 4:
-	{
-		stream << (quint32)0;		// X轴补0 
-		stream << (quint32)0;		// Y轴补0
-		stream << (quint32)1;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.zPos = 0;
-		m_curAxisData.zPos = 0;
-		break;
-	}
-	case 5:
-	{
-		stream << (quint32)1;		// X轴补0 
-		stream << (quint32)0;		// Y轴补0
-		stream << (quint32)1;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		m_dstAxisData.zPos = 0;
-		m_curAxisData.zPos = 0;
-		break;
-	}
-	case 6:
-	{
-		stream << (quint32)1;		// X轴补0 
-		stream << (quint32)1;		// Y轴补0
-		stream << (quint32)0;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		m_dstAxisData.yPos = 0;
-		m_curAxisData.yPos = 0;
-		break;
-	}
-	case 7:
-	{
-		stream << (quint32)1;		// X轴补0 
-		stream << (quint32)1;		// Y轴补0
-		stream << (quint32)1;		// Z轴补0
-
-		// 复位X轴
-		m_dstAxisData.xPos = 0;
-		m_curAxisData.xPos = 0;
-		m_dstAxisData.yPos = 0;
-		m_curAxisData.yPos = 0;
-		m_dstAxisData.zPos = 0;
-		m_curAxisData.zPos = 0;
-
-		break;
-	}
-	default:
-		break;
-	}
-
-	SendCommand(ProtocolPrint::Ctrl_ResetPos, data);
+	SendCommand(ProtocolPrint::Ctrl_MoveOrigin, data);
 	//NAMED_LOG_T("logicMoudle", u8"轴复位所有复位命令已发送"));
 	return 0;
 }
+
+
+
+
+// ==================== 找原点操作（设置偏移量） ====================
+/**
+ * @brief 找原点操作
+ * @param axisFlag 轴标志位：bit0(1)=X, bit1(2)=Y, bit2(4)=Z，可组合
+ * @return 0=成功, -1=失败
+ *
+ * 示例：
+ * - axisFlag=1: 仅复位X轴
+ * - axisFlag=3: 复位X和Y轴
+ * - axisFlag=7: 复位所有轴
+ */
+int SDKManager::SetOriginOffsetData(const MoveAxisPos& data)
+{
+	if (!IsConnected())
+	{
+		NAMED_LOG_T("logicMoudle", "设置原点偏移量数据失败, 设备未连接");
+		return -1;
+	}
+
+
+	NAMED_LOG_T("logicMoudle", "设置原点偏移量数据 x_offset={}, y_offset={}, z_offset={}", data.xPos, data.yPos, data.zPos);
+	SendCommand(ProtocolPrint::SetParam_OriginOffset, data);
+	return 0;
+}
+
+

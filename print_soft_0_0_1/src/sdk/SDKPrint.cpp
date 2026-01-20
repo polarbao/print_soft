@@ -57,13 +57,54 @@ int SDKManager::ResumePrint()
     return 0;
 }
 
-int SDKManager::ResetPrint() 
+
+// ==================== 运动打印控制 ====================
+
+//int SDKManager::SetPrtReset(const MoveAxisPos& bAxisReset)
+//{
+//	if (!IsConnected())
+//	{
+//		return -1;
+//	}
+//
+//	SendCommand(ProtocolPrint::Print_LayerHome, bAxisReset);
+//	return 0;
+//}
+//
+//
+//int SDKManager::SetPrtPassEnable()
+//{
+//	if (!IsConnected())
+//	{
+//		return -1;
+//	}
+//	QByteArray data;
+//
+//	SendCommand(ProtocolPrint::Print_EnablePass);
+//	return 0;
+//}
+
+
+int SDKManager::SetPrtMoveLayer(const MoveAxisPos& prtLayerCnt)
 {
-    if (!IsConnected()) 
+	if (!IsConnected())
 	{
-        return -1;
-    }
-    
-    SendCommand(ProtocolPrint::Ctrl_ResetPos);
-    return 0;
+		return -1;
+	}
+
+	SendCommand(ProtocolPrint::Print_SetLayerData, prtLayerCnt);
+	return 0;
 }
+
+
+int SDKManager::SetPrtLayerData(const MoveAxisPos& data)
+{
+	if (!IsConnected())
+	{
+		return -1;
+	}
+
+	SendCommand(ProtocolPrint::SetParam_LayerPassNum, data);
+	return 0;
+}
+

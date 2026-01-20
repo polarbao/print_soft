@@ -8,8 +8,8 @@ class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 
 	// Qt属性定义
 	Q_PROPERTY(bool connected READ MC_IsConnected NOTIFY MC_SigConnectedChanged)
-	Q_PROPERTY(QString deviceIp READ MC_GetDevIp NOTIFY MC_SigDevIpChanged)
-	Q_PROPERTY(quint16 devicePort READ MC_GetDevPort NOTIFY MC_SigDevPortChanged)
+	//Q_PROPERTY(QString deviceIp READ MC_GetDevIp NOTIFY MC_SigDevIpChanged)
+	//Q_PROPERTY(quint16 devicePort READ MC_GetDevPort NOTIFY MC_SigDevPortChanged)
 
 public:
 
@@ -57,7 +57,7 @@ public:
 	 * @return true=成功发起连接, false=失败
 	 * @note 连接结果通过connected()或MC_SigErrOccurred()信号通知
 	 */
-	bool MC_Connect2Dev(const QString& ip, quint16 port = 5555);
+	bool MC_Connect2Dev(const QString& ip, quint16 port = 12355);
 
 	/**
 	 * @brief 断开连接
@@ -109,38 +109,60 @@ public:
 	 * @brief 设置轴运动控制配置
 	 *		  此接口接收运动配置信息结构体, 然后将参数包全部设置到下位机设备中, 需要在设备连接成功的情况下调用
 	 * @param config 要设置到下位机的配置结构对象const引用
-	 * @return true=配置加载成功, false=配置加载失败
+	 * @return true=设置成功, false=设置失败
 	 */
 	bool MC_SetMotionConfig(const MotionConfig& config);
 
 
+	/**
+	 * @brief 设置运动起点, 单位um
+	 * @param data data.x 位置存储X轴移动终点
+	 * @return true=成功, false=失败
+	 */
+	bool MC_SetPrintStartPos(const MoveAxisPos& data);
+
+	/**
+	 * @brief 设置运动终点, 单位um
+	 * @param data data.x 位置存储X轴移动终点
+	 * @return true=成功, false=失败
+	 */
+	bool MC_SetPrintEndPos(const MoveAxisPos& data);
+
+	/**
+	 * @brief 设置运动步长, 单位um
+	 * @param data data.x 位置保持为0,  data.y位置为Y轴步进距离,  data.z位置为Z步进距离
+	 * @return true=成功, false=失败
+	 */
+	bool MC_SetPrintStep(const MoveAxisPos& data);
+
+	
+
+	/**
+	 * @brief 向下位机设置单图层PASS总数和Z向移动时机信息
+	 * @param passNum 当前图层可打印的pass总数（4字节：Y4）
+	 * @param zStep   Z轴多少层进行一次移动（4字节：Z4）
+	 * @return true=成功, false=失败
+	 */
+	bool MC_SetLayerNumData(quint32 passNum, quint32 zStep);
+
+
+	/**
+	 * @brief 设置原点位置相比负限位的偏移距离, 单位um
+	 * @param xOffset x轴从负限位移动距离数（4字节：Y4）
+	 * @param yOffset y轴从负限位移动距离数（4字节：Z4）
+	 * @param zOffset z轴从负限位移动距离数（4字节：Z4）
+	 * @return true=成功, false=失败
+	 */
+	bool MC_SetOffsetData(quint32 xOffset, quint32 yOffset, quint32 zOffset);
+
 	// ==================== 运动控制 ====================
 
-	/**
-	 * @brief 移动到绝对坐标
-	 * @param x X轴坐标（mm）
-	 * @param y Y轴坐标（mm）
-	 * @param z Z轴坐标（mm）
-	 * @param speed 速度（mm/s，默认100）
-	 * @return true=命令发送成功, false=失败
-	 */
-	//bool moveTo(const MoveAxisPos& posData);
-
-	/**
-	 * @brief 相对移动
-	 * @param dx X轴增量（mm）
-	 * @param dy Y轴增量（mm）
-	 * @param dz Z轴增量（mm）
-	 * @param speed 速度（mm/s，默认100）
-	 * @return true=命令发送成功, false=失败
-	 */
-	//bool moveBy(double dx, double dy, double dz, double speed = 100.0);
 
 	/**
 	 * @brief 回原点（所有轴复位）
 	 * @return true=命令发送成功, false=失败
 	 */
-	bool MC_GoHome();
+	bool MC_GoHome(int x, int y,int z);
 	/**
 	 * @brief X轴移动（结构体版本）
 	 * @param targetPos 目标位置结构体（仅使用xPos）
@@ -152,8 +174,6 @@ public:
 	 * @endcode
 	 */
 	bool MC_moveXAxis(const MoveAxisPos& targetPos);
-
-
 
 	/**
 	 * @brief Y轴移动（结构体版本）
@@ -186,6 +206,7 @@ public:
 
 	// 3轴同步移动
 	bool MC_move2RelAxisPos(double dx, double dy, double dz);
+
 	bool MC_move2AbsAxisPos(const MoveAxisPos& targetPos);
 	bool MC_move2AbsAxisPos(const QByteArray& targetPos);
 
@@ -265,6 +286,33 @@ public:
 	 */
 	void MC_SendCmd(int operCmd, const QByteArray& arrData);
 
+	// ==================== 自动打印流程 ====================
+
+	///**
+	// * @brief 设置步长接口，设置X Y Z轴步长
+	// * @return true=命令发送成功, false=失败
+	// */
+	//bool MC_PrtStep(const MoveAxisPos& targetPos);
+
+	///**
+	// * @brief 打印运动时复位信号
+	// * @return true=命令发送成功, false=失败
+	// */
+	//bool MC_PrtReset(const MoveAxisPos& targetPos);
+
+	///**
+	// * @brief 打印运动时X轴运动使能信号
+	// * @return true=命令发送成功, false=失败
+	// */
+	//bool MC_PrtPassEnable();
+
+	/**
+	 * @brief 打印运动时要移动的图层数
+	 * @return true=命令发送成功, false=失败
+	 */
+	bool MC_PrtMoveLayer(quint32 layerIdx,quint32 passIdx);
+	
+
 public slots:
 	/**
 	 * @brief 槽函数：刷新连接状态
@@ -290,17 +338,16 @@ signals:
 	 */
 	void MC_SigConnectedChanged(bool isConnected);
 
-	/**
-	 * @brief 设备IP改变
-	 * @param ip IP地址
-	 */
-	void MC_SigDevIpChanged(const QString& ip);
-
-	/**
-	 * @brief 设备端口改变
-	 * @param port 端口号
-	 */
-	void MC_SigDevPortChanged(quint16 port);
+	///**
+	// * @brief 设备IP改变
+	// * @param ip IP地址
+	// */
+	//void MC_SigDevIpChanged(const QString& ip);
+	///**
+	// * @brief 设备端口改变
+	// * @param port 端口号
+	// */
+	//void MC_SigDevPortChanged(quint16 port);
 
 	// ==================== 错误和状态信号 ====================
 
@@ -350,7 +397,15 @@ signals:
 	 * @brief 打印状态改变
 	 * @param status 状态描述
 	 */
-	void MC_SigPrintStatusChanged(const QString& status);
+	void MC_SigPrintStatusChangedText(const QString& status);
+
+	/**
+	 * @brief 单pass打印完成信号（最后1pass打印后运动至初始打印位置
+	 * @param status 状态描述
+	 */
+	void MC_SigPrintPassFinished(const QString& msg);
+
+
 
 	// ==================== 运动相关信号 ====================
 
@@ -367,6 +422,12 @@ signals:
 	 * @param z Z坐标（mm）
 	 */
 	void MC_SigPosChanged(double x, double y, double z);
+
+	/**
+	 * @brief 打印状态改变
+	 * @param status 状态描述
+	 */
+	void MC_SigMove2OriginFinished(const QString& status);
 
 private:
 	// Pimpl模式：隐藏实现细节，保持ABI稳定性

@@ -12,13 +12,13 @@
 
 // ==================== TCP连接管理 ====================
 
-int SDKManager::ConnectByTCP(const QString& ip, unsigned short port) 
+int SDKManager::Connect2MotionDev(const QString& ip, unsigned short port) 
 {
     if (!m_initialized || !m_tcpClient) 
 	{
         return -1;
     }
-    
+  
     // 设置IP和端口
     m_tcpClient->setIpAndPort(ip, port);
     

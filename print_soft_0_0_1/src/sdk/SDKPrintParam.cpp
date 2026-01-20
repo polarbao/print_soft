@@ -11,11 +11,9 @@
 #include <QFile>
 #include <QImage>
 #include <SpdlogMgr.h>
-#include <MoveAxisPosFormat.h>
+#include <SpdlogQtDataFormat.h>
 
 // ==================== 打印参数设置 ====================
-
-
 int SDKManager::SetPrintStartPos(const MoveAxisPos& startPos)
 {
     if (!IsConnected()) 
@@ -74,5 +72,17 @@ int SDKManager::SetAxisUnitStep(const MoveAxisPos& step)
 
 	NAMED_LOG_D("logicMoudle", "SetAxisUnitStep => {}", step);
 	SendCommand(ProtocolPrint::SetParam_AxisUnitMove, step);
+	return 0;
+}
+
+int SDKManager::SetAxisAccelerated(const MoveAxisPos& accData)
+{
+	if (!IsConnected())
+	{
+		return -1;
+	}
+
+	NAMED_LOG_D("logicMoudle", "SetAxisAccelerated => {}", accData);
+	SendCommand(ProtocolPrint::SetParam_AxistAccSpd, accData);
 	return 0;
 }

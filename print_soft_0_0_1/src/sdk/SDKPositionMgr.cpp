@@ -6,7 +6,6 @@
  */
 
 #include "SDKManager.h"
-#include "comm/CLogManager.h"
 #include "motionControlSDK.h"
 #include <QMutexLocker>
 #include <QString>
@@ -63,18 +62,16 @@ MoveAxisPos SDKManager::GetCurrentPosition() const
  * 数据流程：
  * 1. 设备发送位置数据（协议格式）
  * 2. ProtocolPrint解析为MoveAxisPos（微米）
- * 3. 通过信号SigHandleFunOper2传递到这里
+ * 3. 通过信号SigHandleAxisPosData传递到这里
  * 4. 更新m_curAxisData
- * 5. 通过sendEvent发送到上层（转换为mm）
+ * 5. 通过SendEvent发送到上层（转换为mm）
  */
 void SDKManager::OnHandleRecvDataOper(int code, const MoveAxisPos& pos)
 {
 	NAMED_LOG_T("logicMoudle", "位置数据 收到位置数据回复，命令码: 0x{:04X}", code);
-
 	// 更新当前位置
-	m_curAxisData.xPos = pos.xPos;
-	m_curAxisData.yPos = pos.yPos;
-	m_curAxisData.zPos = pos.zPos;
+	m_curAxisData = pos;
+
 	
 	// 转换为毫米用于日志和事件
 	double x_mm, y_mm, z_mm;
@@ -102,10 +99,11 @@ void SDKManager::OnHandleRecvDataOper(int code, const MoveAxisPos& pos)
 	} 
 	else 
 	{
-		//LOG_INFO(QString(u8"位置数据 已到达目标位置"));
+		NAMED_LOG_T("logicMoudle", "位置数据 已到达目标位置");
 	}
 	
-	// 发送位置更新事件到上层（毫米单位）
-	sendEvent(EVENT_TYPE_MOVE_STATUS, 0, "Position updated", x_mm, y_mm, z_mm);
+	// 发送位置更新事件到上层
+	SendEvent(EVENT_TYPE_MOVE_STATUS, 0, "Position updated", m_curAxisData.xPos, m_curAxisData.yPos, m_curAxisData.zPos);
+	//SendEvent(EVENT_TYPE_POS_STATUS, 0, "Position updated", m_curAxisData.xPos, m_curAxisData.yPos, m_curAxisData.zPos);
 }
 

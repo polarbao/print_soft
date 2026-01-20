@@ -8,7 +8,6 @@
 #include "SDKManager.h"
 #include "TcpClient.h"
 #include "ProtocolPrint.h"
-#include "CLogManager.h"
 #include "SpdlogMgr.h"
 
 // ==================== 单例实现 ====================
@@ -60,12 +59,8 @@ bool SDKManager::Init(const QString& log_dir)
 	connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &SDKManager::OnHeartbeat);
 	connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &SDKManager::OnCmdReply);
 	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::OnHeartbeat);
-	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper1, this, &SDKManager::OnHandleRecvFunOper);
-	connect(m_protocol.get(), &ProtocolPrint::SigHandleFunOper2, this, &SDKManager::OnHandleRecvDataOper);
-
-    
-    // 设置协议的串口（实际上是TCP客户端）
-   //m_protocol->SetSerialPort(m_tcpClient.get());
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleRespFunOper, this, &SDKManager::OnHandleRecvFunOper);
+	connect(m_protocol.get(), &ProtocolPrint::SigHandleAxisPosData, this, &SDKManager::OnHandleRecvDataOper);
     
     // 初始化心跳定时器
     m_heartbeatSendTimer = std::make_unique<QTimer>();
@@ -78,24 +73,30 @@ bool SDKManager::Init(const QString& log_dir)
     connect(m_heartbeatCheckTimer.get(), &QTimer::timeout, this, &SDKManager::OnCheckHeartbeat);
     
     m_initialized = true;
+	//SendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
     return true;
 }
 
-void SDKManager::Release() {
-    if (!m_initialized) {
+void SDKManager::Release() 
+{
+    if (!m_initialized) 
+	{
         return;  // 未初始化，无需释放
     }
     
     // 停止心跳定时器
-    if (m_heartbeatSendTimer && m_heartbeatSendTimer->isActive()) {
+    if (m_heartbeatSendTimer && m_heartbeatSendTimer->isActive()) 
+	{
         m_heartbeatSendTimer->stop();
     }
-    if (m_heartbeatCheckTimer && m_heartbeatCheckTimer->isActive()) {
+    if (m_heartbeatCheckTimer && m_heartbeatCheckTimer->isActive()) 
+	{
         m_heartbeatCheckTimer->stop();
     }
     
     // 断开连接
-    if (m_tcpClient) {
+    if (m_tcpClient) 
+	{
         m_tcpClient->disconnectFromHost();
     }
     
@@ -146,7 +147,7 @@ void SDKManager::SendCommand(int code, const QByteArray& data)
     // 发送数据
     m_tcpClient->sendData(packet);
 	NAMED_LOG_D("netMoudle", "motion_sdk print_protocol_moudle cur_send_data: {}", packet.toHex().toUpper());
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
+	SendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
 
 }
 
@@ -155,33 +156,13 @@ void SDKManager::SendCommand(const QByteArray& data /*= QByteArray()*/)
 {
 	// 重发失败数据
 	m_tcpClient->sendData(data);
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, data.toHex().toUpper().constData());
+	SendEvent(EVENT_TYPE_SEND_MSG, 0, data.toHex().toUpper().constData());
 
 }
 
 //fc类型+坐标数据
 void SDKManager::SendCommand(int code, const MoveAxisPos& posData)
 {
-	//数据处理
-	//const int dataSize = 12;
-	//uchar sendBuf[dataSize];
-	//memset(sendBuf, 0, dataSize);
-	//sendBuf[0] = posData.xPos >> 0 & 0xFF;
-	//sendBuf[1] = posData.xPos >> 8 & 0xFF;
-	//sendBuf[2] = posData.xPos >> 16 & 0xFF;
-	//sendBuf[3] = posData.xPos >> 24 & 0xFF;
-	//sendBuf[4] = posData.yPos >> 0 & 0xFF;
-	//sendBuf[5] = posData.yPos >> 8 & 0xFF;
-	//sendBuf[6] = posData.yPos >> 16 & 0xFF;
-	//sendBuf[7] = posData.yPos >> 24 & 0xFF;
-	//sendBuf[8] = posData.zPos >> 0 & 0xFF;
-	//sendBuf[9] = posData.zPos >> 8 & 0xFF;
-	//sendBuf[10] = posData.zPos >> 16 & 0xFF;
-	//sendBuf[11] = posData.zPos >> 24 & 0xFF;
-	//QByteArray senddata;
-	//senddata.resize(12);
-	//memcpy(senddata.data(), sendBuf, 12);
-
 	//数据处理
 	QByteArray senddata;
 	senddata.resize(12);
@@ -226,11 +207,11 @@ void SDKManager::SendCommand(int code, const MoveAxisPos& posData)
 	// 使用协议打包数据
 	QByteArray packet = ProtocolPrint::GetSendDatagram(ct, fc, senddata);
 	m_tcpClient->sendData(packet);
-	sendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
+	SendEvent(EVENT_TYPE_SEND_MSG, 0, packet.toHex().toUpper().constData());
 
 }
 
-void SDKManager::sendEvent(SdkEventType type, int code, const char* message, double v1, double v2, double v3) 
+void SDKManager::SendEvent(SdkEventType type, int code, const char* message, double v1, double v2, double v3) 
 {
     QMutexLocker lock(&g_callbackMutex);
     

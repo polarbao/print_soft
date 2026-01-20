@@ -1,15 +1,9 @@
 ﻿#include "ProtocolPrint.h"
-//#include "globalHeader.h"
 //#include "SerialPortData.h"
-#include "CLogManager.h"
 #include <QDataStream>
 #include <QtEndian>
 #include "utils.h"
 #include "SpdlogMgr.h"
-
-
-//启动CRC检测
-//#define TurnOnCRC 
 
 //获取short类型的高字节
 #define HI_OF_SHORT(X) (X >> 8)
@@ -33,7 +27,7 @@
 ProtocolPrint::ProtocolPrint(QObject* parent /*= 0*/)
 	:QObject(parent)
 {
-	qRegisterMetaType<DataFieldInfo1>("DataFieldInfo1");
+	//qRegisterMetaType<DataFieldInfo1>("DataFieldInfo1");
 
 }
 
@@ -252,7 +246,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	//比较包头
 	if (!(recvBuf[0] == LO_OF_SHORT(Req_Package_Head) && (recvBuf[1] == HI_OF_SHORT(Req_Package_Head))))
 	{
-		//NAMED_LOG_I("netMoudle", (u8"motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
+		NAMED_LOG_I("netMoudle", "motion_moudle_sdk print_protocol_moudle cur_recv_req_package_数据包头错误");
 		return;
 	}
 
@@ -260,13 +254,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 	if (!Utils::GetInstance()->CheckCRC(recvBuf, recvLength - 10))
 	{
 		NAMED_LOG_I("netMoudle", "motion_moudle_sdk print_protocol_moudle cur_recv_req_package_crc校验错误");
-		//auto strNum = "crc校验错误次数统计1：{}" + QString::number(++m_crcErrorNum);
-		//NAMED_LOG_I("netMoudle", strNum.toUtf8().toStdString());
-		NAMED_LOG_I("netMoudle", QString("crc校验错误次数统计2：{}").arg(++m_crcErrorNum).toUtf8().toStdString());
-
-#ifdef TurnOnCRC
 		return;
-#endif 
 	}
 
 	//-------------正确的包，开始解析-------------------//
@@ -289,7 +277,7 @@ void ProtocolPrint::ParseReqPackageData(QByteArray& datagram, PackageHeadType ty
 
 	// 拼成一个结构体，进行后续逻辑处理
 	// req处理逻辑
-	emit SigHandleFunOper(codeType, code);
+	emit SigHandleReqFunOper(codeType, code);
 
 
 	//如果是下位机回应上位机的包
@@ -376,15 +364,13 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 		posData.xPos = (packData.data[3] << 24) | (packData.data[2] << 16) | (packData.data[1] << 8) | packData.data[0];
 		posData.yPos = (packData.data[7] << 24) | (packData.data[6] << 16) | (packData.data[5] << 8) | packData.data[4];
 		posData.zPos = (packData.data[11] << 24) | (packData.data[10] << 16) | (packData.data[9] << 8) | packData.data[8];
-		NAMED_LOG_I("netMoudle", QString("motion_moudle_sdk cur_recv_resp_package_各轴数据 _X轴数据：%1, _Y轴数据：%2, _Z轴数据：%3")
-			.arg(posData.xPos)
-			.arg(posData.yPos)
-			.arg(posData.zPos).toUtf8().toStdString());
+		NAMED_LOG_I("netMoudle", "motion_moudle_sdk cur_recv_resp_package_各轴数据 _X轴数据：{}, _Y轴数据：{}, _Z轴数据：{}",
+			posData.xPos, posData.yPos, posData.zPos);
 
 		// req处理逻辑
-		emit SigHandleFunOper(operType, code);
-		emit SigHandleFunOper1(packData);
-		emit SigHandleFunOper2(code, posData);
+		//emit SigHandleFunOper(operType, code);
+		emit SigHandleRespFunOper(packData);
+		emit SigHandleAxisPosData(code, posData);
 
 	}
 	else if (type == Head_AADD)
@@ -443,11 +429,7 @@ QByteArray ProtocolPrint::GetSendDatagram(ECmdType cmdType, FunCode cmd, QByteAr
 	return senddata;
 }
 
-QList<QByteArray> ProtocolPrint::GetSendImgDatagram(quint16 w, quint16 h, quint8 Imgtype, const QByteArray &hexData)
-{
-	QList<QByteArray> packets;
-	return packets;
-}
+
 
 QByteArray ProtocolPrint::GetRespDatagram(FunCode code, QByteArray data /*= QByteArray()*/)
 {
@@ -573,44 +555,3 @@ static QString getErrString(uchar code)
 		return QString("unknow_err");
 	}
 }
-
-
-void ProtocolPrint::SplitComm(uint16_t command, uint8_t& highByte, uint8_t& lowByte)
-{
-	highByte = static_cast<uint8_t>((command >> 8) & 0xFF);
-	lowByte = static_cast<uint8_t>(command & 0xFF);
-}
-
-uint16_t ProtocolPrint::GetSerResponseComm(FunCode clientCmd)
-{
-	uint16_t clientValue = static_cast<uint16_t>(clientCmd);
-	uint8_t highByte, lowByte;
-	SplitComm(clientValue, highByte, lowByte);
-	return (static_cast<uint16_t>(highByte - SER_HIGH_OFFSET) << 8) | lowByte;
-}
-
-
-
-ProtocolPrint::FunCode ProtocolPrint::GetClientCommFromSer(uint16_t serverCommand)
-{
-	//auto it = ServerToClientCommandMap.find(serverCommand);
-	//if (it != ServerToClientCommandMap.end()) {
-	//	return it->second;
-	//}
-	return ProtocolPrint::Get_Breath;
-}
-
-
-
-DataFieldInfo1::DataFieldInfo1()
-{
-
-}
-
-//MoveAxisPos::MoveAxisPos()
-//{
-//	xPos = 0;
-//	yPos = 0;
-//	zPos = 0;
-//}
-//

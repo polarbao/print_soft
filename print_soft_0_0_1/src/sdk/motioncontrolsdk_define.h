@@ -29,11 +29,19 @@ typedef enum
 {
 	EVENT_TYPE_GENERAL,     // 普通信息事件 (如: "Connected", "Disconnected")
 	EVENT_TYPE_ERROR,       // 错误事件
-	EVENT_TYPE_PRINT_STATUS,// 打印状态更新 (如: 进度, 层数)
-	EVENT_TYPE_MOVE_STATUS, // 运动状态更新 (如: "Moving", "Idle")
-	EVENT_TYPE_LOG,          // 内部日志事件
+	EVENT_TYPE_PRINT_STATUS,// 打印状态更新 (如: 打印操作 开始、暂停、停止、恢复、pass打印完成)
+	EVENT_TYPE_MOVE_STATUS, // 运动状态更新 (如: 回原点，手动控制移动)
+	EVENT_TYPE_LOG,         // 内部日志事件
+
 	EVENT_TYPE_SEND_MSG,
 	EVENT_TYPE_RECV_MSG
+	
+	// 预留接口
+	//EVENT_TYPE_MOVE_STATUS		// 运动状态更新
+	//EVENT_TYPE_DEV_CONNECT		// 设备层数更新 
+	//EVENT_TYPE_PRT_LAYOUT_STATUS	// 打印层数更新 
+	//EVENT_TYPE_POS_STATUS			// 位置信息更新 
+
 } SdkEventType;
 
 /**
@@ -61,10 +69,26 @@ struct MOTIONCONTROLSDK_EXPORT MoveAxisPos
 	quint32 yPos;
 	quint32 zPos;
 
-	MoveAxisPos() : xPos(0), yPos(0), zPos(0) {}
+	constexpr MoveAxisPos() noexcept : xPos(0), yPos(0), zPos(0) {}
 
-	MoveAxisPos(quint32 x, quint32 y, quint32 z)
+	constexpr MoveAxisPos(quint32 x, quint32 y, quint32 z) noexcept
 		: xPos(x), yPos(y), zPos(z) {}
+
+	bool operator==(const MoveAxisPos& other) const noexcept 
+	{
+		return xPos == other.xPos && yPos == other.yPos && zPos == other.zPos;
+	}
+	bool operator!=(const MoveAxisPos& other) const noexcept 
+	{
+		return !(*this == other);
+	}
+
+	void Clear()
+	{
+		xPos = 0;
+		yPos = 0;
+		zPos = 0;
+	}
 
 	static MoveAxisPos fromMillimeters(double x_mm, double y_mm, double z_mm)
 	{
@@ -82,14 +106,16 @@ struct MOTIONCONTROLSDK_EXPORT MoveAxisPos
 		z_out = static_cast<double>(zPos) / 1000.0;
 	}
 
-	QStringList toStrList(MoveAxisPos data) const
+	QStringList toStrList() const
 	{
 		QStringList tmp;
-		tmp.push_back(QString::number(data.xPos));
-		tmp.push_back(QString::number(data.yPos));
-		tmp.push_back(QString::number(data.zPos));
+		tmp.reserve(3);
+		tmp.push_back(QString::number(xPos));
+		tmp.push_back(QString::number(yPos));
+		tmp.push_back(QString::number(zPos));
 		return tmp;
 	}
+
 
 };
 Q_DECLARE_METATYPE(MoveAxisPos)
@@ -106,9 +132,13 @@ struct MOTIONCONTROLSDK_EXPORT MotionConfig {
 	MoveAxisPos		endPos;				// 打印坐标参数	->	结束位置
 	MoveAxisPos		cleanPos;			// 打印坐标参数	->	清理位置
 
+	MoveAxisPos offset;					// 打印原点偏移量(在y轴数据区设置数据
+	MoveAxisPos layerData;				// 当前图层pass总数，Z轴移动所需图层数    Y表示PASS总数, Z表示打印几层图层后, 位移轴动一次Z
 	MoveAxisPos step;					// 打印步长参数
 	MoveAxisPos	limit;					// 轴最大距离限制参数
 	MoveAxisPos	speed;					// 轴速度参数
+	MoveAxisPos	acc;					// 轴加速度参数
+
 };
 Q_DECLARE_METATYPE(MotionConfig)
 

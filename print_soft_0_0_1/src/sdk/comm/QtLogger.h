@@ -425,3 +425,5 @@ void example7(QObject* obj) {
     QT_LOG_DATETIME_MSG(endTime, "结束时间");
 }
 */
+
+

@@ -7,7 +7,6 @@
 
 #include "SDKManager.h"
 #include "protocol/ProtocolPrint.h"
-#include "CLogManager.h"
 #include "SpdlogMgr.h"
 #include <QString>
 
@@ -22,9 +21,9 @@
 void SDKManager::OnHandleRecvFunOper(const PackParam& packData)
 {
    NAMED_LOG_T("netMoudle","收到PackParam数据包  ");
-   NAMED_LOG_T("netMoudle","包头(head):0x{:04X}", QString::number(packData.head, 16).toUpper().rightJustified(4, '0'));
-   NAMED_LOG_T("netMoudle", "操作类型(operType):0x{:02X}", QString::number(packData.operType, 16).toUpper().rightJustified(4, '0'));
-   NAMED_LOG_T("netMoudle", "命令功能码(cmdFun):0x{:02X}", QString::number(packData.cmdFun, 16).toUpper().rightJustified(4, '0'));
+   NAMED_LOG_T("netMoudle","包头(head):0x{:04X}", packData.head);
+   NAMED_LOG_T("netMoudle", "操作类型(operType):0x{:04X}", packData.operType);
+   NAMED_LOG_T("netMoudle", "命令功能码(cmdFun):0x{:04X}", packData.cmdFun);
    NAMED_LOG_T("netMoudle","数据长度(dataLen):{}字节", packData.dataLen);
     
     // 打印数据域（前12字节，十六进制）
@@ -62,8 +61,8 @@ void SDKManager::OnHandleRecvFunOper(const PackParam& packData)
         break;
         
     default:
-		NAMED_LOG_T("netMoudle"," 未知操作类型: 0x{:04X}", QString::number(packData.operType, 16).toUpper());
-        sendEvent(EVENT_TYPE_ERROR, -1, "Unknown operation type in PackParam");
+		NAMED_LOG_T("netMoudle"," 未知操作类型: 0x{:04X}", packData.operType);
+        SendEvent(EVENT_TYPE_ERROR, -1, "Unknown operation type in PackParam");
         break;
     }
 }
@@ -84,7 +83,7 @@ void SDKManager::OnHandleRecvFunOper(const PackParam& packData)
  */
 void SDKManager::HandleSetParamResponse(const PackParam& packData)
 {
-   NAMED_LOG_T("netMoudle","设置参数 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
+	NAMED_LOG_T("netMoudle","设置参数 命令应答: 0x{:04X}", packData.cmdFun);
     
     QString message;
     switch (packData.cmdFun)
@@ -131,8 +130,8 @@ void SDKManager::HandleSetParamResponse(const PackParam& packData)
         break;
     }
     
-   NAMED_LOG_T("netMoudle","当前设置参数数据：{}", message);
-   sendEvent(EVENT_TYPE_GENERAL, 0, message.toUtf8().constData());
+	NAMED_LOG_D("netMoudle","当前设置参数数据：{}", message);
+	SendEvent(EVENT_TYPE_GENERAL, 0, message.toUtf8().constData());
 }
 
 /**
@@ -145,54 +144,59 @@ void SDKManager::HandleSetParamResponse(const PackParam& packData)
  */
 void SDKManager::HandleGetCmdResponse(const PackParam& packData)
 {
-   NAMED_LOG_T("netMoudle","获取命令 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
-    
+	NAMED_LOG_T("netMoudle","获取命令 命令应答: 0x{:04X}", packData.cmdFun); 
     switch (packData.cmdFun)
     {
-    case ProtocolPrint::Get_AxisPos:  // 获取轴位置
-    {
-        // 验证数据长度（假设位置数据为12字节：X(4) Y(4) Z(4)）
-        if (packData.dataLen < 12) {
-           NAMED_LOG_T("netMoudle","位置数据长度不足: 期望12字节，实际{}字节", packData.dataLen);
-            sendEvent(EVENT_TYPE_ERROR, -1, "Invalid axis position data length");
-            break;
-        }
+		//OnHandleRecvDataOper通过该函数在参数包中直接获取轴信息
+		case ProtocolPrint::Get_AxisPos:  // 获取轴位置
+		{
+			//// 验证数据长度（假设位置数据为12字节：X(4) Y(4) Z(4)）
+			//if (packData.dataLen < 12) 
+			//{
+			//	NAMED_LOG_D("netMoudle","位置数据长度不足: 期望12字节，实际{}字节", packData.dataLen);
+			//	SendEvent(EVENT_TYPE_ERROR, -1, "Invalid axis position data length");
+			//	break;
+			//}
         
-        // 解析轴位置数据（大端序，单位假设为0.01mm）
-        uint32_t xPos = (static_cast<uint32_t>(packData.data[0]) << 24) | (static_cast<uint32_t>(packData.data[1]) << 16) | 
-                       (static_cast<uint32_t>(packData.data[2]) << 8) | static_cast<uint32_t>(packData.data[3]);
-                        
-        uint32_t yPos = (static_cast<uint32_t>(packData.data[4]) << 24) | (static_cast<uint32_t>(packData.data[5]) << 16) | 
-                       (static_cast<uint32_t>(packData.data[6]) << 8) | static_cast<uint32_t>(packData.data[7]);
-                        
-        uint32_t zPos = (static_cast<uint32_t>(packData.data[8]) << 24) | (static_cast<uint32_t>(packData.data[9]) << 16) | 
-                       (static_cast<uint32_t>(packData.data[10]) << 8) | static_cast<uint32_t>(packData.data[11]);
+			//// 解析轴位置数据（大端序，单位假设为0.01mm）
+			//uint32_t xPos = (static_cast<uint32_t>(packData.data[3]) << 24) | (static_cast<uint32_t>(packData.data[2]) << 16) | 
+			//				(static_cast<uint32_t>(packData.data[1]) << 8) | (static_cast<uint32_t>(packData.data[0]));
+			//uint32_t yPos = (static_cast<uint32_t>(packData.data[7]) << 24) | (static_cast<uint32_t>(packData.data[6]) << 16) | 
+			//				(static_cast<uint32_t>(packData.data[5]) << 8) | (static_cast<uint32_t>(packData.data[4]));
+			//uint32_t zPos = (static_cast<uint32_t>(packData.data[11]) << 24) | (static_cast<uint32_t>(packData.data[10]) << 16) |
+			//				(static_cast<uint32_t>(packData.data[9]) << 8) | (static_cast<uint32_t>(packData.data[8]));
+
+			//// 更新当前位置到成员变量
+			//m_curAxisData.xPos = xPos;
+			//m_curAxisData.yPos = yPos;
+			//m_curAxisData.zPos = zPos;
         
-        // 更新当前位置到成员变量
-        m_curAxisData.xPos = xPos;
-        m_curAxisData.yPos = yPos;
-        m_curAxisData.zPos = zPos;
+			//// 转换为毫米单位（假设原始单位是0.01mm）
+			//double xMM = static_cast<double>(xPos) / 100.0;
+			//double yMM = static_cast<double>(yPos) / 100.0;
+			//double zMM = static_cast<double>(zPos) / 100.0;
         
-        // 转换为毫米单位（假设原始单位是0.01mm）
-        double xMM = static_cast<double>(xPos) / 100.0;
-        double yMM = static_cast<double>(yPos) / 100.0;
-        double zMM = static_cast<double>(zPos) / 100.0;
+			//NAMED_LOG_T("netMoudle", " 当前轴位置: X={:.3f} mm, Y={:.3f} mm, Z={:.3f} mm", xMM, yMM, zMM);
         
-		NAMED_LOG_T("netMoudle", " 当前轴位置: X={:.3f} mm, Y={:.3f} mm, Z={:.3f} mm", xMM, yMM, zMM);
-        
-        // 发送位置更新事件到上层
-        sendEvent(EVENT_TYPE_MOVE_STATUS, 0, "Position updated", xMM, yMM, zMM);
-        break;
-    }
+			//// 发送位置更新事件到上层
+			//SendEvent(EVENT_TYPE_MOVE_STATUS, 0, "Position updated", m_curAxisData.xPos, m_curAxisData.yPos, m_curAxisData.zPos);
+			//SendEvent(EVENT_TYPE_POS_STATUS, 0, "Position updated", m_curAxisData.xPos, m_curAxisData.yPos, m_curAxisData.zPos);
+
+			break;
+		}
     
-    case ProtocolPrint::Get_Breath:  // 心跳
-        // 心跳应答已在SDKCallback.cpp的onHeartbeat()中处理
-       NAMED_LOG_T("netMoudle"," 心跳应答（已在onHeartbeat中处理）");
-        break;
+		case ProtocolPrint::Get_Breath:  // 心跳
+		{
+			// 心跳应答已在SDKCallback.cpp的onHeartbeat()中处理
+			NAMED_LOG_T("netMoudle", " 心跳应答(已在onHeartbeat中处理)）");
+			break;
+		}
         
-    default:
-       NAMED_LOG_T("netMoudle","其他获取命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
-        break;
+		default:
+		{
+			NAMED_LOG_T("netMoudle", "其他获取命令应答: 0x{:04X}", packData.cmdFun);
+			break;
+		}
     }
 }
 
@@ -211,106 +215,108 @@ void SDKManager::HandleGetCmdResponse(const PackParam& packData)
  */
 void SDKManager::HandleCtrlCmdResponse(const PackParam& packData)
 {
-   NAMED_LOG_T("netMoudle","控制命令 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
+   NAMED_LOG_T("netMoudle","控制命令 命令应答: 0x{:04X}", packData.cmdFun);
     
-    QString message;
-    SdkEventType eventType = EVENT_TYPE_GENERAL;
-    
+    QString logMsg, evMsg;
+    SdkEventType evType = EVENT_TYPE_GENERAL;
+	SdkEventType logType = EVENT_TYPE_LOG;
+
     switch (packData.cmdFun)
     {
-    // 打印控制命令
-    case ProtocolPrint::Ctrl_StartPrint:
-	{
-		//message = QString(u8"打印已启动");
-		eventType = EVENT_TYPE_PRINT_STATUS;
-		break;
-	}
+		// 打印控制命令
+		case ProtocolPrint::Ctrl_StartPrint:
+		{
+			logMsg = "start_print_oper";
+			evType = EVENT_TYPE_PRINT_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_PasusePrint:
-	{
-		//message = "打印已暂停";
-		eventType = EVENT_TYPE_PRINT_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_PasusePrint:
+		{
+			logMsg = "pause_print_oper";
+			evType = EVENT_TYPE_PRINT_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_ContinuePrint:
-	{
-		//message = "打印已恢复";
-		eventType = EVENT_TYPE_PRINT_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_ContinuePrint:
+		{
+			logMsg = "continue_print_oper";
+			evType = EVENT_TYPE_PRINT_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_StopPrint:
-	{
-		//message = "打印已停止";
-		eventType = EVENT_TYPE_PRINT_STATUS;
-		break;
+		case ProtocolPrint::Ctrl_StopPrint:
+		{
+			logMsg = "stop_print_oper";
+			evType = EVENT_TYPE_PRINT_STATUS;
+			break;
 
-	}
-    // 轴控制命令
-    case ProtocolPrint::Ctrl_ResetPos:
-	{
-		//message = "轴复位完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		}
+		// 轴控制命令
+		case ProtocolPrint::Ctrl_MoveOrigin:
+		{
+			logMsg = "move_origin_finished";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_XAxisLMove:
-	{
-		//message = "X轴向左移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_XAxisLMove:
+		{
+			logMsg = "X轴向左移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_XAxisRMove:
-	{
-		//message = "X轴向右移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_XAxisRMove:
+		{
+			logMsg = "X轴向右移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_YAxisLMove:
-	{
-		//message = "Y轴向左移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_YAxisLMove:
+		{
+			logMsg = "Y轴向左移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_YAxisRMove:
-	{
-		//message = "Y轴向右移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_YAxisRMove:
+		{
+			logMsg = "Y轴向右移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_ZAxisLMove:
-	{
-		//message = "Z轴向上移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_ZAxisLMove:
+		{
+			logMsg = "Z轴向上移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_ZAxisRMove:
-	{
-		//message = "Z轴向下移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_ZAxisRMove:
+		{
+			logMsg = "Z轴向下移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    case ProtocolPrint::Ctrl_AxisAbsMove:
-	{
-		//message = "轴绝对移动完成";
-		eventType = EVENT_TYPE_MOVE_STATUS;
-		break;
-	}
+		case ProtocolPrint::Ctrl_AxisAbsMove:
+		{
+			logMsg = "轴绝对移动完成";
+			evType = EVENT_TYPE_MOVE_STATUS;
+			break;
+		}
         
-    default:
-        message = QString("控制命令执行完成 (命令码: 0x%1)").arg(QString::number(packData.cmdFun, 16).toUpper());
-        break;
+		default:
+			logMsg.append(QString("控制命令执行完成 (命令码: 0x%1)").arg(QString::number(packData.cmdFun, 16).toUpper()));
+			break;
     }
     
-	NAMED_LOG_T("netMoudle","当前设置命令 %1", message);
-	sendEvent(eventType, 0, message.toUtf8().constData());
+	NAMED_LOG_T("netMoudle","收到控制命令回复 当前命令 {}", logMsg);
+	SendEvent(logType, 0, logMsg.toUtf8().constData());
+	SendEvent(evType, 0, evMsg.toUtf8().constData());
 }
 
 /**
@@ -323,35 +329,65 @@ void SDKManager::HandleCtrlCmdResponse(const PackParam& packData)
  */
 void SDKManager::HandlePrintCommCmdResponse(const PackParam& packData)
 {
-   NAMED_LOG_T("netMoudle","打印通信 命令应答: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
+   NAMED_LOG_T("netMoudle","打印通信 命令应答: 0x{:04X}", packData.cmdFun);
     
-    switch (packData.cmdFun)
-    {
-    case ProtocolPrint::Print_AxisMovePos:
-    {
-        //LOG_INFO(QString(u8"打印过程轴移动位置更新"));
-        
-        // 解析打印过程中的轴移动位置（根据实际协议定义）
-        // TODO: 根据实际协议解析数据
-        // 示例：
-        // if (packData.dataLen >= 12) {
-        //     解析Y轴和Z轴位置
-        //     sendEvent(EVENT_TYPE_PRINT_STATUS, 0, "Printing position updated", y, z);
-        // }
-        break;
-    }
-    
-    case ProtocolPrint::Print_PeriodData:
-    {
-		NAMED_LOG_T("netMoudle","周期数据 已在HandlePeriodData中处理）");
-        // 周期数据已在ProtocolPrint::HandlePeriodData()中处理
-        break;
-    }
-    
-    default:
-		NAMED_LOG_T("netMoudle","其他打印通信命令: 0x{:04X}", QString::number(packData.cmdFun, 16).toUpper());
-        break;
-    }
+	QString logMsg;
+	QString evMsg;
+	SdkEventType evType = EVENT_TYPE_GENERAL;
+	SdkEventType logType = EVENT_TYPE_LOG;
+	MoveAxisPos layerData;
+	switch (packData.cmdFun)
+	{
+		// 打印控制命令
+		// 预留
+		case ProtocolPrint::Print_AxisMovePos:
+		{
+			//LOG_INFO(QString(u8"打印过程轴移动位置更新"));
+
+			// 解析打印过程中的轴移动位置（根据实际协议定义）
+			// TODO: 根据实际协议解析数据
+			// 示例：
+			// if (packData.dataLen >= 12) 
+			// {
+			//     解析Y轴和Z轴位置
+			//     SendEvent(EVENT_TYPE_PRINT_STATUS, 0, "Printing position updated", y, z);
+			// }
+			logMsg = QString(u8"打印已启动");
+			evMsg = QString("print_oper_start_print");
+
+			break;
+		}
+		// 预留
+		case ProtocolPrint::Print_PeriodData:
+		{
+
+			logMsg = QString(u8"打印已暂停");
+			evMsg = QString("print_oper_start_print");
+
+			NAMED_LOG_T("netMoudle", "周期数据 已在HandlePeriodData中处理）");
+			break;
+		}
+		case ProtocolPrint::Print_SetLayerData:
+		{
+			logMsg = "完成当前打印单元打印操作，已运动至下一pass起点";
+			evMsg = "print_pass_unit_finished";
+			evType = EVENT_TYPE_PRINT_STATUS;
+	
+			// 数据区使用小端字节序解析
+			layerData.xPos = (packData.data[3] << 24) | (packData.data[2] << 16) | (packData.data[1] << 8) | packData.data[0];
+			layerData.yPos = (packData.data[7] << 24) | (packData.data[6] << 16) | (packData.data[5] << 8) | packData.data[4];
+			layerData.zPos = (packData.data[11] << 24) | (packData.data[10] << 16) | (packData.data[9] << 8) | packData.data[8];
+
+			NAMED_LOG_T("netMoudle", "完成当前打印单元打印操作，已运动至下一pass起点。当前pass_num = {}, 当前layer_num = {}", layerData.yPos, layerData.zPos);
+			break;
+		}
+		default:
+			NAMED_LOG_T("netMoudle", "其他打印通信命令: 0x{:04X}", packData.cmdFun);
+			break;
+	}
+	SendEvent(logType, 0, logMsg.toUtf8().constData());
+	SendEvent(evType, 0, evMsg.toUtf8().constData(), layerData.xPos, layerData.yPos, layerData.zPos);
+	NAMED_LOG_T("netMoudle", "控制命令 命令应答: 0x{:04X}", packData.cmdFun);
 }
 
 

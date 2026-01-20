@@ -51,6 +51,10 @@ public:
 
 	ushort MakeCRCCheck(uchar* data, int datalen);
 
+	// 将完整MoveAxisPos转换为QByteArray
+	QByteArray fullPositionToByteArray(const MoveAxisPos& pos);
+
+
 private:
 	/**  crc高字节  **/
 	static const uchar gabyCRCHi[256];

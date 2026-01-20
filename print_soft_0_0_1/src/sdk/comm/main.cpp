@@ -7,6 +7,25 @@
 #include <QDir>
 #include "comm/CMotionConfig.h"
 
+
+#include <QList>
+#include <QVector>
+#include <QMap>
+#include <QHash>
+#include <QString>
+#include <QByteArray>
+#include <QStringList>
+#include <QDateTime>
+#include <QVariant>
+#include <QPoint>
+#include <QSize>
+#include <QRect>
+#include <QSet>
+#include <QUrl>
+#include <QUuid>
+#include <QLine>
+#include <QMargins>
+
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
@@ -349,29 +368,29 @@ void testQtDataLog()
 
 	// 测试QVector<double>
 	QVector<double> doubleVec = { 1.1, 2.2, 3.3 };
-	LOGP->info("QVector<double>格式化测试: ");
 	NAMED_LOG_I("AAA", "QVector<double>: {}", doubleVec);
+	LOGP->info("QVector<double>格式化测试完成\n");
 
 	// 测试QMap<QString, int>
 	QMap<QString, int> strIntMap;
 	strIntMap["key1"] = 100;
 	strIntMap["key2"] = 200;
 	strIntMap["key3"] = 300;
-	LOGP->info("QMap<QString,int>格式化测试: ");
 	NAMED_LOG_I("AAA", "QMap<QString,int>: {}", strIntMap);
+	LOGP->info("QMap<QString,int>格式化测试完成\n");
 
 	// 测试QHash<int, QString>
 	QHash<int, QString> intStrHash;
 	intStrHash[1] = "value1";
 	intStrHash[2] = "value2";
 	intStrHash[3] = "value3";
-	LOGP->info("QHash<int,QString>格式化测试: ");
 	NAMED_LOG_I("AAA", "QHash<int,QString>: {}", intStrHash);
+	LOGP->info("QHash<int,QString>格式化测试完成\n");
 
 	// 测试QByteArray
 	QByteArray byteArray("Hello Qt!");
-	LOGP->info("QByteArray格式化测试: ");
 	NAMED_LOG_I("AAA", "QByteArray: {}", byteArray);
+	LOGP->info("QByteArray格式化测试完成\n");
 
 	// 测试嵌套容器
 	QList<QVector<int>> nestedList;
@@ -379,26 +398,137 @@ void testQtDataLog()
 	QVector<int> vec2 = { 3, 4, 5 };
 	nestedList.append(vec1);
 	nestedList.append(vec2);
-	LOGP->info("嵌套容器格式化测试: ");
 	NAMED_LOG_I("AAA", "QList<QVector<int>>: {}", nestedList);
+	LOGP->info("嵌套容器格式化测试完成\n");
 
 	// 测试空容器
 	QList<int> emptyList;
 	QMap<QString, int> emptyMap;
-	LOGP->info("空容器格式化测试: ");
 	NAMED_LOG_I("AAA", "Empty QList: {}", emptyList);
 	NAMED_LOG_I("AAA", "Empty QMap: {}", emptyMap);
+	LOGP->info("空容器格式化测试完成\n");
 
 	// 测试QVariant
 	QVariant varInt(42);
 	QVariant varStr("Hello World");
 	QVariant varBool(true);
 	QVariant varDouble(3.14159);
-	LOGP->info("QVariant格式化测试:\n");
 	NAMED_LOG_I("AAA", "QVariant(int): {}", varInt);
 	NAMED_LOG_I("AAA", "QVariant(string): {}", varStr);
 	NAMED_LOG_I("AAA", "QVariant(bool): {}", varBool);
 	NAMED_LOG_I("AAA", "QVariant(double): {}", varDouble);
+	LOGP->info("QVariant格式化测试完成\n");
+
+	// 测试 QStringList
+	QStringList strList = { "Apple", "Banana", "Cherry" };
+	NAMED_LOG_I("AAA", "QStringList: {}", strList);
+	LOGP->info("QStringList格式化测试完成 \n");
+
+	// 测试 QDateTime (通过 QVariant 打印)
+	QDateTime now = QDateTime::currentDateTime();
+	NAMED_LOG_I("AAA", "Current Time: {}", QVariant(now));
+
+	// 测试QSet
+	QSet<int> intSet = { 1, 2, 3, 5, 8, 13 };
+	NAMED_LOG_I("AAA", "QSet<int>: {}", intSet);
+	LOGP->info( "QSet测试完成\n");
+
+	// 测试QPair
+	QPair<int, QString> pair(42, "answer");
+	NAMED_LOG_I("AAA", "QPair<int,QString>: {}", pair);
+	LOGP->info( "QPair测试完成\n");
+
+	// 测试QDateTime
+	QDateTime now1 = QDateTime::currentDateTime();
+	NAMED_LOG_I("AAA", "QDateTime: {}", now1);
+	LOGP->info( "QDateTime测试完成\n");
+
+	// 测试QDate
+	QDate date = QDate::currentDate();
+	NAMED_LOG_I("AAA", "QDate: {}", date);
+	LOGP->info( "QDate测试完成\n");
+
+	// 测试QTime
+	QTime time = QTime::currentTime();	
+	NAMED_LOG_I("AAA", "QTime: {}", time);
+	LOGP->info( "QTime测试完成\n");
+
+	// 测试QList<QStringList>
+	QList<QStringList> listOfLists;
+	listOfLists.append({ "a", "b" });
+	listOfLists.append({ "x", "y", "z" });
+	NAMED_LOG_I("AAA", "QList<QStringList>: {}", listOfLists);
+	LOGP->info( "QList<QStringList>测试完成\n");
+
+	// 测试QMap<QString, QVariant>
+	QMap<QString, QVariant> configMap;
+	configMap["port"] = 8080;
+	configMap["host"] = "localhost";
+	configMap["debug"] = true;
+	NAMED_LOG_I("AAA", "QMap<QString,QVariant>: {}", configMap);
+	LOGP->info( "QMap<QString,QVariant>测试完成\n");
+
+
+	// 测试QPoint
+	QPoint pt(100, 200);
+	NAMED_LOG_I("AAA", "QPoint: {}", pt);
+	LOGP->info( "QPoint测试完成\n");
+
+	// 测试QPointF
+	QPointF ptf(10.5, 20.75);
+	NAMED_LOG_I("AAA", "QPointF: {}", ptf);
+	LOGP->info( "QPointF测试完成\n");
+
+	// 测试QSize
+	QSize sz(1920, 1080);
+	NAMED_LOG_I("AAA", "QSize: {}", sz);
+	LOGP->info( "QSize测试完成\n");
+
+	// 测试QSizeF
+	QSizeF szf(1920.5, 1080.25);
+	NAMED_LOG_I("AAA", "QSizeF: {}", szf);
+	LOGP->info( "QSizeF测试完成\n");
+
+	// 测试QRect
+	QRect rect(10, 20, 300, 400);
+	NAMED_LOG_I("AAA", "QRect: {}", rect);
+	LOGP->info( "QRect测试完成\n");
+
+	// 测试QRectF
+	QRectF rectf(10.5, 20.5, 300.75, 400.25);
+	NAMED_LOG_I("AAA", "QRectF: {}", rectf);
+	LOGP->info( "QRectF测试完成\n");
+
+	// 测试QUrl
+	QUrl url("https://www.qt.io/download?param=1");
+	NAMED_LOG_I("AAA", "QUrl: {}", url);
+	LOGP->info( "QUrl测试完成\n");
+
+	// 测试QUuid
+	QUuid uuid = QUuid::createUuid();
+	NAMED_LOG_I("AAA", "QUuid: {}", uuid);
+	LOGP->info( "QUuid测试完成\n");
+
+	// 测试QLine
+	QLine line(0, 0, 100, 100);
+	NAMED_LOG_I("AAA", "QLine: {}", line);
+	LOGP->info( "QLine测试完成\n");
+
+	// 测试QLineF
+	QLineF linef(0.5, 0.5, 100.5, 100.5);
+	NAMED_LOG_I("AAA", "QLineF: {}", linef);
+	LOGP->info( "QLineF测试完成\n");
+
+	// 测试QMargins
+	QMargins margins(10, 20, 10, 20);
+	NAMED_LOG_I("AAA", "QMargins: {}", margins);
+	LOGP->info( "QMargins测试完成\n");
+
+	// 测试QMarginsF
+	QMarginsF marginsf(10.5, 20.5, 10.5, 20.5);
+	NAMED_LOG_I("AAA", "QMarginsF: {}", marginsf);
+	LOGP->info( "QMarginsF测试完成\n");
+
 }
 
 

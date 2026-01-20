@@ -70,7 +70,7 @@ public:
      * @param port 端口号
      * @return 0=成功, -1=失败
      */
-    int ConnectByTCP(const QString& ip, unsigned short port);
+    int Connect2MotionDev(const QString& ip, unsigned short port);
     
     /**
      * @brief 断开设备连接
@@ -179,12 +179,35 @@ public:
      */
     int ResumePrint();
     
-    /**
-     * @brief 打印复位
-     * @return 0=成功, -1=失败
-     */
-    int ResetPrint();
-    
+	// ==================== 运动打印控制（实现在SDKPrint.cpp） ====================
+
+	///**
+	// * @brief 打印复位
+	// * @param positionData 位置数据（12字节：X4 + Y4 + Z4）
+	// * @return 0=成功, -1=失败
+	// */
+	//int SetPrtReset(const MoveAxisPos& startPos);
+
+	///**
+	// * @brief 打印复位
+	// * @return 0=成功, -1=失败
+	// */
+	//int SetPrtPassEnable();
+
+	/**
+	 * @brief 设置当前图层打印信息：当前打印图层数、pass数
+	 * @param prtData 打印层数信息（总层数，在Z数据区设置）
+	 * @return 0=成功, -1=失败
+	 */
+	int SetPrtMoveLayer(const MoveAxisPos& prtData);
+
+	/**
+	 * @brief 设置图像相关信息：当前图层的pass总数、Z轴几图层移动单位距离
+	 * @param passNum 位置数据（12字节：X4+Y4+Z4）
+	 * @param zStep   Z轴多少层进行一次移动（12字节：X4+Y4+Z4）
+	 * @return 0=成功, -1=失败
+	 */
+	int SetPrtLayerData(const MoveAxisPos& data);
 
 	// ==================== 打印参数控制（实现在SDKPrintParam.cpp） ====================
 
@@ -199,8 +222,20 @@ public:
 
 	int SetAxisUnitStep(const MoveAxisPos& step);
 
+	/**
+	 * @brief 设置各轴加速度数据
+	 * @param data 偏移量数据（12字节：X4+Y4+Z4）
+	 * @return 0=成功, -1=失败
+	 */
+	int SetAxisAccelerated(const MoveAxisPos& step);
 
-    
+	/**
+	 * @brief 设置原点偏移量
+	 * @param data 偏移量数据（12字节：X4+Y4+Z4）
+	 * @return 0=成功, -1=失败
+	 */
+	int SetOriginOffsetData(const MoveAxisPos& data);
+
     // ==================== 辅助方法 ====================
     
     /**
@@ -234,8 +269,14 @@ public:
      * @param v2 附加值2
      * @param v3 附加值3
      */
-    void sendEvent(SdkEventType type, int code, const char* message, 
-                   double v1 = 0.0, double v2 = 0.0, double v3 = 0.0);
+    void SendEvent(SdkEventType type, 
+		int code, 
+		const char* message, 
+		double v1 = 0.0, 
+		double v2 = 0.0, 
+		double v3 = 0.0);
+
+
 
 private slots:
     // ==================== 信号处理（实现在SDKCallback.cpp） ====================
