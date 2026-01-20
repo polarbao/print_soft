@@ -68,6 +68,7 @@ TcpClientImpl::TcpClientImpl(QObject* parent /*= nullptr*/)
 	:QObject(parent)
 {
 	m_tcpsocket = new QTcpSocket(this);
+	m_tcpsocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 	m_timer = new QTimer(this);
 
 	connect(m_tcpsocket, &QTcpSocket::stateChanged, this, &TcpClientImpl::onStateChanged);

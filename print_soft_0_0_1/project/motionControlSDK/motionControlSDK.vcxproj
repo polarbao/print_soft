@@ -124,7 +124,6 @@
     <ClInclude Include="..\..\..\..\print_soft\print_soft_0_0_1\src\sdk\comm\SpdlogQtDataFormat.h" />
     <ClInclude Include="..\..\src\sdk\comm\CMotionConfig.h" />
     <ClInclude Include="..\..\src\sdk\comm\CNewSingleton.h" />
-    <ClInclude Include="..\..\src\sdk\comm\CSingleton.h" />
     <ClInclude Include="..\..\src\sdk\comm\SpdlogMgr.h" />
     <ClInclude Include="..\..\src\sdk\motioncontrolsdk_define.h" />
   </ItemGroup>

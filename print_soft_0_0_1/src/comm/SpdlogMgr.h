@@ -23,7 +23,7 @@
 //#include "fmt/bundled/base.h"
 //#include "fmt/bundled/core.h"
 //#include "fmt/bundled/ranges.h"
-#include "comm/CSingleton.h"
+#include "comm/CNewSingleton.h"
 
 #include <QString>
 #include <QList>

@@ -108,9 +108,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\sdk\comm\CSingleton.h">
-      <Filter>Header Files\comm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\sdk\comm\CNewSingleton.h">
       <Filter>Header Files\comm</Filter>
     </ClInclude>

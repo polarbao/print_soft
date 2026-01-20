@@ -6,6 +6,38 @@
 #include <QTextCodec>
 #include "SpdlogMgr.h"
 
+namespace ConfigKeys {
+	const QString Group_Base = "base_param";
+	const QString Key_FolderPath = "floder_path";
+
+	const QString Group_Net = "net_param";
+	const QString Key_IP = "motion_ip";
+	const QString Key_Port = "motion_port";
+
+	const QString Group_PrintPos = "print_pos_param";
+	const QString Key_StartPos = "print_start_pos";
+	const QString Key_EndPos = "print_end_pos";
+	const QString Key_CleanPos = "print_clean_pos";
+
+	const QString Group_Step = "motion_axis_step_param";
+	const QString Key_XStep = "x_axis_step";
+	const QString Key_YStep = "y_axis_step";
+	const QString Key_ZStep = "z_axis_step";
+
+	const QString Group_Limit = "motion_max_limit_param";
+	const QString Key_XLimit = "x_axis_limit";
+	const QString Key_YLimit = "y_axis_limit";
+	const QString Key_ZLimit = "z_axis_limit";
+
+	const QString Group_Speed = "motion_speed_param";
+	const QString Key_XSpeed = "x_axis_speed";
+	const QString Key_YSpeed = "y_axis_speed";
+	const QString Key_ZSpeed = "z_axis_speed";
+
+	// ... (Other groups can be added similarly, keeping it concise for the diff)
+}
+
+
 // 辅助函数：从 QSettings 中读取包含逗号的字符串值
 // QSettings 会将包含逗号的值解析为 QStringList，需要特殊处理
 static QString readCommaSeparatedValue(QSettings& settings, const QString& key, const QString& defaultValue)
@@ -70,22 +102,22 @@ bool CMotionConfig::load(MotionConfig& config, const QString & iniPath)
 	m_iniFilePath = iniPath;
 
 	// 读取基础参数
-	settings.beginGroup("base_param");
-	config.floderPath = settings.value("floder_path", "").toString();
+	settings.beginGroup(ConfigKeys::Group_Base);
+	config.floderPath = settings.value(ConfigKeys::Key_FolderPath, "").toString();
 	settings.endGroup();
 
 	// 读取网络参数
-	settings.beginGroup("net_param");
-	config.ip = settings.value("motion_ip", "192.168.1.100").toString();
-	config.port = settings.value("motion_port", 12355).toInt();
+	settings.beginGroup(ConfigKeys::Group_Net);
+	config.ip = settings.value(ConfigKeys::Key_IP, "192.168.1.100").toString();
+	config.port = settings.value(ConfigKeys::Key_Port, 12355).toInt();
 	settings.endGroup();
 
 	// 读取打印坐标参数
-	settings.beginGroup("print_pos_param");
+	settings.beginGroup(ConfigKeys::Group_PrintPos);
 	// 使用特殊函数处理包含逗号的值（QSettings 会将其解析为 QStringList）
-	QString startPosStr = readCommaSeparatedValue(settings, "print_start_pos", "1000,1000,0");
-	QString endPosStr = readCommaSeparatedValue(settings, "print_end_pos", "1000,1000,0");
-	QString cleanPosStr = readCommaSeparatedValue(settings, "print_clean_pos", "1000,1000,0");
+	QString startPosStr = readCommaSeparatedValue(settings, ConfigKeys::Key_StartPos, "1000,1000,0");
+	QString endPosStr = readCommaSeparatedValue(settings, ConfigKeys::Key_EndPos, "1000,1000,0");
+	QString cleanPosStr = readCommaSeparatedValue(settings, ConfigKeys::Key_CleanPos, "1000,1000,0");
 	
 	config.startPos = parseMoveAxisPos(startPosStr);
 	config.endPos = parseMoveAxisPos(endPosStr);
@@ -93,26 +125,26 @@ bool CMotionConfig::load(MotionConfig& config, const QString & iniPath)
 	settings.endGroup();
 
 	// 读取轴步长参数（单位：微米）
-	settings.beginGroup("motion_axis_step_param");
-	quint32 xStep = settings.value("x_axis_step", 1000).toUInt();
-	quint32 yStep = settings.value("y_axis_step", 1000).toUInt();
-	quint32 zStep = settings.value("z_axis_step", 1000).toUInt();
+	settings.beginGroup(ConfigKeys::Group_Step);
+	quint32 xStep = settings.value(ConfigKeys::Key_XStep, 1000).toUInt();
+	quint32 yStep = settings.value(ConfigKeys::Key_YStep, 1000).toUInt();
+	quint32 zStep = settings.value(ConfigKeys::Key_ZStep, 1000).toUInt();
 	config.step = MoveAxisPos(xStep, yStep, zStep);
 	settings.endGroup();
 
 	// 读取轴最大距离限制参数（单位：微米）
-	settings.beginGroup("motion_max_limit_param");
-	quint32 xLimit = settings.value("x_axis_limit", 1000).toUInt();
-	quint32 yLimit = settings.value("y_axis_limit", 1000).toUInt();
-	quint32 zLimit = settings.value("z_axis_limit", 1000).toUInt();
+	settings.beginGroup(ConfigKeys::Group_Limit);
+	quint32 xLimit = settings.value(ConfigKeys::Key_XLimit, 1000).toUInt();
+	quint32 yLimit = settings.value(ConfigKeys::Key_YLimit, 1000).toUInt();
+	quint32 zLimit = settings.value(ConfigKeys::Key_ZLimit, 1000).toUInt();
 	config.limit = MoveAxisPos(xLimit, yLimit, zLimit);
 	settings.endGroup();
 
 	// 读取轴速度参数（单位：毫米）
-	settings.beginGroup("motion_speed_param");
-	quint32 xSpeed = settings.value("x_axis_speed", 10).toUInt();
-	quint32 ySpeed = settings.value("y_axis_speed", 10).toUInt();
-	quint32 zSpeed = settings.value("z_axis_speed", 10).toUInt();
+	settings.beginGroup(ConfigKeys::Group_Speed);
+	quint32 xSpeed = settings.value(ConfigKeys::Key_XSpeed, 10).toUInt();
+	quint32 ySpeed = settings.value(ConfigKeys::Key_YSpeed, 10).toUInt();
+	quint32 zSpeed = settings.value(ConfigKeys::Key_ZSpeed, 10).toUInt();
 	config.speed = MoveAxisPos(xSpeed, ySpeed, zSpeed);
 	settings.endGroup();
 
@@ -158,42 +190,42 @@ bool CMotionConfig::save(const MotionConfig& config, const QString& iniPath)
 	settings.setIniCodec("UTF-8");
 
 	// 保存基础参数
-	settings.beginGroup("base_param");
-	settings.setValue("floder_path", config.floderPath);
+	settings.beginGroup(ConfigKeys::Group_Base);
+	settings.setValue(ConfigKeys::Key_FolderPath, config.floderPath);
 	settings.endGroup();
 
 	// 保存网络参数
-	settings.beginGroup("net_param");
-	settings.setValue("motion_ip", config.ip);
-	settings.setValue("motion_port", config.port);
+	settings.beginGroup(ConfigKeys::Group_Net);
+	settings.setValue(ConfigKeys::Key_IP, config.ip);
+	settings.setValue(ConfigKeys::Key_Port, config.port);
 	settings.endGroup();
 
 	// 保存打印坐标参数
-	settings.beginGroup("print_pos_param");
-	settings.setValue("print_start_pos", formatMoveAxisPos(config.startPos));
-	settings.setValue("print_end_pos", formatMoveAxisPos(config.endPos));
-	settings.setValue("print_clean_pos", formatMoveAxisPos(config.cleanPos));
+	settings.beginGroup(ConfigKeys::Group_PrintPos);
+	settings.setValue(ConfigKeys::Key_StartPos, formatMoveAxisPos(config.startPos));
+	settings.setValue(ConfigKeys::Key_EndPos, formatMoveAxisPos(config.endPos));
+	settings.setValue(ConfigKeys::Key_CleanPos, formatMoveAxisPos(config.cleanPos));
 	settings.endGroup();
 
 	// 保存轴步长参数（单位：微米）
-	settings.beginGroup("motion_axis_step_param");
-	settings.setValue("x_axis_step", config.step.xPos);
-	settings.setValue("y_axis_step", config.step.yPos);
-	settings.setValue("z_axis_step", config.step.zPos);
+	settings.beginGroup(ConfigKeys::Group_Step);
+	settings.setValue(ConfigKeys::Key_XStep, config.step.xPos);
+	settings.setValue(ConfigKeys::Key_YStep, config.step.yPos);
+	settings.setValue(ConfigKeys::Key_ZStep, config.step.zPos);
 	settings.endGroup();
 
 	// 保存轴最大距离限制参数（单位：微米）
-	settings.beginGroup("motion_max_limit_param");
-	settings.setValue("x_axis_limit", config.limit.xPos);
-	settings.setValue("y_axis_limit", config.limit.yPos);
-	settings.setValue("z_axis_limit", config.limit.zPos);
+	settings.beginGroup(ConfigKeys::Group_Limit);
+	settings.setValue(ConfigKeys::Key_XLimit, config.limit.xPos);
+	settings.setValue(ConfigKeys::Key_YLimit, config.limit.yPos);
+	settings.setValue(ConfigKeys::Key_ZLimit, config.limit.zPos);
 	settings.endGroup();
 
 	// 保存轴速度参数（单位：微米）
-	settings.beginGroup("motion_speed_param");
-	settings.setValue("x_axis_speed", config.speed.xPos);
-	settings.setValue("y_axis_speed", config.speed.yPos);
-	settings.setValue("z_axis_speed", config.speed.zPos);
+	settings.beginGroup(ConfigKeys::Group_Speed);
+	settings.setValue(ConfigKeys::Key_XSpeed, config.speed.xPos);
+	settings.setValue(ConfigKeys::Key_YSpeed, config.speed.yPos);
+	settings.setValue(ConfigKeys::Key_ZSpeed, config.speed.zPos);
 	settings.endGroup();
 
 	// 保存轴速度参数（单位：微米）

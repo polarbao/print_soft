@@ -9,7 +9,6 @@
 
 #pragma once
 #include <QObject>
-#include "CSingleton.h"
 #include "CNewSingleton.h"
 #include "motioncontrolsdk_define.h"
 
