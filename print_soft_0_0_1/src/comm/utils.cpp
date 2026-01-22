@@ -1,4 +1,6 @@
 ﻿#include "utils.h"
+#include <QDataStream>
+
 //获取short类型的高字节
 #define HI_OF_SHORT(X) (X >> 8)
 //获取short类型的低字节
