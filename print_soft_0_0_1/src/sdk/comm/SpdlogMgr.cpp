@@ -12,10 +12,6 @@
 
 namespace fs = std::filesystem;
 
-SpdlogWrapper* SpdlogWrapper::m_instance = nullptr;
-std::mutex SpdlogWrapper::m_mtx;
-
-
 SpdlogWrapper::SpdlogWrapper()
 	: m_defaultLogger(nullptr)
 	, m_bInit(false)
@@ -28,18 +24,11 @@ SpdlogWrapper::~SpdlogWrapper()
 	Shutdown();
 }
 
-SpdlogWrapper* SpdlogWrapper::GetInstance()
-{
-	if (m_instance == nullptr)
-	{
-		std::lock_guard<std::mutex> lock(m_mtx);
-		if (m_instance == nullptr)
-		{
-			m_instance = new SpdlogWrapper();
-		}
-	}
-	return m_instance;
-}
+//SpdlogWrapper* SpdlogWrapper::GetInstance()
+//{
+//	static SpdlogWrapper manager;
+//	return &manager;
+//}
 
 
 

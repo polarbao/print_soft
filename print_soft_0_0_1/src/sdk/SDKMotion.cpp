@@ -7,7 +7,6 @@
 
 #include "SDKManager.h"
 #include "protocol/ProtocolPrint.h"
-#include "SpdlogMgr.h"
 #include "motionControlSDK.h"
 #include "Utils.h"
 #include <QByteArray>

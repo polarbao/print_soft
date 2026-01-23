@@ -8,7 +8,6 @@
 #include "TcpClient.h"
 #include "ProtocolPrint.h"
 #include <QTimer>
-#include "SpdlogMgr.h"
 
 // ==================== TCP连接管理 ====================
 

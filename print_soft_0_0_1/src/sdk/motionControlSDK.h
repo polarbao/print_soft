@@ -2,7 +2,7 @@
 
 #include "motioncontrolsdk_define.h"
 
-class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
+class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject 
 {
 	Q_OBJECT
 
@@ -10,21 +10,14 @@ class MOTIONCONTROLSDK_EXPORT motionControlSDK : public QObject
 	Q_PROPERTY(bool connected READ MC_IsConnected NOTIFY MC_SigConnectedChanged)
 	//Q_PROPERTY(QString deviceIp READ MC_GetDevIp NOTIFY MC_SigDevIpChanged)
 	//Q_PROPERTY(quint16 devicePort READ MC_GetDevPort NOTIFY MC_SigDevPortChanged)
+	Q_DISABLE_COPY(motionControlSDK)  // 禁止拷贝
 
 public:
 
 	/**
-	 * @brief 构造函数
-	 * @param parent 父对象（Qt对象树管理）
+	 * @brief 获取单例实例
 	 */
-	explicit motionControlSDK(QObject *parent = nullptr);
-
-	/**
-	 * @brief 析构函数
-	 * @note 自动释放SDK资源
-	 */
-	~motionControlSDK();
-
+	static motionControlSDK* GetInstance();
 
 	// ==================== 生命周期管理 ====================
 
@@ -275,10 +268,16 @@ public:
 	bool MC_StopPrint();
 
 	/**
-	 * @brief 清洗逻辑 add
+	 * @brief 清洗逻辑（运动至清洗位置，开始清洗操作
 	 * @return true=命令发送成功, false=失败
 	 */
 	bool MC_CleanPrint();
+
+	/**
+	 * @brief 急停逻辑（根据传入数据，判断是否为急停状态，并进行后续操作
+	 * @return true=命令发送成功, false=失败
+	 */
+	bool MC_EmergencyStopPrint();
 
 	/**
 	 * @brief 停止打印
@@ -311,7 +310,19 @@ public:
 	 * @return true=命令发送成功, false=失败
 	 */
 	bool MC_PrtMoveLayer(quint32 layerIdx,quint32 passIdx);
-	
+
+private:
+	/**
+	 * @brief 构造函数
+	 //* @param parent 父对象（Qt对象树管理）
+	 */
+	explicit motionControlSDK();
+
+	/**
+	 * @brief 析构函数
+	 * @note 自动释放SDK资源
+	 */
+	~motionControlSDK();
 
 public slots:
 	/**
@@ -434,6 +445,5 @@ private:
 	class Private;
 	Private* d;
 
-	//Q_DISABLE_COPY(PrintDeviceController)  // 禁止拷贝
 
 };

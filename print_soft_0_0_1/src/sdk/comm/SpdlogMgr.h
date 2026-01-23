@@ -34,7 +34,7 @@ inline std::string FormatString(Args&&... args)
 	return oss.str();
 }
 
-class SpdlogWrapper //: public CNewSingleton<SpdlogWrapper>
+class SpdlogWrapper : public CNewSingleton<SpdlogWrapper>
 {
 
 public:
@@ -50,7 +50,9 @@ public:
 	};
 
 
-	static SpdlogWrapper* GetInstance();
+	//static SpdlogWrapper* GetInstance();
+
+	~SpdlogWrapper();
 
 	bool Init(const std::string& logDir,
 		const std::string& logFileName = "app_log",
@@ -110,9 +112,9 @@ public:
 
 
 private:
-	//friend class CSingleton<SpdlogWrapper>;
+	friend class CNewSingleton<SpdlogWrapper>;
 	SpdlogWrapper();
-	~SpdlogWrapper();
+
 	SpdlogWrapper(const SpdlogWrapper&) = delete;
 	SpdlogWrapper& operator=(const SpdlogWrapper&) = delete;
 
@@ -121,8 +123,6 @@ private:
 	spdlog::level::level_enum ConvertLogLevel(LogLevel level);
 
 private:
-	static SpdlogWrapper* m_instance;
-	static std::mutex m_mtx;
 	std::shared_ptr<spdlog::logger> m_defaultLogger;
 	std::string m_logDir;
 	bool m_bInit;

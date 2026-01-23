@@ -1,6 +1,5 @@
-﻿#include "Utils.h"
+#include "Utils.h"
 #include <QDataStream>
-
 //获取short类型的高字节
 #define HI_OF_SHORT(X) (X >> 8)
 //获取short类型的低字节
@@ -89,7 +88,7 @@ QByteArray Utils::fullPositionToByteArray(const MoveAxisPos& pos)
 	QDataStream stream(&data, QIODevice::WriteOnly);
 	stream.setByteOrder(QDataStream::LittleEndian);
 
-	// 写入X/Y/Z坐标（各4字节，大端序，微米单位）
+	// 写入X/Y/Z坐标（各4字节，小端序，微米单位）
 	stream << pos.xPos;
 	stream << pos.yPos;
 	stream << pos.zPos;

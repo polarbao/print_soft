@@ -3,7 +3,7 @@
 #include <QDataStream>
 #include <QtEndian>
 #include "utils.h"
-#include "SpdlogMgr.h"
+//#include "SpdlogMgr.h"
 
 //获取short类型的高字节
 #define HI_OF_SHORT(X) (X >> 8)
@@ -375,7 +375,8 @@ void ProtocolPrint::ParseRespPackageData(QByteArray& datagram, PackageHeadType t
 	}
 	else if (type == Head_AADD)
 	{
-		//emit SigPackFailRetransport(datagram, type);
+		NAMED_LOG_E("netMoudle", "motion_moudle_sdk cur_recv_failed_msg:{}", datagram);
+		LOGP->info(QString("motion_moudle_sdk cur_recv_failed_msg:%1\n").arg(QString(datagram)));
 		emit SigPackFailRetransport(datagram);
 	}
 

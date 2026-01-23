@@ -12,6 +12,7 @@
 #include <QMutex>
 #include <QAbstractSocket>
 #include <memory>
+#include "SpdlogMgr.h"
 
 // 前向声明
 class TcpClient;

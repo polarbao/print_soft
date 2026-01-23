@@ -9,7 +9,6 @@
 #include "motionControlSDK.h"
 #include <QMutexLocker>
 #include <QString>
-#include "SpdlogMgr.h"
 
 // ==================== 位置管理 ====================
 

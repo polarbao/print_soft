@@ -8,7 +8,6 @@
 #include "SDKManager.h"
 #include "TcpClient.h"
 #include "ProtocolPrint.h"
-#include "SpdlogMgr.h"
 
 // ==================== 单例实现 ====================
 
@@ -42,10 +41,6 @@ bool SDKManager::Init(const QString& log_dir)
         return true;  // 已经初始化
     }
     
-    // 初始化日志系统
-	SPDLOG_TRACE("motion_moudle_sdk_init");
-
-
     // 创建TCP客户端和协议处理器
     m_tcpClient = std::make_unique<TcpClient>();
     m_protocol = std::make_unique<ProtocolPrint>();
@@ -58,7 +53,7 @@ bool SDKManager::Init(const QString& log_dir)
     // 连接协议处理器信号
 	connect(m_protocol.get(), &ProtocolPrint::SigHeartBeat, this, &SDKManager::OnHeartbeat);
 	connect(m_protocol.get(), &ProtocolPrint::SigCmdReply, this, &SDKManager::OnCmdReply);
-	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::OnHeartbeat);
+	connect(m_protocol.get(), &ProtocolPrint::SigPackFailRetransport, this, &SDKManager::OnFaileHandleReTransport);
 	connect(m_protocol.get(), &ProtocolPrint::SigHandleRespFunOper, this, &SDKManager::OnHandleRecvFunOper);
 	connect(m_protocol.get(), &ProtocolPrint::SigHandleAxisPosData, this, &SDKManager::OnHandleRecvDataOper);
     

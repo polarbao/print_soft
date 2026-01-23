@@ -69,6 +69,7 @@ TcpClientImpl::TcpClientImpl(QObject* parent /*= nullptr*/)
 {
 	m_tcpsocket = new QTcpSocket(this);
 	m_tcpsocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+
 	m_timer = new QTimer(this);
 
 	connect(m_tcpsocket, &QTcpSocket::stateChanged, this, &TcpClientImpl::onStateChanged);
@@ -81,11 +82,36 @@ TcpClientImpl::TcpClientImpl(QObject* parent /*= nullptr*/)
 
 TcpClientImpl::~TcpClientImpl()
 {
-	m_timer->stop();
+	/*
+	1. 停timer
+	2. 断开socket
+	3. 清空队列
+	4. 删除对象
+	*/
 
-	m_sendLists.clear();
+	if (m_timer) 
+	{
+		m_timer->stop();
+		disconnect(m_timer, nullptr, this, nullptr);  // 断开所有连接
+	}
+
+	if (m_tcpsocket) 
+	{
+		disconnect(m_tcpsocket, nullptr, this, nullptr);
+		if (m_tcpsocket->state() != QAbstractSocket::UnconnectedState) 
+		{
+			m_tcpsocket->abort();  // 立即断开
+		}
+	}
+	{
+		QMutexLocker lock(&m_sendMutex);
+		m_sendLists.clear();
+	}
+
 	delete m_tcpsocket;
 	delete m_timer;
+	m_tcpsocket = nullptr;
+	m_timer = nullptr;
 }
 
 void TcpClientImpl::sendData(QByteArray data)

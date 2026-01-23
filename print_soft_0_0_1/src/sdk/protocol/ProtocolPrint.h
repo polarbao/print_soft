@@ -49,24 +49,24 @@ public:
 		SetParam_AxistSpd = 0x1030,
 		SetParam_AxistAccSpd = 0x1040,
 		SetParam_LayerPassNum = 0x1050,
-
-
 		SetParam_End = 0x1FFF,
 
 		// 获取命令
 		Get_AxisPos = 0x2000,
-
 		Get_Breath = 0x2010,
 		Get_End = 0x2FFF,
 
 
 		// 控制命令
-		Ctrl_StartPrint = 0x3000,
-		Ctrl_PasusePrint = 0x3001,
-		Ctrl_ContinuePrint = 0x3002,
-		Ctrl_StopPrint = 0x3003,
+		Ctrl_StartPrint		= 0x3000,
+		Ctrl_PasusePrint	= 0x3001,
+		Ctrl_ContinuePrint	= 0x3002,
+		Ctrl_StopPrint		= 0x3003,
+		Ctrl_MoveOrigin		= 0x3004,
+		Ctrl_MoveCleanPos	= 0x3005,
+		Ctrl_EmergenctStop	= 0x3006,
+		Ctrl_RecoveryEmergenctStop = 0x3007,
 
-		Ctrl_MoveOrigin = 0x3004,
 
 		//[手动控制] x 左右 y 前后 z 上下
 		Ctrl_XAxisLMove = 0x3101,

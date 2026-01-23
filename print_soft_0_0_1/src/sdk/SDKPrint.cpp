@@ -31,7 +31,7 @@ int SDKManager::StopPrint()
         return -1;
     }
     
-	SendCommand(ProtocolPrint::Ctrl_PasusePrint);
+	SendCommand(ProtocolPrint::Ctrl_StopPrint);
     return 0;
 }
 
@@ -42,7 +42,7 @@ int SDKManager::PausePrint()
         return -1;
     }
     
-   SendCommand(ProtocolPrint::Ctrl_StopPrint);
+	SendCommand(ProtocolPrint::Ctrl_PasusePrint);
     return 0;
 }
 

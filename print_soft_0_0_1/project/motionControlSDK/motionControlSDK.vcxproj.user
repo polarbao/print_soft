@@ -5,6 +5,9 @@
     <LocalDebuggerWorkingDirectory>D:\work_namespace\Code\print_moudle\manu_print_soft\print_soft_0_0_1\bin\Release</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup>
+    <ShowAllFiles>false</ShowAllFiles>
+  </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtLastBackgroundBuild>2025-12-29T09:00:59.5884885Z</QtLastBackgroundBuild>
     <QtTouchProperty>

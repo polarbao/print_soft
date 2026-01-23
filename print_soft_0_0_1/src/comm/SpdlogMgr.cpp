@@ -12,10 +12,6 @@
 
 namespace fs = std::filesystem;
 
-SpdlogWrapper* SpdlogWrapper::m_instance = nullptr;
-std::mutex SpdlogWrapper::m_mtx;
-
-
 SpdlogWrapper::SpdlogWrapper()
 	: m_defaultLogger(nullptr)
 	, m_bInit(false)
@@ -27,21 +23,6 @@ SpdlogWrapper::~SpdlogWrapper()
 {
 	Shutdown();
 }
-
-SpdlogWrapper* SpdlogWrapper::GetInstance()
-{
-	if (m_instance == nullptr)
-	{
-		std::lock_guard<std::mutex> lock(m_mtx);
-		if (m_instance == nullptr)
-		{
-			m_instance = new SpdlogWrapper();
-		}
-	}
-	return m_instance;
-}
-
-
 
 bool SpdlogWrapper::Init(const std::string& logDir, 
 	const std::string& logFileName /*= "app_log"*/, 
@@ -315,7 +296,7 @@ void SpdlogWrapper::Debug(const char* file, int line, const char* func, const st
 {
 	if (m_defaultLogger)
 	{
-		m_defaultLogger->trace("[{}:{}][{}] {}", ExtractFileName(file), line, func, msg);
+		m_defaultLogger->debug("[{}:{}][{}] {}", ExtractFileName(file), line, func, msg);
 	}
 }
 
@@ -323,7 +304,7 @@ void SpdlogWrapper::Info(const char* file, int line, const char* func, const std
 {
 	if (m_defaultLogger)
 	{
-		m_defaultLogger->debug("[{}:{}][{}] {}", ExtractFileName(file), line, func, msg);
+		m_defaultLogger->info("[{}:{}][{}] {}", ExtractFileName(file), line, func, msg);
 	}
 }
 
@@ -362,7 +343,7 @@ const char* SpdlogWrapper::ExtractFileName(const char* filePath)
 #ifdef _WIN32
 	const char* fileName = strrchr(filePath, '\\');
 #else
-	const char* fileName = strrchr(fileName, '/);
+	const char* fileName = strrchr(fileName, '/');
 #endif
 		
 	return fileName ? fileName + 1 : filePath;
@@ -378,19 +359,19 @@ spdlog::level::level_enum SpdlogWrapper::ConvertLogLevel(LogLevel level)
 		}
 		case LogLevel::Debug:
 		{
-			return spdlog::level::trace;
+			return spdlog::level::debug;
 		}
 		case LogLevel::Info:
 		{
-			return spdlog::level::trace;
+			return spdlog::level::info;
 		}
 		case LogLevel::Warn:
 		{
-			return spdlog::level::trace;
+			return spdlog::level::warn;
 		}
 		case LogLevel::Err:
 		{
-			return spdlog::level::trace;
+			return spdlog::level::err;
 		}
 		case LogLevel::Critical:
 		{

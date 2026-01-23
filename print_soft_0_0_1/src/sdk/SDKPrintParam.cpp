@@ -10,8 +10,6 @@
 
 #include <QFile>
 #include <QImage>
-#include <SpdlogMgr.h>
-#include <SpdlogQtDataFormat.h>
 
 // ==================== 打印参数设置 ====================
 int SDKManager::SetPrintStartPos(const MoveAxisPos& startPos)
